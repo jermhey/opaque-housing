@@ -268,11 +268,16 @@ def sensitivity_table(
     pad: pl.DataFrame | None = None,
     configs: list[tuple[str, SaleFilterConfig]] | None = None,
 ) -> pl.DataFrame:
+    # Classify the widest named-grantee sale set once; each config is a row filter.
+    if "buyer_class" in transfers.columns:
+        classified = transfers
+    else:
+        widest, _ = history_only_sales(transfers)
+        classified = classify_buyers(widest)
     rows: list[dict[str, Any]] = []
     for name, config in configs or SENSITIVITY_CONFIGS:
-        filtered, _ = apply_sale_filter(transfers, config)
-        buyers = classify_buyers(filtered)
-        matched, _ = attach_residential(buyers, parcels, pad)
+        filtered, _ = apply_sale_filter(classified, config)
+        matched, _ = attach_residential(filtered, parcels, pad)
         matched = with_year_and_borough(matched)
         matched, _ = in_coverage_window(matched)
         headlines = flow_headlines(matched)

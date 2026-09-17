@@ -2,7 +2,7 @@
 
 A public, reproducible investigation of how much residential housing is held behind opaque ownership (LLCs, corporations, trusts, shell chains), and whether that share is growing.
 
-This is an investigation, not a product. **Milestone 1** (rules classifier, stock shares, gold labels, raw and corrected headlines) is in the repo. **Milestone 2** adds ACRIS flow, reconstructed history, and a 2003–2025 coverage window. Corrected stock shares use the held-out test split only.
+This is an investigation, not a product. **Milestone 1** (rules classifier, stock shares, gold labels, raw and corrected headlines) and **Milestone 2** (ACRIS flow, reconstructed history, 2003–2025 window) are in the repo. Corrected stock shares use the held-out test split only.
 
 ## Setup
 

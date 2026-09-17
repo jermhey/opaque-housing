@@ -289,4 +289,5 @@ A full ACRIS Parties pull is still the binding constraint. Whether a monthly Git
 - Official ACRIS `property_type` code list (not used; lot join is boro/block/lot).
 - Byte size of a **full** 108-column PLUTO CSV and of a cold ACRIS Parties extract.
 - A complete PAD file. Portal and guessed `s-media` zip URLs 403/404 from this environment (2026-09-17). Official layout is `padlayout.pdf` (`billboro` / `billblock` / `billlot`). SODA `bc8t-ecyu` remains 403. Mapper is fixture-tested; live join is exact-BBL until a PAD extract is on disk.
+- Staten Island deeds as `DEED`. The 2026-09-17 sale-type Master extract overlaps 194,407 unique SI legal `document_id`s in **one** row. A live lookup of eight SI legal IDs returned `RPTT` (transfer tax) on every one. `RPTT` is official class `OTHER DOCUMENTS`.
 - Philadelphia sources (M5).

@@ -94,6 +94,8 @@ Coverage window: recorded years **2003–2025** (ADR 0006). Year is `recorded_da
 
 Condo unit lots map through DCP PAD (`billboro` / `billblock` / `billlot` and the official lo–hi range). A mapped unit counts as `condo_unit` with 1 unit, not the billing-lot complex size. Without a PAD file, only exact-BBL PLUTO matches enter the residential universe.
 
+Staten Island is effectively out of the headline flow. SI legal lots exist, but the linked Master rows in a live sample are `RPTT` (NYC real property transfer tax), which ADR 0005 leaves as `other`. Treating `RPTT` as a sale is an open question, not a silent retune.
+
 ## What will be documented here later
 
 - Opacity-tier tests and evidence fields
