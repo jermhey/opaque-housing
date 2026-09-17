@@ -105,7 +105,16 @@ Coverage (live aggregate, 2026-09-16):
 - 121 distinct recorded years. Volume ≥100k documents/year from **1966 through 2026** (61 years). Sparse before that.
 - Recent recorded-year counts: 2023=267,175; 2024=274,227; 2025=295,404; 2026 (partial)=203,047.
 
-Analysis window for flow metrics will be set from party-join coverage in M2, not from this master-only histogram.
+Analysis window for flow metrics: **recorded years 2003–2025** (ADR 0006). Re-measured 2026-09-17:
+
+- `DEED` consideration is unusable before 2003 (`document_amt >= 10000` is 0–7 rows/year for 1966–2002; 31,695 of 51,337 in 2003).
+- `document_id` switches from reel-style (`BK_…`, `FT_…`) to `YYYYMMDD`+sequence in 2003.
+- `DEED` raw type counts (incl. snapshot dups): 3,650,964. 2024 raw 52,450 vs distinct `document_id` 52,149.
+- `document_amt` on `DEED`: 2,711,941 zero; 32,487 in (0, 10000); 906,536 ≥ 10000.
+- `percent_trans` on `DEED`: 0 = 2,322,457 (treated as unspecified); 100 = 1,309,673; 50 = 10,641.
+- `REIT` live count: **0**. `DEEDO` 30,160; `ASTU` 2,337; `DEED, RC` 477; `DEEDP` 2.
+- `recorded_borough` is the recording office, not the tax lot (2024 `DEED`: borough 1 = 48,764; 2 = 222; 3 = 1,298; 4 = 2,166). Property borough is Legals `borough`.
+- Dedup grain: latest `good_through_date` per `document_id` (Master) / per lot (Legals) / per party identity (Parties).
 
 ---
 
@@ -135,7 +144,9 @@ Sample includes a Queens condo-style row (`lot=1031`, `unit=313`) and a Manhatta
 
 Verified columns: `document_id`, `record_type`, `party_type`, `name`, `address_1`, `address_2` (often absent), `country`, `city`, `state`, `zip`, `good_through_date`.
 
-`party_type` counts: `1`=25,414,430; `2`=21,152,796; `3`=46,823. Document Control Codes map party 1/2 by document class (for `DEED`: party1=`GRANTOR/SELLER`, party2=`GRANTEE/BUYER`). Null `name`: **3,017** (very small overall). Per-borough and per-year party coverage is **not** measured yet — that join is M2.
+`party_type` counts: `1`=25,414,430; `2`=21,152,796; `3`=46,823. Document Control Codes map party 1/2 by document class (for `DEED`: party1=`GRANTOR/SELLER`, party2=`GRANTEE/BUYER`). `party_type=3` is not mapped (sample names look like people; no official third role on `DEED`). Null `name`: **3,017** (very small overall).
+
+Party-name coverage on `DEED` (40-doc samples, 2026-09-17): 1985, 1995, 2005, 2015, 2020, 2024 each had **40/40** documents with a named `party_type=2`. The published window is still 2003–2025 because consideration, not names, is the binding constraint (ADR 0006).
 
 This is the first verified source of *party mailing addresses*.
 
@@ -151,7 +162,7 @@ This is the first verified source of *party mailing addresses*.
 
 Verified columns: `record_type`, `doc__type`, `doc__type_description`, `class_code_description`, `party1_type`, `party2_type`.
 
-`class_code_description = DEEDS AND OTHER CONVEYANCES` has 34 codes, including `DEED`, `DEED, RC`, `DEEDO`, `DEEDP`, `CONDEED` (confirmatory), `CORRD` (correction deed), `DEED COR`, `TODD`, `CDEC` (condo declaration), `LEAS`, `EASE`. Sale-deed vs nonsale mapping is a later ADR; the official table is in-repo so we will not invent codes.
+`class_code_description = DEEDS AND OTHER CONVEYANCES` has 34 codes, including `DEED`, `DEED, RC`, `DEEDO`, `DEEDP`, `CONDEED` (confirmatory), `CORRD` (correction deed), `DEED COR`, `TODD`, `CDEC` (condo declaration), `LEAS`, `EASE`. Sale-deed vs nonsale mapping is ADR 0005. Headline `sale_deed` codes: `DEED`, `DEED, RC`, `DEEDP`, `DEEDO`, `REIT`, `ASTU`.
 
 ---
 
@@ -275,8 +286,7 @@ A full ACRIS Parties pull is still the binding constraint. Whether a monthly Git
 
 ## Not yet pulled (called out so we do not pretend)
 
-- Per-year × borough ACRIS *party* coverage (needs a join).
-- Official ACRIS `property_type` code list.
-- Byte size of a **full** 108-column PLUTO CSV and of ACRIS extracts. The M1 column subset is measured above.
-- A complete PAD sample (file download, not SODA).
+- Official ACRIS `property_type` code list (not used; lot join is boro/block/lot).
+- Byte size of a **full** 108-column PLUTO CSV and of a cold ACRIS Parties extract.
+- A complete PAD file. Portal and guessed `s-media` zip URLs 403/404 from this environment (2026-09-17). Official layout is `padlayout.pdf` (`billboro` / `billblock` / `billlot`). SODA `bc8t-ecyu` remains 403. Mapper is fixture-tested; live join is exact-BBL until a PAD extract is on disk.
 - Philadelphia sources (M5).
