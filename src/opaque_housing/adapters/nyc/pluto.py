@@ -10,8 +10,9 @@ from pathlib import Path
 import polars as pl
 
 from opaque_housing.adapters.nyc.building_type import (
+    building_type_expr,
     building_type_from_pluto,
-    is_residential_pluto,
+    residential_expr,
 )
 from opaque_housing.quality.filters import FilterCount
 from opaque_housing.schema import ParcelSnapshot
@@ -77,6 +78,15 @@ def load_boro_county_fips(path: Path = BORO_FIPS_PATH) -> dict[str, str]:
     }
 
 
+def _bct_key(value: object) -> str:
+    if value is None:
+        return ""
+    text = str(value).strip()
+    if "." in text:
+        text = text.split(".", 1)[0]
+    return text
+
+
 class NycPlutoAdapter:
     metro_id = "nyc"
 
@@ -96,50 +106,74 @@ class NycPlutoAdapter:
         if self.tract_equiv_path is not None:
             equiv = _normalize_columns(_read_table(self.tract_equiv_path))
             for row in equiv.iter_rows(named=True):
-                key = str(row.get("boroct2020") or "")
+                key = _bct_key(row.get("boroct2020"))
                 nta = row.get("ntacode") or row.get("nta2020")
                 if key and nta:
                     nta_by_bct[key] = str(nta)
 
-        records: list[dict[str, object]] = []
         rows_in = raw.height
-        for row in raw.iter_rows(named=True):
-            if not is_residential_pluto(
-                bldgclass=row["bldgclass"],
-                landuse=row.get("landuse"),
-                unitsres=row["unitsres"],
-            ):
-                continue
-            bct = "" if row["bct2020"] is None else str(row["bct2020"]).strip()
-            records.append(
-                {
-                    "metro_id": self.metro_id,
-                    "parcel_id": format_bbl(row["bbl"]),
-                    "snapshot_date": self.snapshot_date,
-                    "geo_tract": format_geoid(row["borocode"], row["bct2020"], self._county_fips),
-                    "geo_neighborhood": nta_by_bct.get(bct),
-                    "building_type": building_type_from_pluto(
-                        bldgclass=row["bldgclass"],
-                        landuse=row.get("landuse"),
-                        unitsres=row["unitsres"],
-                    ).value,
-                    "res_units": int(float(str(row["unitsres"] or 0))),
-                    "owner_name_raw": None if row["ownername"] is None else str(row["ownername"]),
-                    "owner_mailing_address_raw": None,
-                    "source_dataset": SOURCE_DATASET,
-                    "source_version": "" if row["version"] is None else str(row["version"]),
-                }
+        kept = raw.filter(residential_expr())
+        geo_tracts = [
+            format_geoid(boro, tract, self._county_fips)
+            for boro, tract in zip(
+                kept["borocode"].to_list(),
+                kept["bct2020"].to_list(),
+                strict=True,
             )
+        ]
+        geo_neighborhoods = [_bct_key(value) for value in kept["bct2020"].to_list()]
+        geo_neighborhoods = [nta_by_bct.get(key) for key in geo_neighborhoods]
+        result = kept.with_columns(
+            pl.lit(self.metro_id).alias("metro_id"),
+            pl.col("bbl").map_elements(format_bbl, return_dtype=pl.Utf8).alias("parcel_id"),
+            pl.lit(self.snapshot_date).alias("snapshot_date"),
+            pl.Series("geo_tract", geo_tracts, dtype=pl.Utf8),
+            pl.Series("geo_neighborhood", geo_neighborhoods, dtype=pl.Utf8),
+            building_type_expr().alias("building_type"),
+            _units_int_expr().alias("res_units"),
+            pl.col("ownername").cast(pl.Utf8).alias("owner_name_raw"),
+            pl.lit(None).cast(pl.Utf8).alias("owner_mailing_address_raw"),
+            pl.lit(SOURCE_DATASET).alias("source_dataset"),
+            pl.col("version").cast(pl.Utf8).fill_null("").alias("source_version"),
+        ).select(
+            "metro_id",
+            "parcel_id",
+            "snapshot_date",
+            "geo_tract",
+            "geo_neighborhood",
+            "building_type",
+            "res_units",
+            "owner_name_raw",
+            "owner_mailing_address_raw",
+            "source_dataset",
+            "source_version",
+        )
         self.filter_counts.append(
             FilterCount(
                 stage="pluto_to_parcels",
                 rule_id="pluto_residential_only",
                 rows_in=rows_in,
-                rows_out=len(records),
+                rows_out=result.height,
             )
         )
-        return pl.DataFrame(records)
+        return result
+
+
+def _units_int_expr() -> pl.Expr:
+    return pl.col("unitsres").cast(pl.Float64, strict=False).fill_null(0).cast(pl.Int64)
 
 
 def parcels_from_frame(df: pl.DataFrame) -> list[ParcelSnapshot]:
     return [ParcelSnapshot.model_validate(row) for row in df.iter_rows(named=True)]
+
+
+# Re-export so existing tests that imported the Python mapper still work.
+__all__ = [
+    "NycPlutoAdapter",
+    "SOURCE_DATASET",
+    "building_type_from_pluto",
+    "format_bbl",
+    "format_geoid",
+    "load_boro_county_fips",
+    "parcels_from_frame",
+]

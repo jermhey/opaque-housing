@@ -1,8 +1,12 @@
+from pathlib import Path
+
 from typer.testing import CliRunner
 
 from opaque_housing.cli import app
 
 runner = CliRunner()
+FIXTURE = Path("tests/fixtures/nyc/pluto_sample.csv")
+EQUIV = Path("tests/fixtures/nyc/tract_nta_equiv_sample.csv")
 
 
 def test_help() -> None:
@@ -10,9 +14,83 @@ def test_help() -> None:
     assert result.exit_code == 0
     assert "ingest" in result.stdout
     assert "build" in result.stdout
+    assert "label" in result.stdout
+    assert "eval" in result.stdout
 
 
 def test_version() -> None:
     result = runner.invoke(app, ["version"])
     assert result.exit_code == 0
     assert result.stdout.strip() == "0.1.0"
+
+
+def test_build_and_eval_on_committed_fixtures(tmp_path: Path) -> None:
+    out = tmp_path / "derived"
+    built = runner.invoke(
+        app,
+        [
+            "build",
+            "--metro",
+            "nyc",
+            "--source",
+            str(FIXTURE),
+            "--equiv",
+            str(EQUIV),
+            "--out-dir",
+            str(out),
+        ],
+    )
+    assert built.exit_code == 0, built.stdout + built.stderr
+    assert (out / "headlines.json").exists()
+    assert (out / "run_manifest.json").exists()
+    assert (out / "parcels_classified.parquet").exists()
+
+    report = tmp_path / "eval.json"
+    evaluated = runner.invoke(
+        app,
+        [
+            "eval",
+            "--gold",
+            "eval/gold/ci_dev.csv",
+            "--baseline",
+            "eval/reports/baseline_macro_f1.json",
+            "--split",
+            "test",
+            "--out",
+            str(report),
+        ],
+    )
+    assert evaluated.exit_code == 0, evaluated.stdout + evaluated.stderr
+    assert report.exists()
+
+
+def test_label_sample_from_build(tmp_path: Path) -> None:
+    derived = tmp_path / "derived"
+    runner.invoke(
+        app,
+        [
+            "build",
+            "--source",
+            str(FIXTURE),
+            "--equiv",
+            str(EQUIV),
+            "--out-dir",
+            str(derived),
+        ],
+    )
+    queue = tmp_path / "queue.csv"
+    sampled = runner.invoke(
+        app,
+        [
+            "label",
+            "--sample-from",
+            str(derived / "parcels_classified.parquet"),
+            "--queue",
+            str(queue),
+            "--n",
+            "4",
+        ],
+    )
+    assert sampled.exit_code == 0, sampled.stdout + sampled.stderr
+    assert queue.exists()
+    assert "label" in queue.read_text()

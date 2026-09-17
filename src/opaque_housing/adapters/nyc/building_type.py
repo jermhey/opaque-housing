@@ -5,6 +5,8 @@ PLUTO 26v2 data dictionary (DCP-created condo rollup codes). The mapping
 rules themselves are ours and are unit-tested.
 """
 
+import polars as pl
+
 from opaque_housing.schema import BuildingType
 
 # Official DOF labels that are cooperatives (not inferred from "CORP").
@@ -150,3 +152,53 @@ def building_type_from_pluto(
             return BuildingType.SFR_1_4
         return BuildingType.SMALL_MF
     return BuildingType.OTHER_RES
+
+
+def _bldgclass_expr() -> pl.Expr:
+    return pl.col("bldgclass").cast(pl.Utf8).str.strip_chars().str.to_uppercase()
+
+
+def _unitsres_expr() -> pl.Expr:
+    return pl.col("unitsres").cast(pl.Float64, strict=False).fill_null(0)
+
+
+def _landuse_expr() -> pl.Expr:
+    return pl.col("landuse").cast(pl.Float64, strict=False)
+
+
+def residential_expr() -> pl.Expr:
+    """Polars form of ``is_residential_pluto`` for the full extract."""
+    units = _unitsres_expr()
+    use = _landuse_expr()
+    code = _bldgclass_expr()
+    official_classes = (
+        COOP_CLASSES | RESIDENTIAL_CONDO_CLASSES | SFR_1_4_CLASSES | PRIMARILY_RES_MIXED_CLASSES
+    )
+    official = code.is_in(list(official_classes))
+    return (units >= 1) | use.is_in([1.0, 2.0, 3.0, 4.0]) | official
+
+
+def building_type_expr() -> pl.Expr:
+    """Polars form of ``building_type_from_pluto``."""
+    code = _bldgclass_expr()
+    units = _unitsres_expr()
+    use = _landuse_expr()
+    return (
+        pl.when(code.is_in(list(COOP_CLASSES)))
+        .then(pl.lit(BuildingType.COOP_BUILDING.value))
+        .when(code.is_in(list(RESIDENTIAL_CONDO_CLASSES)))
+        .then(pl.lit(BuildingType.CONDO_UNIT.value))
+        .when(code.is_in(list(MIXED_USE_RES_CLASSES)) | (use == 4))
+        .then(pl.lit(BuildingType.MIXED_USE_RES.value))
+        .when(code.is_in(list(SFR_1_4_CLASSES)))
+        .then(pl.lit(BuildingType.SFR_1_4.value))
+        .when(units >= 20)
+        .then(pl.lit(BuildingType.LARGE_MF.value))
+        .when(units >= 5)
+        .then(pl.lit(BuildingType.SMALL_MF.value))
+        .when((units >= 1) & use.is_in([1.0, 2.0, 3.0]) & (units <= 4))
+        .then(pl.lit(BuildingType.SFR_1_4.value))
+        .when((units >= 1) & use.is_in([1.0, 2.0, 3.0]))
+        .then(pl.lit(BuildingType.SMALL_MF.value))
+        .otherwise(pl.lit(BuildingType.OTHER_RES.value))
+    )

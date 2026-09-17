@@ -16,9 +16,15 @@ build/
 data/raw/**/*
 !data/raw/.gitkeep
 
+# Derived city extracts stay local
+data/derived/**/*
+!data/derived/.gitkeep
+
 # Gold labels for individuals must never be published
 eval/gold/individuals/
 eval/gold/*individual*
+eval/gold/queue.csv
+eval/gold/labeled.csv
 
 # One-off probe dumps (summarized into docs/data_sources.md)
 analysis/source_probe/

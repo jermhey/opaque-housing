@@ -4,8 +4,10 @@ import polars as pl
 
 from opaque_housing.adapters.nyc.building_type import (
     COOP_CLASSES,
+    building_type_expr,
     building_type_from_pluto,
     is_residential_pluto,
+    residential_expr,
 )
 from opaque_housing.schema import BuildingType
 
@@ -56,3 +58,36 @@ def test_every_official_coop_code_is_in_dof_table() -> None:
     table = pl.read_csv(DOF_CODES)
     official = set(table["code"].to_list())
     assert COOP_CLASSES <= official
+
+
+def test_polars_exprs_match_python_mappers() -> None:
+    rows = [
+        {"bldgclass": "A1", "landuse": "1", "unitsres": "1"},
+        {"bldgclass": "C6", "landuse": "2", "unitsres": "24"},
+        {"bldgclass": "R4", "landuse": "3", "unitsres": "80"},
+        {"bldgclass": "C2", "landuse": "2", "unitsres": "6"},
+        {"bldgclass": "D1", "landuse": "3", "unitsres": "48"},
+        {"bldgclass": "S2", "landuse": "4", "unitsres": "2"},
+        {"bldgclass": "V0", "landuse": "11", "unitsres": "0"},
+        {"bldgclass": "Y5", "landuse": "8", "unitsres": "0"},
+        {"bldgclass": "A8", "landuse": "", "unitsres": "0"},
+    ]
+    frame = pl.DataFrame(rows).with_columns(
+        residential_expr().alias("keep"),
+        building_type_expr().alias("type"),
+    )
+    for row, rec in zip(rows, frame.iter_rows(named=True), strict=True):
+        assert rec["keep"] == is_residential_pluto(
+            bldgclass=row["bldgclass"],
+            landuse=row["landuse"] or None,
+            unitsres=row["unitsres"],
+        )
+        if rec["keep"]:
+            assert (
+                rec["type"]
+                == building_type_from_pluto(
+                    bldgclass=row["bldgclass"],
+                    landuse=row["landuse"] or None,
+                    unitsres=row["unitsres"],
+                ).value
+            )

@@ -1,1 +1,5 @@
-"""Stock, flow, and concentration metrics. Implemented in Milestones 1–2."""
+"""Stock, flow, and concentration metrics."""
+
+from opaque_housing.metrics.stock import headline_shares, private_residential
+
+__all__ = ["headline_shares", "private_residential"]

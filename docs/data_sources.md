@@ -35,6 +35,7 @@ Nothing in this file is from memory. Dataset IDs, field names, row counts, and y
 | Dataset ID | `64uk-42ks` |
 | Publisher | Department of City Planning (DCP) |
 | API | `https://data.cityofnewyork.us/resource/64uk-42ks.json` |
+| Ingest | `oh ingest` pulls `$select=bbl,bldgclass,unitsres,ownername,version,bct2020,borocode,landuse,condono` with `$limit=1000000` (verified field names only) |
 | Version (live) | **26v2** (`version` column; catalog description) |
 | Rows | **858,284** |
 | Columns | 108 |
@@ -261,7 +262,14 @@ Rough current extracts:
 | NY DOS active | 4.3M |
 | Name status history | 7.5M |
 
-A full ACRIS Parties pull is the binding constraint. Whether a monthly GitHub-hosted runner can do a cold extract is **not yet measured** (byte size / time). An ADR is due before `refresh.yml` is written.
+Measured on 2026-09-16 (selected columns, not the full 108-column PLUTO table):
+
+| Dataset | Rows | Bytes |
+|---|---:|---:|
+| PLUTO `$select` used by `oh ingest` | 858,284 | 67,098,962 |
+| Tract–NTA equivalency | 2,327 | 197,482 |
+
+A full ACRIS Parties pull is still the binding constraint. Whether a monthly GitHub-hosted runner can do a cold extract of ACRIS is **not yet measured**. An ADR is due before `refresh.yml` is written.
 
 ---
 
@@ -269,6 +277,6 @@ A full ACRIS Parties pull is the binding constraint. Whether a monthly GitHub-ho
 
 - Per-year × borough ACRIS *party* coverage (needs a join).
 - Official ACRIS `property_type` code list.
-- Byte size of full CSV/Parquet extracts.
+- Byte size of a **full** 108-column PLUTO CSV and of ACRIS extracts. The M1 column subset is measured above.
 - A complete PAD sample (file download, not SODA).
 - Philadelphia sources (M5).

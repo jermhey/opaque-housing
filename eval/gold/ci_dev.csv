@@ -1,0 +1,29 @@
+name_raw,building_type,owner_class,split
+,sfr_1_4,unknown,test
+EAST SIDE HDFC,sfr_1_4,hdfc,dev
+HOUSING DEVELOPMENT FUND CORP,small_mf,hdfc,test
+CITY OF NEW YORK,sfr_1_4,public,dev
+NYCHA,large_mf,public,test
+FANNIE MAE,sfr_1_4,lender_reo,dev
+WELLS FARGO BANK NA,sfr_1_4,lender_reo,test
+ST MARYS CHURCH,sfr_1_4,nonprofit_religious,dev
+COLUMBIA UNIVERSITY,sfr_1_4,nonprofit_religious,test
+ESTATE OF JOHN SMITH,sfr_1_4,estate,dev
+ESTATE OF JANE DOE,sfr_1_4,estate,test
+SMITH FAMILY TRUST,sfr_1_4,trust,test
+JOHN SMITH TRUSTEE OF SMITH TRUST,sfr_1_4,trust,dev
+JOHN SMITH TR,sfr_1_4,trust,test
+EXAMPLE TENANTS CORP,coop_building,coop_corp,dev
+123 MAIN ST LLC,coop_building,coop_corp,test
+PARK TENANTS CORP,sfr_1_4,coop_corp,dev
+456 PINE LLC,sfr_1_4,llc,test
+ABC ASSOCIATES LP,sfr_1_4,partnership,dev
+SMITH JONES LLP,sfr_1_4,partnership,test
+ABC REALTY CORP,sfr_1_4,corp,dev
+ABC REALTY INC,sfr_1_4,corp,test
+JOHN SMITH,sfr_1_4,individual,dev
+SMITH JOHN & MARY,sfr_1_4,individual,test
+JOHN SMITH ET AL,sfr_1_4,individual,dev
+SMITH JOHN JTWROS,sfr_1_4,individual,test
+ACME REALTY,sfr_1_4,unknown,dev
+ACME HOLDINGS,sfr_1_4,unknown,test
