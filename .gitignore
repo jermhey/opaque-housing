@@ -1,0 +1,28 @@
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.pyright/
+.env
+*.egg-info/
+dist/
+build/
+*.duckdb
+*.duckdb.wal
+.DS_Store
+
+# Immutable raw extracts stay local
+data/raw/**/*
+!data/raw/.gitkeep
+
+# Gold labels for individuals must never be published
+eval/gold/individuals/
+eval/gold/*individual*
+
+# One-off probe dumps (summarized into docs/data_sources.md)
+analysis/source_probe/
+
+# Site toolchain (M4)
+site/node_modules/
+site/.evidence/

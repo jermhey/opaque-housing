@@ -1,0 +1,22 @@
+---
+description: Working agreements for the opaque-housing investigation
+alwaysApply: true
+---
+
+# Working Agreements
+
+- **Inspect data before coding against it.** Never invent field names, codes, or dataset IDs. If you can't verify something, say so and ask.
+- **Keep code pure where possible.** Classification, opacity, and metric logic are pure functions with no I/O. All network and file access lives in adapters and the CLI.
+- **Test every rule.** Every classification rule has a `rule_id` and at least one positive and one negative test.
+- **Never drop rows silently.** Every filter logs before/after counts to the run manifest.
+- **Surface definitional ambiguity as a question to me.** Record resolved decisions as ADRs in `docs/decisions/`.
+- **Commit small** with descriptive messages. Repo history is part of the deliverable.
+- **Keep notebooks in `analysis/` only.** Nothing in `src/` imports them.
+- **Handle secrets via `.env`.** Never commit keys or raw personal data.
+- **Prefer boring, well-documented tools.** Justify any new dependency in one line in the PR/commit description.
+- **Report at the end of each milestone:**
+  - what was built;
+  - what was verified vs. assumed;
+  - open questions;
+  - the numbers produced so far, with caveats.
+- **Do not start the next milestone until I confirm.**

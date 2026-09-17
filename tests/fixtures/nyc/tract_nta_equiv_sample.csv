@@ -1,0 +1,4 @@
+geoid,countyfips,borocode,boroname,boroct2020,ct2020,ntacode,ntaname
+36061002100,061,1,Manhattan,1002100,002100,MN0101,Example NTA
+36061001600,061,1,Manhattan,1001600,001600,MN0302,Example NTA 2
+36005001901,005,2,Bronx,2001901,001901,BX0101,Mott Haven-Port Morris

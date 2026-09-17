@@ -1,0 +1,223 @@
+code,description,source
+A0,"CAPE COD",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+A1,"TWO STORIES - DETACHED SM OR MID",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+A2,"ONE STORY - PERMANENT LIVING QUARTER",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+A3,"LARGE SUBURBAN RESIDENCE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+A4,"CITY RESIDENCE ONE FAMILY",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+A5,"ONE FAMILY ATTACHED OR SEMI-DETACHED",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+A6,"SUMMER COTTAGE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+A7,"MANSION TYPE OR TOWN HOUSE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+A8,"BUNGALOW COLONY - COOPERATIVELY OWNED LAND",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+A9,"MISCELLANEOUS ONE FAMILY",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+B1,"TWO FAMILY BRICK",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+B2,"TWO FAMILY FRAME",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+B3,"TWO FAMILY CONVERTED FROM ONE FAMILY",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+B9,"MISCELLANEOUS TWO FAMILY",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+C0,"THREE FAMILIES",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+C1,"OVER SIX FAMILIES WITHOUT STORES",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+C2,"FIVE TO SIX FAMILIES",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+C3,"FOUR FAMILIES",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+C4,"OLD LAW TENEMENT",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+C5,"CONVERTED DWELLINGS OR ROOMING HOUSE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+C6,"WALK-UP COOPERATIVE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+C7,"WALK-UP APT. OVER SIX FAMILIES WITH STORES",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+C8,"WALK-UP CO-OP; CONVERSION FROM LOFT/WAREHOUSE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+C9,"GARDEN APARTMENTS",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+CB,"WALKUP APT LESS THAN 11 UNITS RESIDENTIAL",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+CC,"WALKUP CO-OP APT LESS THAN 11 UNITS RESIDENTIAL",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+CM,"MOBILE HOMES/TRAILER PARKS",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+D0,"ELEVATOR CO-OP; CONVERSION FROM LOFT/WAREHOUSE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+D1,"ELEVATOR APT; SEMI-FIREPROOF WITHOUT STORES",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+D2,"ELEVATOR APT; ARTISTS IN RESIDENCE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+D3,"ELEVATOR APT; FIREPROOF WITHOUT STORES",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+D4,"ELEVATOR COOPERATIVE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+D5,"ELEVATOR APT; CONVERTED",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+D6,"ELEVATOR APT; FIREPROOF WITH STORES",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+D7,"ELEVATOR APT; SEMI-FIREPROOF WITH STORES",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+D8,"ELEVATOR APT; LUXURY TYPE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+D9,"ELEVATOR APT; MISCELLANEOUS",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+DB,"ELEVATOR APT LESS THAN 11 UNITS RESIDENTIAL",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+DC,"ELEVATOR CO-OP APT LESS THAN 11 UNITS RESIDENTIAL",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+E1,"GENERAL WAREHOUSE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+E2,"CONTRACTORS WAREHOUSE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+E7,"SELF-STORAGE WAREHOUSES",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+E9,"MISCELLANEOUS WAREHOUSE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+F1,"FACTORY; HEAVY MANUFACTURING - FIREPROOF",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+F2,"FACTORY; SPECIAL CONSTRUCTION - FIREPROOF",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+F4,"FACTORY; INDUSTRIAL SEMI-FIREPROOF",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+F5,"FACTORY; LIGHT MANUFACTURING",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+F8,"FACTORY; TANK FARM",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+F9,"FACTORY; INDUSTRIAL-MISCELLANEOUS",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+G0,"GARAGE; RESIDENTIAL TAX CLASS 1",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+G1,"ALL PARKING GARAGES",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+G2,"AUTO BODY/COLLISION OR AUTO REPAIR",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+G3,"GAS STATION WITH RETAIL STORE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+G4,"GAS STATION WITH SERVICE/AUTO REPAIR",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+G5,"GAS STATION ONLY WITH/WITHOUT SMALL KIOSK",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+G6,"LICENSED PARKING LOT",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+G7,"UNLICENSED PARKING LOT",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+G8,"CAR SALES/RENTAL WITH SHOWROOM",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+G9,"MISCELLANEOUS GARAGE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+GU,"CAR SALES OR RENTAL LOTS WITHOUT SHOWROOM",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+GW,"CAR WASH OR LUBRITORIUM FACILITY",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+HB,"BOUTIQUE: 10-100 ROOMS",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+HH,"HOSTELS",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+HR,"SRO",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+HS,"EXTENDED STAY/SUITE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+H1,"LUXURY HOTEL",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+H2,"FULL SERVICE HOTEL",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+H3,"LIMITED SERVICE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+H4,"MOTEL",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+H5,"HOTEL; PRIVATE CLUB, LUXURY TYPE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+H6,"APARTMENT HOTEL",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+H7,"APARTMENT HOTEL - COOPERATIVELY OWNED",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+H8,"DORMITORY",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+H9,"MISCELLANEOUS HOTEL",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+I1,"HOSPITAL, SANITARIUM, MENTAL INSTITUTION",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+I2,"INFIRMARY",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+I3,"DISPENSARY",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+I4,"HOSPITAL; STAFF FACILITY",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+I5,"HEALTH CENTER, CHILD CENTER, CLINIC",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+I6,"NURSING HOME",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+I7,"ADULT CARE FACILITY",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+I9,"MISCELLANEOUS HOSPITAL, HEALTH CARE FACILITY",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+J1,"THEATRE; ART TYPE LESS THAN 400 SEATS",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+J2,"THEATRE; ART TYPE MORE THAN 400 SEATS",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+J3,"MOTION PICTURE THEATRE WITH BALCONY",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+J4,"LEGITIMATE THEATRE, SOLE USE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+J5,"THEATRE IN MIXED-USE BUILDING",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+J6,"TELEVISION STUDIO",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+J7,"OFF BROADWAY TYPE THEATRE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+J8,"MULTIPLEX PICTURE THEATRE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+J9,"MISCELLANEOUS THEATRE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+K1,"ONE STORY RETAIL BUILDING",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+K2,"MULTI-STORY RETAIL BUILDING (2 OR MORE)",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+K3,"MULTI-STORY DEPARTMENT STORE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+K4,"PREDOMINANT RETAIL WITH OTHER USES",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+K5,"STAND-ALONE FOOD ESTABLISHMENT",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+K6,"SHOPPING CENTER WITH OR WITHOUT PARKING",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+K7,"BANKING FACILITIES WITH OR WITHOUT PARKING",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+K8,"BIG BOX RETAIL",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+K9,"MISCELLANEOUS STORE BUILDING",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+L1,"LOFT; OVER 8 STORIES (MID MANH. TYPE)",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+L2,"LOFT; FIREPROOF AND STORAGE TYPE WITHOUT STORES",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+L3,"LOFT; SEMI-FIREPROOF",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+L8,"LOFT; WITH RETAIL STORES OTHER THAN TYPE ONE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+L9,"MISCELLANEOUS LOFT",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+M1,"CHURCH, SYNAGOGUE, CHAPEL",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+M2,"MISSION HOUSE (NON-RESIDENTIAL)",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+M3,"PARSONAGE, RECTORY",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+M4,"CONVENT",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+M9,"MISCELLANEOUS RELIGIOUS FACILITY",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+N1,"ASYLUM",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+N2,"HOME FOR INDIGENT CHILDREN, AGED, HOMELESS",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+N3,"ORPHANAGE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+N4,"DETENTION HOUSE FOR WAYWARD GIRLS",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+N9,"MISCELLANEOUS ASYLUM, HOME",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+O1,"OFFICE ONLY - 1 STORY",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+O2,"OFFICE ONLY 2 - 6 STORIES",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+O3,"OFFICE ONLY 7 - 19 STORIES",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+O4,"OFFICE ONLY WITH OR WITHOUT COMM - 20 STORIES OR MORE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+O5,"OFFICE WITH COMM - 1 TO 6 STORIES",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+O6,"OFFICE WITH COMM 7 - 19 STORIES",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+O7,"PROFESSIONAL BUILDINGS/STAND ALONE FUNERAL HOMES",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+O8,"OFFICE WITH APARTMENTS ONLY (NO COMM)",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+O9,"MISCELLANEOUS AND OLD STYLE BANK BLDGS.",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+P1,"CONCERT HALL",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+P2,"LODGE ROOM",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+P3,"YWCA, YMCA, YWHA, YMHA, PAL",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+P4,"BEACH CLUB",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+P5,"COMMUNITY CENTER",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+P6,"AMUSEMENT PLACE, BATH HOUSE, BOAT HOUSE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+P7,"MUSEUM",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+P8,"LIBRARY",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+P9,"MISCELLANEOUS INDOOR PUBLIC ASSEMBLY",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+Q1,"PARKS/RECREATION FACILTY",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+Q2,"PLAYGROUND",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+Q3,"OUTDOOR POOL",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+Q4,"BEACH",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+Q5,"GOLF COURSE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+Q6,"STADIUM, RACE TRACK, BASEBALL FIELD",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+Q7,"TENNIS COURT",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+Q8,"MARINA, YACHT CLUB",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+Q9,"MISCELLANEOUS OUTDOOR RECREATIONAL FACILITY",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+RA,"CULTURAL, MEDICAL, EDUCATIONAL, ETC.",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+RB,"OFFICE SPACE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+RG,"INDOOR PARKING",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+RH,"HOTEL/BOATEL",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+RK,"RETAIL SPACE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+RP,"OUTDOOR PARKING",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+RR,"CONDOMINIUM RENTALS",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+RS,"NON-BUSINESS STORAGE SPACE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+RT,"TERRACES/GARDENS/CABANAS",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+RW,"WAREHOUSE/FACTORY/INDUSTRIAL",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+R0,"SPECIAL CONDOMINIUM BILLING LOT",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+R1,"CONDO; RESIDENTIAL UNIT IN 2-10 UNIT BLDG.",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+R2,"CONDO; RESIDENTIAL UNIT IN WALK-UP BLDG.",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+R3,"CONDO; RESIDENTIAL UNIT IN 1-3 STORY BLDG.",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+R4,"CONDO; RESIDENTIAL UNIT IN ELEVATOR BLDG.",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+R5,"MISCELLANEOUS COMMERCIAL",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+R6,"CONDO; RESID.UNIT OF 1-3 UNIT BLDG-ORIG CLASS 1",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+R7,"CONDO; COMML.UNIT OF 1-3 UNIT BLDG-ORIG CLASS 1",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+R8,"CONDO; COMML.UNIT OF 2-10 UNIT BLDG.",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+R9,"CO-OP WITHIN A CONDOMINIUM",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+S0,"PRIMARILY 1 FAMILY WITH 2 STORES OR OFFICES",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+S1,"PRIMARILY 1 FAMILY WITH 1 STORE OR OFFICE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+S2,"PRIMARILY 2 FAMILY WITH 1 STORE OR OFFICE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+S3,"PRIMARILY 3 FAMILY WITH 1 STORE OR OFFICE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+S4,"PRIMARILY 4 FAMILY WITH 1 STORE OR OFFICE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+S5,"PRIMARILY 5-6 FAMILY WITH 1 STORE OR OFFICE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+S9,"SINGLE OR MULTIPLE DWELLING WITH STORES OR OFFICES",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+T1,"AIRPORT, AIRFIELD, TERMINAL",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+T2,"PIER, DOCK, BULKHEAD",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+T9,"MISCELLANEOUS TRANSPORTATION FACILITY",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+U0,"UTILITY COMPANY LAND AND BUILDING",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+U1,"BRIDGE, TUNNEL, HIGHWAY",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+U2,"GAS OR ELECTRIC UTILITY",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+U3,"CEILING RAILROAD",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+U4,"TELEPHONE UTILITY",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+U5,"COMMUNICATION FACILITY OTHER THAN TELEPHONE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+U6,"RAILROAD - PRIVATE OWNERSHIP",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+U7,"TRANSPORTATION - PUBLIC OWNERSHIP",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+U8,"REVOCABLE CONSENT",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+U9,"MISCELLANEOUS UTILITY PROPERTY",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+UR,"UTILITY REVOCABLE CONSENT",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+V0,"ZONED RESIDENTIAL; NOT MANHATTAN",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+V1,"ZONED COMMERCIAL OR MANHATTAN RESIDENTIAL",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+V2,"ZONED COMMERCIAL ADJACENT TO CLASS 1 DWELLING: NOT MANHATTAN",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+V3,"ZONED PRIMARILY RESIDENTIAL; NOT MANHATTAN",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+V4,"POLICE OR FIRE DEPARTMENT",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+V5,"SCHOOL SITE OR YARD",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+V6,"LIBRARY, HOSPITAL OR MUSEUM",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+V7,"PORT AUTHORITY OF NEW YORK AND NEW JERSEY",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+V8,"NEW YORK STATE OR US GOVERNMENT",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+V9,"MISCELLANEOUS VACANT LAND",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+VG,"COMMUNITY GARDEN ZONED RESIDENTIAL; NOT MANHATTAN",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+VC,"COMMUNITY GARDEN ZONED COMMERCIAL OR MANHATTAN",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+W1,"PUBLIC ELEMENTARY, JUNIOR OR SENIOR HIGH",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+W2,"PAROCHIAL SCHOOL, YESHIVA",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+W3,"SCHOOL OR ACADEMY",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+W4,"TRAINING SCHOOL",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+W5,"CITY UNIVERSITY",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+W6,"OTHER COLLEGE AND UNIVERSITY",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+W7,"THEOLOGICAL SEMINARY",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+W8,"OTHER PRIVATE SCHOOL",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+W9,"MISCELLANEOUS EDUCATIONAL FACILITY",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+Y1,"FIRE DEPARTMENT",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+Y2,"POLICE DEPARTMENT",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+Y3,"PRISON, JAIL, HOUSE OF DETENTION",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+Y4,"MILITARY AND NAVAL INSTALLATION",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+Y5,"DEPARTMENT OF REAL ESTATE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+Y6,"DEPARTMENT OF SANITATION",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+Y7,"DEPARTMENT OF PORTS AND TERMINALS",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+Y8,"DEPARTMENT OF PUBLIC WORKS",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+Y9,"DEPARTMENT OF ENVIRONMENTAL PROTECTION",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+Z0,"TENNIS COURT, POOL, SHED, ETC.",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+Z1,"COURT HOUSE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+Z2,"PUBLIC PARKING AREA",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+Z3,"POST OFFICE",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+Z4,"FOREIGN GOVERNMENT",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+Z5,"UNITED NATIONS",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+Z7,"EASEMENT",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+Z8,"CEMETERY",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html
+Z9,"OTHER MISCELLANEOUS",https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html

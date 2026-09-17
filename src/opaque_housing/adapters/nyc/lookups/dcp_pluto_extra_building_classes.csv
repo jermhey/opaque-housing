@@ -1,0 +1,9 @@
+code,description,source
+RC,Mixed commercial condominium types (DCP billing-lot rollup),PLUTO Data Dictionary 26v2 Appendix C
+RD,Mixed residential condominium types (DCP billing-lot rollup),PLUTO Data Dictionary 26v2 Appendix C
+RI,Mixed commercial and industrial/warehouse condominium types (DCP billing-lot rollup),PLUTO Data Dictionary 26v2 Appendix C
+RM,Mixed commercial and residential condominium types (DCP billing-lot rollup),PLUTO Data Dictionary 26v2 Appendix C
+RX,Mixed commercial residential and industrial condominium types (DCP billing-lot rollup),PLUTO Data Dictionary 26v2 Appendix C
+RZ,Mixed residential and industrial/warehouse condominium types (DCP billing-lot rollup),PLUTO Data Dictionary 26v2 Appendix C
+Q0,Park/ball field/playground/public space assigned by DCP on vacant PTS class V,PLUTO Data Dictionary 26v2
+QG,NYC Greenthumb community garden assigned by DCP on vacant PTS class V,PLUTO Data Dictionary 26v2

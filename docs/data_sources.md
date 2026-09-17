@@ -1,0 +1,274 @@
+# Data sources
+
+Retrieval date for every probe below: **2026-09-16**. Client User-Agent: `opaque-housing/0.1 (residential-ownership-research)`.
+
+Nothing in this file is from memory. Dataset IDs, field names, row counts, and year spans were read from the live Socrata APIs (`/api/views/{id}.json` and `/resource/{id}.json`) or from the cited official HTML/PDF. Probe dumps (not committed) live under `analysis/source_probe/`.
+
+## Terms
+
+- **NYC Open Data.** [Terms of Use](https://data.cityofnewyork.us/stories/s/Terms-of-Use/k9k7-3cje/). Local Law 11 of 2012: public datasets are available without a registration or license requirement. The City disclaims completeness, accuracy, and fitness for a particular purpose. DoITT may require republication to identify source, version, and modifications. We identify the client with a User-Agent and will cite dataset ID + version + retrieval date on published aggregates.
+- **DCP PLUTO / MapPLUTO / PAD.** DCP states the files are informational only and carries the same no-warranty language ([PLUTO 26v2 readme](https://s-media.nyc.gov/agencies/dcp/assets/files/pdf/data-tools/bytes/pluto_readme.pdf)).
+- **OPEN NY (data.ny.gov).** [OPEN-NY Terms of Use](https://data.ny.gov/en/dataset/OPEN-NY-Terms-Of-Use/77gx-ii52). Lawful reuse, including commercial use, is permitted; state disclaimers still apply.
+
+## What the brief got wrong or incomplete
+
+| Brief assumption | What the live sources show |
+|---|---|
+| PLUTO has an owner mailing address | **It does not.** `address` is the *tax-lot* address. Owner mailing is not a PLUTO field. Transfer-party addresses are in ACRIS Parties (`address_1`, `city`, `state`, `zip`). HPD contacts have a business address. |
+| PLUTO current snapshot is version 26v1 | The live `64uk-42ks` description and `version` column are **26v2** (DCP readme dated August 2026). |
+| MapPLUTO is a drop-in attribute table | `f888-ni5f` returns **403** on the SODA resource API (geometry/export dataset). Use tabular PLUTO `64uk-42ks` for attributes. |
+| PLUTO can support `condo_unit` ownership | PLUTO stores **one row per condo complex (billing lot)**, not per unit. `OwnerName` on those rows is the billing-lot / association name. Unit lots appear in ACRIS Legals (`lot`, optional `unit`) and in DCP PAD (`billboro` / `billblock` / `billlot`). |
+| PLUTO has NTA | **No `nta2020` column** on `64uk-42ks`. Join `bct2020` → `boroct2020` on the official equivalency table `hm78-6dwm`. |
+| `landuse` is a 2-character zero-padded code | Socrata types it as a **number** (`1`…`11`). 2,912 lots have a null land use. |
+| NY DOS bulk data includes inactive/dissolved entities | `n9v6-gdp6` is titled **Active Corporations** (4,281,406 rows). Dissolved entities are missing from that table — the survivorship bias called out in the brief is real. `ekwr-p59j` is a name-status history (A=4.31M, I=3.18M) without process addresses. |
+| DOF building-class codes are a Socrata table | `nzvw-cjc2` and PAD `bc8t-ecyu` also 403 on SODA. Official codes were taken from the [DOF HTML list](https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html). DCP-created condo mix classes (RC/RD/RI/RM/RX/RZ, Q0, QG) are only in the PLUTO data dictionary. |
+| HPD contact types are owner / head officer / agent | Also: `SiteManager`, `Officer`, `JointOwner`, `Shareholder`, `Lessee`. |
+| ACRIS doc-type field is a simple code | Document Control Codes use **`doc__type`** (double underscore). Master uses `doc_type`. Values include `DEED`, `DEED, RC`, `CONDEED`, `CORRD`, etc. |
+
+---
+
+## 1. Primary Land Use Tax Lot Output (PLUTO)
+
+| | |
+|---|---|
+| Portal | https://data.cityofnewyork.us/City-Government/Primary-Land-Use-Tax-Lot-Output-PLUTO-/64uk-42ks |
+| Dataset ID | `64uk-42ks` |
+| Publisher | Department of City Planning (DCP) |
+| API | `https://data.cityofnewyork.us/resource/64uk-42ks.json` |
+| Version (live) | **26v2** (`version` column; catalog description) |
+| Rows | **858,284** |
+| Columns | 108 |
+| Snapshot / not a panel | Current tax-lot snapshot. Historical annual files are on [DCP MapPLUTO/PLUTO](https://www.nyc.gov/content/planning/pages/resources/datasets/mappluto-pluto-change). |
+| Dictionary | https://s-media.nyc.gov/agencies/dcp/assets/files/pdf/data-tools/bytes/pluto_datadictionary.pdf |
+| Readme | https://s-media.nyc.gov/agencies/dcp/assets/files/pdf/data-tools/bytes/pluto_readme.pdf |
+
+### Verified fields used for `parcels_snapshot`
+
+| Socrata field | Canonical target | Notes |
+|---|---|---|
+| `bbl` | `parcel_id` | Number; sample values look like `4087860042.00000000`. Normalize to a 10-digit string. For condos this is the **billing lot**. |
+| `ownername` | `owner_name_raw` | 81-character PTS name. Public owners are sometimes DCP-normalized. |
+| `address` | (lot address only) | **Not** a mailing address. Not mapped to `owner_mailing_address_raw`. |
+| `ownertype` | (kept as source attribute, not a canonical field) | C 12,997; M 77; O 1,414; P 583; X 20,390; blank 822,822; **S 1** (S is not in the data dictionary — flag). Blank usually means private. |
+| `bldgclass` | input to building-type map | Official DOF 2-char codes. |
+| `landuse` | input to building-type map | DCP 1–11. Sample counts: 1=566,810; 2=131,460; 3=13,288; 4=56,272; null=2,912. |
+| `unitsres` | `res_units` | Residential unit count; 0 if none. |
+| `condono` | condo flag | Non-null on **11,046** lots. |
+| `bct2020` | `geo_tract` via GEOID construction | DCP borough+tract (`4157903`). GEOID = `36` + official county FIPS + 6-digit tract. |
+| `borocode` | GEOID / join | 1–5. |
+| `version` | `source_version` | `26v2`. |
+
+`OwnerType` codes from the official dictionary: C city; M mixed city/private; O other public authority / state / federal; P private; X fully tax-exempt; blank unknown (usually private).
+
+`parcels_snapshot` keeps **residential lots only** (ADR 0003). The adapter records `pluto_residential_only` before/after counts. Non-res lots (vacant, city yards, retail without units) are not silently dropped later in metrics.
+
+### Building-type inputs (official, not recalled)
+
+- DOF list: https://www.nyc.gov/assets/finance/jump/hlpbldgcode.html (committed as `dof_building_classification_codes.csv`).
+- DCP extra condo mix classes: PLUTO dictionary Appendix C (committed as `dcp_pluto_extra_building_classes.csv`).
+- Co-op classes used by the adapter (official labels contain cooperative / co-op): `A8, C6, C8, CC, D0, D4, DC, H7, R9`.
+- HDFC is **not** a building class. NY DOS has `DOMESTIC NOT-FOR-PROFIT CORPORATION (HOUSING DEVELOPMENT FUND COMPANY) (ARTICLE XI)` (3,417 active entities) — use that plus name rules in M1.
+
+### Condo handling (required for M2)
+
+PLUTO 26v2 readme: one record per condominium *complex*; billing lot when assigned, else lowest unit lot. ACRIS/deeds use unit lots. Billing-lot ↔ unit-lot mapping is **DCP PAD** (`billboro`, `billblock`, `billlot`), not PLUTO. PAD portal: https://www.nyc.gov/content/planning/pages/resources/datasets/pad . NYC Open Data `bc8t-ecyu` is not queryable via SODA (403).
+
+---
+
+## 2. MapPLUTO
+
+| | |
+|---|---|
+| Portal | https://data.cityofnewyork.us/City-Government/Primary-Land-Use-Tax-Lot-Output-Map-MapPLUTO-/f888-ni5f |
+| Dataset ID | `f888-ni5f` |
+| SODA resource | **403 Forbidden** on 2026-09-16 |
+| Role | Geometry for mapping. Attributes come from PLUTO. Not used in M0. |
+
+---
+
+## 3. ACRIS Real Property Master
+
+| | |
+|---|---|
+| Portal | https://data.cityofnewyork.us/City-Government/ACRIS-Real-Property-Master/bnx9-e6tj |
+| Dataset ID | `bnx9-e6tj` |
+| Rows | **17,090,001** |
+| Columns | 14 |
+
+Verified columns: `document_id`, `record_type`, `crfn`, `recorded_borough`, `doc_type`, `document_date`, `document_amt`, `recorded_datetime`, `modified_date`, `reel_yr`, `reel_nbr`, `reel_pg`, `percent_trans`, `good_through_date`.
+
+Coverage (live aggregate, 2026-09-16):
+
+- `recorded_datetime` min **1903-10-15**, max **2026-08-31**.
+- `document_date` min is garbage (`0001-04-03`); do not use min(document_date) as the window start.
+- 121 distinct recorded years. Volume ≥100k documents/year from **1966 through 2026** (61 years). Sparse before that.
+- Recent recorded-year counts: 2023=267,175; 2024=274,227; 2025=295,404; 2026 (partial)=203,047.
+
+Analysis window for flow metrics will be set from party-join coverage in M2, not from this master-only histogram.
+
+---
+
+## 4. ACRIS Real Property Legals
+
+| | |
+|---|---|
+| Portal | https://data.cityofnewyork.us/City-Government/ACRIS-Real-Property-Legals/8h5j-fqxa |
+| Dataset ID | `8h5j-fqxa` |
+| Rows | **22,761,783** |
+| Columns | 14 |
+
+Verified columns: `document_id`, `record_type`, `borough`, `block`, `lot`, `easement`, `partial_lot`, `air_rights`, `subterranean_rights`, `property_type`, `street_number`, `street_name`, `unit`, `good_through_date`.
+
+Sample includes a Queens condo-style row (`lot=1031`, `unit=313`) and a Manhattan office (`property_type=OF`). Multi-parcel deeds are expected (`document_id` 1:n lots). `property_type` codes were **not** hardcoded; they need the official property-type code table before use.
+
+---
+
+## 5. ACRIS Real Property Parties
+
+| | |
+|---|---|
+| Portal | https://data.cityofnewyork.us/City-Government/ACRIS-Real-Property-Parties/636b-3b5g |
+| Dataset ID | `636b-3b5g` |
+| Rows | **46,614,049** |
+| Columns | 11 |
+
+Verified columns: `document_id`, `record_type`, `party_type`, `name`, `address_1`, `address_2` (often absent), `country`, `city`, `state`, `zip`, `good_through_date`.
+
+`party_type` counts: `1`=25,414,430; `2`=21,152,796; `3`=46,823. Document Control Codes map party 1/2 by document class (for `DEED`: party1=`GRANTOR/SELLER`, party2=`GRANTEE/BUYER`). Null `name`: **3,017** (very small overall). Per-borough and per-year party coverage is **not** measured yet — that join is M2.
+
+This is the first verified source of *party mailing addresses*.
+
+---
+
+## 6. ACRIS Document Control Codes
+
+| | |
+|---|---|
+| Portal | https://data.cityofnewyork.us/widgets/7isb-wh4c |
+| Dataset ID | `7isb-wh4c` |
+| Rows | **126** (full table committed to `acris_document_control_codes.csv`) |
+
+Verified columns: `record_type`, `doc__type`, `doc__type_description`, `class_code_description`, `party1_type`, `party2_type`.
+
+`class_code_description = DEEDS AND OTHER CONVEYANCES` has 34 codes, including `DEED`, `DEED, RC`, `DEEDO`, `DEEDP`, `CONDEED` (confirmatory), `CORRD` (correction deed), `DEED COR`, `TODD`, `CDEC` (condo declaration), `LEAS`, `EASE`. Sale-deed vs nonsale mapping is a later ADR; the official table is in-repo so we will not invent codes.
+
+---
+
+## 7. HPD Multiple Dwelling Registrations
+
+| | |
+|---|---|
+| Portal | https://data.cityofnewyork.us/Housing-Development/Multiple-Dwelling-Registrations/tesw-yqqr |
+| Dataset ID | `tesw-yqqr` |
+| Rows | **203,887** |
+| Columns | 16 |
+
+Verified columns include: `registrationid`, `buildingid`, `boroid`, `boro`, `housenumber`, `streetname`, `zip`, `block`, `lot`, `bin`, `communityboard`, `lastregistrationdate`, `registrationenddate`.
+
+**No owner names** on this table. Join to contacts on `registrationid`.
+
+`lastregistrationdate` span: 1993-04-01 … 2026-07-31.
+
+HPD's own description (agency open-data page): owners must register buildings with 3+ residential units, or 1–2 family homes that are not owner/family-occupied. That is broader than "3+" alone.
+
+---
+
+## 8. HPD Registration Contacts
+
+| | |
+|---|---|
+| Portal | https://data.cityofnewyork.us/Housing-Development/Registration-Contacts/feu5-w2e2 |
+| Dataset ID | `feu5-w2e2` |
+| Rows | **810,494** |
+| Columns | 15 |
+
+Verified columns include: `registrationcontactid`, `registrationid`, `type`, `contactdescription`, `corporationname`, `firstname`, `lastname`, `title`, plus business address parts.
+
+`type` counts: SiteManager 167,796; Agent 161,136; HeadOfficer 132,287; CorporateOwner 125,548; Officer 75,636; IndividualOwner 50,592; JointOwner 46,640; Shareholder 41,571; Lessee 9,288.
+
+Primary O1 evidence candidates: `HeadOfficer`, `IndividualOwner`, `JointOwner`, `Officer` (natural-person name fields). CorporateOwner is an entity name.
+
+---
+
+## 9. NY Department of State — Active Corporations
+
+| | |
+|---|---|
+| Portal | https://data.ny.gov/Economic-Development/Active-Corporations-Beginning-1800/n9v6-gdp6 |
+| Dataset ID | `n9v6-gdp6` |
+| Host | data.ny.gov |
+| Rows | **4,281,406** |
+| Columns | 30 |
+| Filing-date span | 1800-02-16 … 2026-09-15 |
+
+Verified columns in the sample: `dos_id`, `current_entity_name`, `initial_dos_filing_date`, `county`, `jurisdiction`, `entity_type`, `dos_process_name`, `dos_process_address_1`, `dos_process_city`, `dos_process_state`, `dos_process_zip`. Metadata lists chairman and registered-agent fields as well (often empty).
+
+Top `entity_type` values: domestic LLC 2,052,674; domestic business corp 1,450,181; domestic NFP 287,477; foreign LLC 172,991; foreign business corp 134,789; domestic LP 15,175; **HDFC (Article XI) 3,417**.
+
+Inactive/dissolved entities are **not** in this extract. Formation-date-before-purchase signals will be biased toward survivors.
+
+Companion table `ekwr-p59j` (“Corporations and Other Entities: All Filings - Name Status History”): 7,493,463 rows; columns `film_num`, `date_filed`, `name_type`, `name_status`, `corp_name`. `name_status` A=4,313,513; I=3,179,950. This is name history, not a full inactive registry with process addresses.
+
+---
+
+## 10. Geography
+
+### 2020 Neighborhood Tabulation Areas
+
+| | |
+|---|---|
+| Portal | https://data.cityofnewyork.us/City-Government/2020-Neighborhood-Tabulation-Areas-NTAs-/9nt8-h7nd |
+| Dataset ID | `9nt8-h7nd` |
+| Rows | **262** |
+
+Verified attribute fields: `borocode`, `boroname`, `countyfips`, `nta2020`, `ntaname`, `ntaabbrev`, `ntatype`, `cdta2020`, `cdtaname` (+ geometry).
+
+Official borough → county FIPS from this table (committed as `nyc_boro_county_fips.csv`):
+
+| borocode | boroname | countyfips |
+|---|---|---|
+| 1 | Manhattan | 061 |
+| 2 | Bronx | 005 |
+| 3 | Brooklyn | 047 |
+| 4 | Queens | 081 |
+| 5 | Staten Island | 085 |
+
+### 2020 Census Tracts → 2020 NTAs
+
+| | |
+|---|---|
+| Portal | https://data.cityofnewyork.us/City-Government/2020-Census-Tracts-to-2020-NTAs-and-CDTAs-Equivale/hm78-6dwm |
+| Dataset ID | `hm78-6dwm` |
+| Rows | **2,327** |
+
+Verified columns: `geoid`, `countyfips`, `borocode`, `boroname`, `boroct2020`, `ct2020`, `ctlabel`, `ntacode`, `ntatype`, `ntaname`, `ntaabbrev`, `cdtacode`, `cdtatype`, `cdtaname`.
+
+Join: PLUTO.`bct2020` = equiv.`boroct2020`. Canonical `geo_tract` = `geoid`; `geo_neighborhood` = `ntacode`.
+
+---
+
+## Size vs. GitHub-hosted runners (preview)
+
+Rough current extracts:
+
+| Dataset | Rows |
+|---|---|
+| PLUTO | 0.86M |
+| ACRIS Master | 17.1M |
+| ACRIS Legals | 22.8M |
+| ACRIS Parties | 46.6M |
+| HPD regs + contacts | 1.0M |
+| NY DOS active | 4.3M |
+| Name status history | 7.5M |
+
+A full ACRIS Parties pull is the binding constraint. Whether a monthly GitHub-hosted runner can do a cold extract is **not yet measured** (byte size / time). An ADR is due before `refresh.yml` is written.
+
+---
+
+## Not yet pulled (called out so we do not pretend)
+
+- Per-year × borough ACRIS *party* coverage (needs a join).
+- Official ACRIS `property_type` code list.
+- Byte size of full CSV/Parquet extracts.
+- A complete PAD sample (file download, not SODA).
+- Philadelphia sources (M5).
