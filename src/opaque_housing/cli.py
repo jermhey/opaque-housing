@@ -14,16 +14,21 @@ from dotenv import load_dotenv
 from opaque_housing import __version__
 from opaque_housing.adapters.http import stream_to_path
 from opaque_housing.adapters.nyc.acris import NycAcrisAdapter
+from opaque_housing.adapters.nyc.hpd import NycHpdAdapter
+from opaque_housing.adapters.nyc.nys_dos import NycDosAdapter
 from opaque_housing.adapters.nyc.pad import load_pad_crosswalk
 from opaque_housing.adapters.nyc.pluto import NycPlutoAdapter
 from opaque_housing.adapters.nyc.sources import (
     ACRIS_SOURCES,
+    HPD_SOURCES,
     NYC_SOURCES,
+    NYS_DOS,
     PLUTO_SNAPSHOT_DATE,
     resolve_ingest_specs,
 )
 from opaque_housing.adapters.soda import write_soda_parquet
 from opaque_housing.classify.apply import classify_parcel_frame
+from opaque_housing.classify.llm import apply_llm_label, needs_llm
 from opaque_housing.classify.pipeline import classify_owner
 from opaque_housing.classify.rules import RULES_VERSION
 from opaque_housing.labeling.sample import (
@@ -44,15 +49,29 @@ from opaque_housing.metrics.flow import (
     with_year_and_borough,
 )
 from opaque_housing.metrics.history import consistency_check, historical_stock_table, year_end_dates
+from opaque_housing.metrics.opacity import (
+    attach_clusters,
+    attach_opacity,
+    entity_owned,
+    opacity_by_type,
+    opacity_headlines,
+    top_cluster_review,
+)
 from opaque_housing.metrics.sale_filter import (
     SaleFilterConfig,
     apply_sale_filter,
     attach_primary_parties,
 )
 from opaque_housing.metrics.stock import headline_shares, private_residential, stock_breakdowns
+from opaque_housing.opacity.build import attach_parcel_owners, run_opacity
+from opaque_housing.opacity.tiers import OPACITY_VERSION
 from opaque_housing.paths import derived_dir, latest_raw_file, raw_dir
 from opaque_housing.quality.manifest import RunManifest
+from opaque_housing.resolve.cluster import component_sizes
+from opaque_housing.resolve.denylist import ADDRESS_DEGREE_THRESHOLD, seed_agent_names
 from opaque_housing.schema import ENTITY_OWNED_CLASSES, BuildingType, OwnerClass
+
+_AGENT_LOOKUP = Path(__file__).parent / "adapters/nyc/lookups/nys_dos_agent_names.csv"
 
 load_dotenv()
 
@@ -100,6 +119,7 @@ def ingest(
                 where=spec.where,
                 key=spec.key,
                 page_size=spec.limit,
+                host=spec.host,
             )
             typer.echo(
                 f"wrote {dest} pages={stats['pages']} rows={stats['rows']} "
@@ -302,6 +322,147 @@ def flow(
     )
 
 
+@app.command()
+def opacity(
+    metro: Annotated[str, typer.Option(help="Metro id, e.g. nyc.")] = "nyc",
+    parcels: Annotated[
+        Path | None, typer.Option(help="Classified parcels parquet from oh build.")
+    ] = None,
+    registrations: Annotated[Path | None, typer.Option(help="HPD registrations extract.")] = None,
+    contacts: Annotated[Path | None, typer.Option(help="HPD contacts extract.")] = None,
+    dos: Annotated[Path | None, typer.Option(help="NY DOS active-corporations extract.")] = None,
+    out_dir: Annotated[Path | None, typer.Option(help="Derived output directory.")] = None,
+    review_out: Annotated[Path, typer.Option(help="Top-20 cluster review markdown.")] = Path(
+        "eval/reports/cluster_review_top20.md"
+    ),
+    address_degree: Annotated[int, typer.Option(help="Deny addresses at this owner degree.")] = (
+        ADDRESS_DEGREE_THRESHOLD
+    ),
+) -> None:
+    """Assign opacity tiers, cluster portfolios, and write internal shares."""
+    if metro != "nyc":
+        typer.echo(f"opacity is only wired for nyc (got {metro})", err=True)
+        raise typer.Exit(code=1)
+    parcel_path = parcels or (derived_dir(metro) / "parcels_classified.parquet")
+    regs_path = registrations or latest_raw_file(
+        metro, "hpd_registrations", HPD_SOURCES["hpd_registrations"].filename
+    )
+    contacts_path = contacts or latest_raw_file(
+        metro, "hpd_contacts", HPD_SOURCES["hpd_contacts"].filename
+    )
+    dos_path = dos or latest_raw_file(metro, "nys_dos", NYS_DOS.filename)
+    missing = [
+        label
+        for label, path in (
+            ("parcels", parcel_path),
+            ("hpd_registrations", regs_path),
+            ("hpd_contacts", contacts_path),
+            ("nys_dos", dos_path),
+        )
+        if path is None or not path.exists()
+    ]
+    if missing:
+        typer.echo(f"missing inputs: {', '.join(missing)}", err=True)
+        raise typer.Exit(code=1)
+    assert regs_path is not None and contacts_path is not None and dos_path is not None
+    dest = out_dir or derived_dir(metro)
+    dest.mkdir(parents=True, exist_ok=True)
+    started = datetime.now(tz=UTC)
+
+    parcel_frame = pl.read_parquet(parcel_path)
+    hpd = NycHpdAdapter()
+    dos_adapter = NycDosAdapter()
+    typer.echo("loading HPD registrations and contacts")
+    latest = hpd.latest_registration_per_parcel(hpd.load_registrations(regs_path))
+    hpd_contacts = hpd.contacts_on_latest(hpd.load_contacts(contacts_path), latest)
+    hpd_on_parcels = attach_parcel_owners(hpd_contacts, parcel_frame)
+    typer.echo(f"hpd contacts on parcels={hpd_on_parcels.height}")
+    seeds = seed_agent_names(pl.read_csv(_AGENT_LOOKUP)["name_raw"].to_list())
+    owner_keys = (
+        parcel_frame.filter(pl.col("owner_class").is_in(list(_ENTITY_VALUES)))
+        .select("owner_key")
+        .unique()
+    )
+    typer.echo(f"matching NY DOS to {owner_keys.height} entity owner keys")
+    dos_matched = dos_adapter.load_entities(dos_path, owner_keys=owner_keys)
+    typer.echo(f"dos matched={dos_matched.height}")
+    results, links, denied, membership = run_opacity(
+        parcel_frame,
+        hpd_on_parcels,
+        dos_matched,
+        seeds=seeds,
+        threshold=address_degree,
+    )
+    with_tiers = attach_clusters(attach_opacity(parcel_frame, results), membership)
+    private, private_count = private_residential(with_tiers)
+    entity_rows, entity_count = entity_owned(private)
+    headlines = opacity_headlines(with_tiers)
+    by_type = opacity_by_type(with_tiers)
+    keep = set(entity_rows["owner_key"].to_list()) if entity_rows.height else set()
+    sizes = component_sizes(membership, keep=keep)
+    headlines["clusters"] = {
+        "entity_owners": len(keep),
+        "components": len(sizes),
+        "largest_owners": max(sizes.values()) if sizes else 0,
+        "large_components": sum(1 for count in sizes.values() if count >= 200),
+        "dos_matched": dos_matched.height,
+        "dos_owner_keys": owner_keys.height,
+    }
+    review = top_cluster_review(entity_rows)
+    review_out.parent.mkdir(parents=True, exist_ok=True)
+    review_out.write_text(_cluster_review_markdown(review, sizes) + "\n")
+
+    with_tiers.write_parquet(dest / "parcels_opacity.parquet")
+    links.write_csv(dest / "owner_links.csv")
+    denied.write_csv(dest / "denied_addresses.csv")
+    by_type.write_csv(dest / "opacity_by_type.csv")
+    (dest / "opacity_headlines.json").write_text(json.dumps(headlines, indent=2) + "\n")
+    (dest / "opacity_results.json").write_text(
+        json.dumps(
+            [
+                {
+                    "owner_key": row.owner_key,
+                    "tier": row.tier.value,
+                    "rule_id": row.rule_id,
+                    "evidence": row.evidence,
+                    "rules_version": row.rules_version,
+                }
+                for row in results
+            ]
+        )
+        + "\n"
+    )
+    manifest = RunManifest(
+        metro_id=metro,
+        started_at=started.isoformat(),
+        finished_at=datetime.now(tz=UTC).isoformat(),
+        source_paths={
+            "parcels": str(parcel_path),
+            "hpd_registrations": str(regs_path),
+            "hpd_contacts": str(contacts_path),
+            "nys_dos": str(dos_path),
+        },
+        source_versions={
+            "hpd": hpd.source_version,
+            "nys_dos": dos_adapter.source_version,
+            "opacity": OPACITY_VERSION,
+        },
+        rules_version=RULES_VERSION,
+        filter_counts=[*hpd.filter_counts, *dos_adapter.filter_counts, private_count, entity_count],
+        notes=[
+            "O-tiers on entity-owned private residential lots only (ADR 0007)",
+            f"address degree threshold {address_degree} (ADR 0008)",
+            "cluster review lists entity names only",
+        ],
+    )
+    (dest / "opacity_manifest.json").write_text(json.dumps(manifest.to_dict(), indent=2) + "\n")
+    entity_block = headlines["entity_owned"]
+    typer.echo(
+        f"wrote {dest} entity_parcels={entity_block['parcels']} "
+        f"o1_unit={entity_block['by_tier']['O1']['unit_share']}"
+    )
+
+
 @app.command("eval")
 def eval_cmd(
     gold: Annotated[Path, typer.Option(help="Labeled gold CSV.")] = Path("eval/gold/ci_dev.csv"),
@@ -310,6 +471,12 @@ def eval_cmd(
     ),
     split: Annotated[str, typer.Option(help="dev, test, or all.")] = "test",
     out: Annotated[Path, typer.Option(help="Report JSON.")] = Path("eval/reports/rules_eval.json"),
+    with_llm: Annotated[bool, typer.Option(help="Also score rules+LLM on R999 names.")] = False,
+    llm_cache: Annotated[Path, typer.Option(help="DuckDB LLM cache.")] = Path(
+        "data/derived/nyc/llm_cache.duckdb"
+    ),
+    llm_cost_cap: Annotated[float, typer.Option(help="Abort live LLM calls above this USD.")] = 5.0,
+    llm_max_names: Annotated[int, typer.Option(help="Max live LLM names this run.")] = 500,
 ) -> None:
     """Compare rule predictions to gold labels. CI fails if test macro-F1 drops."""
     rows = _read_labeled_gold(gold)
@@ -324,12 +491,39 @@ def eval_cmd(
     report["split"] = split
     report["gold"] = str(gold)
     report["rules_version"] = RULES_VERSION
+    report["source"] = "rules"
+    if with_llm:
+        llm_pred, llm_meta = _predict_with_llm(
+            rows, cache_path=llm_cache, cost_cap=llm_cost_cap, max_names=llm_max_names
+        )
+        llm_report = evaluation_report(y_true, llm_pred)
+        llm_macro = llm_report["macro_f1"]
+        rules_macro = report["macro_f1"]
+        if not isinstance(llm_macro, float) or not isinstance(rules_macro, float):
+            raise TypeError("macro_f1 must be float")
+        report["llm"] = {
+            **llm_report,
+            "prompt_version": llm_meta["prompt_version"],
+            "model_id": llm_meta["model_id"],
+            "names_sent": llm_meta["names_sent"],
+            "cache_hits": llm_meta["cache_hits"],
+            "skipped": llm_meta["skipped"],
+            "macro_f1_lift": llm_macro - rules_macro,
+        }
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(report, indent=2) + "\n")
     macro_f1_value = report["macro_f1"]
     if not isinstance(macro_f1_value, float):
         raise TypeError("macro_f1 must be float")
     typer.echo(f"macro_f1={macro_f1_value:.4f} n={report['n']} -> {out}")
+    llm_block = report.get("llm")
+    if with_llm and isinstance(llm_block, dict):
+        llm_f1 = llm_block["macro_f1"]
+        lift = llm_block["macro_f1_lift"]
+        sent = llm_block["names_sent"]
+        if not isinstance(llm_f1, float) or not isinstance(lift, float):
+            raise TypeError("llm macro_f1 must be float")
+        typer.echo(f"rules+llm macro_f1={llm_f1:.4f} lift={lift:.4f} sent={sent}")
     if baseline.exists():
         stored = json.loads(baseline.read_text())
         threshold = float(stored["value"])
@@ -428,6 +622,105 @@ def label(
 def _predict_class(name_raw: str | None, building_type: str | None) -> str:
     parsed = BuildingType(building_type) if building_type else None
     return classify_owner(name_raw, parsed).owner_class.value
+
+
+def _predict_with_llm(
+    rows: list[dict[str, str]],
+    *,
+    cache_path: Path,
+    cost_cap: float,
+    max_names: int,
+) -> tuple[list[str], dict[str, object]]:
+    from opaque_housing.adapters.llm_cache import LlmCache
+    from opaque_housing.classify.llm import PROMPT_VERSION
+
+    cache = LlmCache(cache_path)
+    model_id = ""
+    client = None
+    try:
+        from opaque_housing.adapters.anthropic import AnthropicClassifier
+
+        client = AnthropicClassifier(cost_cap_usd=cost_cap, max_names=max_names)
+        model_id = client.model
+    except RuntimeError:
+        client = None
+    names_sent = 0
+    cache_hits = 0
+    skipped = 0
+    preds: list[str] = []
+    try:
+        for row in rows:
+            parsed = BuildingType(row["building_type"]) if row.get("building_type") else None
+            owner = classify_owner(row["name_raw"], parsed)
+            if not needs_llm(owner):
+                preds.append(owner.owner_class.value)
+                continue
+            label = cache.get(owner.owner_key, model_id or "cache-only") if model_id else None
+            if label is None and model_id:
+                # try any cached row for this owner_key+prompt by reading with the live model
+                label = cache.get(owner.owner_key, model_id)
+            if label is None and not model_id:
+                # cache-only: look up with empty model skipped
+                skipped += 1
+                preds.append(owner.owner_class.value)
+                continue
+            if label is None and client is not None:
+                try:
+                    label = client.classify_name(owner.name_normalized)
+                    cache.put(owner.owner_key, owner.name_normalized, label)
+                    names_sent += 1
+                except Exception as exc:  # noqa: BLE001
+                    skipped += 1
+                    typer.echo(f"llm skipped {owner.name_normalized}: {exc}", err=True)
+                    preds.append(owner.owner_class.value)
+                    continue
+            elif label is not None:
+                cache_hits += 1
+            preds.append(apply_llm_label(owner, label).owner_class.value)
+    finally:
+        cache.close()
+    return preds, {
+        "prompt_version": PROMPT_VERSION,
+        "model_id": model_id,
+        "names_sent": names_sent,
+        "cache_hits": cache_hits,
+        "skipped": skipped,
+    }
+
+
+def _cluster_review_markdown(
+    review: list[dict[str, object]],
+    sizes: dict[str, int],
+) -> str:
+    lines = [
+        "# Top-20 portfolio cluster review",
+        "",
+        f"Opacity rules `{OPACITY_VERSION}`. Entity names only; HPD person names are omitted.",
+        "",
+        f"Components (PLUTO entity owners): {len(sizes)}. "
+        f"Largest owner-count: {max(sizes.values()) if sizes else 0}.",
+        "",
+    ]
+    if not review:
+        lines.append("No clusters to review.")
+        return "\n".join(lines)
+    for index, row in enumerate(review, start=1):
+        names_raw = row["entity_names"]
+        names = (
+            ", ".join(str(name) for name in names_raw) if isinstance(names_raw, list) else ""
+        )
+        flag = f" **{row['flag']}**" if row.get("flag") else ""
+        lines.extend(
+            [
+                f"## {index}. cluster `{row['cluster_id']}`{flag}",
+                "",
+                f"- parcels: {row['parcels']}; units: {row['units']}; "
+                f"entity owners: {row['owners']}; O1 parcels: {row['o1_parcels']}",
+                f"- entity names: {names}",
+                "",
+            ]
+        )
+    return "\n".join(lines)
 
 
 def _read_labeled_gold(path: Path) -> list[dict[str, str]]:

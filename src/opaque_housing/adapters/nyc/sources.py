@@ -7,6 +7,7 @@ from urllib.parse import quote
 
 # Dataset IDs were read from the live catalogs on 2026-09-16. See docs/data_sources.md.
 SOCRATA_NYC = "https://data.cityofnewyork.us"
+SOCRATA_NY = "https://data.ny.gov"
 
 # Electronic ACRIS ids and usable document_amt begin in 2003 (ADR 0006).
 ACRIS_ID_WINDOW = "document_id>='2003010100000000' and document_id<'2027010100000000'"
@@ -29,11 +30,12 @@ class SourceSpec:
     where: str | None = None
     paged: bool = False
     key: str = "document_id"
+    host: str = SOCRATA_NYC
 
     @property
     def csv_url(self) -> str:
         url = (
-            f"{SOCRATA_NYC}/resource/{self.dataset_id}.csv"
+            f"{self.host}/resource/{self.dataset_id}.csv"
             f"?$select={self.select}&$limit={self.limit}"
         )
         if self.where:
@@ -101,13 +103,74 @@ ACRIS_SOURCES: dict[str, SourceSpec] = {
     ACRIS_PARTIES.name: ACRIS_PARTIES,
 }
 
+# HPD / DOS field lists were re-read from the live catalogs on 2026-09-17.
+HPD_REGISTRATIONS = SourceSpec(
+    dataset_id="tesw-yqqr",
+    name="hpd_registrations",
+    select=(
+        "registrationid,buildingid,boroid,block,lot,"
+        "lastregistrationdate,registrationenddate"
+    ),
+    limit=1_000_000,
+    filename="tesw-yqqr.csv",
+)
+
+HPD_CONTACTS = SourceSpec(
+    dataset_id="feu5-w2e2",
+    name="hpd_contacts",
+    select=(
+        "registrationcontactid,registrationid,type,contactdescription,"
+        "corporationname,title,firstname,lastname,"
+        "businesshousenumber,businessstreetname,businessapartment,"
+        "businesscity,businessstate,businesszip"
+    ),
+    limit=1_000_000,
+    filename="feu5-w2e2.csv",
+)
+
+HPD_SOURCES: dict[str, SourceSpec] = {
+    HPD_REGISTRATIONS.name: HPD_REGISTRATIONS,
+    HPD_CONTACTS.name: HPD_CONTACTS,
+}
+
+NYS_DOS = SourceSpec(
+    dataset_id="n9v6-gdp6",
+    name="nys_dos",
+    select=(
+        "dos_id,current_entity_name,initial_dos_filing_date,county,"
+        "jurisdiction,entity_type,dos_process_name,dos_process_address_1,"
+        "dos_process_address_2,dos_process_city,dos_process_state,"
+        "dos_process_zip,chairman_name,registered_agent_name,"
+        "registered_agent_address_1,registered_agent_city,"
+        "registered_agent_state,registered_agent_zip"
+    ),
+    limit=50_000,
+    filename="n9v6-gdp6.parquet",
+    paged=True,
+    key="dos_id",
+    host=SOCRATA_NY,
+)
+
+DOS_SOURCES: dict[str, SourceSpec] = {NYS_DOS.name: NYS_DOS}
+
 
 def resolve_ingest_specs(dataset: str) -> list[SourceSpec]:
     if dataset == "all":
         return list(NYC_SOURCES.values())
     if dataset == "acris":
         return list(ACRIS_SOURCES.values())
-    spec = NYC_SOURCES.get(dataset) or ACRIS_SOURCES.get(dataset)
+    if dataset == "hpd":
+        return list(HPD_SOURCES.values())
+    if dataset == "dos":
+        return list(DOS_SOURCES.values())
+    if dataset == "opacity":
+        return [*HPD_SOURCES.values(), NYS_DOS]
+    spec = (
+        NYC_SOURCES.get(dataset)
+        or ACRIS_SOURCES.get(dataset)
+        or HPD_SOURCES.get(dataset)
+        or DOS_SOURCES.get(dataset)
+    )
     if spec is None:
         raise KeyError(dataset)
     return [spec]

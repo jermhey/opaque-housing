@@ -175,9 +175,11 @@ Verified columns: `record_type`, `doc__type`, `doc__type_description`, `class_co
 | Rows | **203,887** |
 | Columns | 16 |
 
-Verified columns include: `registrationid`, `buildingid`, `boroid`, `boro`, `housenumber`, `streetname`, `zip`, `block`, `lot`, `bin`, `communityboard`, `lastregistrationdate`, `registrationenddate`.
+Verified columns (re-read 2026-09-17): `registrationid`, `buildingid`, `boroid`, `boro`, `housenumber`, `lowhousenumber`, `highhousenumber`, `streetname`, `streetcode`, `zip`, `block`, `lot`, `bin`, `communityboard`, `lastregistrationdate`, `registrationenddate`.
 
-**No owner names** on this table. Join to contacts on `registrationid`.
+Ingest `$select`: `registrationid,buildingid,boroid,block,lot,lastregistrationdate,registrationenddate`.
+
+**No owner names** on this table. Join to contacts on `registrationid`. BBL = `format_bbl_parts(boroid, block, lot)`. Latest registration per BBL = max `lastregistrationdate`, then max `registrationid`.
 
 `lastregistrationdate` span: 1993-04-01 … 2026-07-31.
 
@@ -194,11 +196,13 @@ HPD's own description (agency open-data page): owners must register buildings wi
 | Rows | **810,494** |
 | Columns | 15 |
 
-Verified columns include: `registrationcontactid`, `registrationid`, `type`, `contactdescription`, `corporationname`, `firstname`, `lastname`, `title`, plus business address parts.
+Verified columns (re-read 2026-09-17): `registrationcontactid`, `registrationid`, `type`, `contactdescription`, `corporationname`, `title`, `firstname`, `middleinitial`, `lastname`, `businesshousenumber`, `businessstreetname`, `businessapartment`, `businesscity`, `businessstate`, `businesszip`.
+
+Ingest `$select` is those fields except `middleinitial`.
 
 `type` counts: SiteManager 167,796; Agent 161,136; HeadOfficer 132,287; CorporateOwner 125,548; Officer 75,636; IndividualOwner 50,592; JointOwner 46,640; Shareholder 41,571; Lessee 9,288.
 
-Primary O1 evidence candidates: `HeadOfficer`, `IndividualOwner`, `JointOwner`, `Officer` (natural-person name fields). CorporateOwner is an entity name.
+First+last fill is ≥99% on HeadOfficer / IndividualOwner / JointOwner / Officer / Shareholder. CorporateOwner is an entity name (125,395 / 125,548 have `corporationname`). O1 contact types and the agent exclusion are ADR 0007.
 
 ---
 
@@ -213,11 +217,15 @@ Primary O1 evidence candidates: `HeadOfficer`, `IndividualOwner`, `JointOwner`, 
 | Columns | 30 |
 | Filing-date span | 1800-02-16 … 2026-09-15 |
 
-Verified columns in the sample: `dos_id`, `current_entity_name`, `initial_dos_filing_date`, `county`, `jurisdiction`, `entity_type`, `dos_process_name`, `dos_process_address_1`, `dos_process_city`, `dos_process_state`, `dos_process_zip`. Metadata lists chairman and registered-agent fields as well (often empty).
+Verified columns (re-read 2026-09-17): `dos_id`, `current_entity_name`, `initial_dos_filing_date`, `county`, `jurisdiction`, `entity_type`, `dos_process_name`, `dos_process_address_1`, `dos_process_address_2`, `dos_process_city`, `dos_process_state`, `dos_process_zip`, `chairman_name` (catalog label: CEO Name), `chairman_address_*`, `registered_agent_name`, `registered_agent_address_*`, `location_*`.
+
+Ingest `$select`: identity, filing, process address, `chairman_name`, and registered-agent name/address. `dos_id` is an unpadded numeric string; full extracts use lexicographic keyset pagination (same coverage as numeric order).
+
+Fill rates (live count, 2026-09-17): `chairman_name` 472,391 / 4,281,406 (11.0%); `registered_agent_name` 876,325 (20.5%). Top process names are registered-agent mills (`THE LIMITED LIABILITY COMPANY` 93,064; `NORTHWEST REGISTERED AGENT LLC` 49,379; …) — committed as `nys_dos_agent_names.csv` (ADR 0008).
 
 Top `entity_type` values: domestic LLC 2,052,674; domestic business corp 1,450,181; domestic NFP 287,477; foreign LLC 172,991; foreign business corp 134,789; domestic LP 15,175; **HDFC (Article XI) 3,417**.
 
-Inactive/dissolved entities are **not** in this extract. Formation-date-before-purchase signals will be biased toward survivors.
+Inactive/dissolved entities are **not** in this extract. Formation-date-before-purchase signals will be biased toward survivors. Name match to PLUTO owners is exact `normalize_name` only.
 
 Companion table `ekwr-p59j` (“Corporations and Other Entities: All Filings - Name Status History”): 7,493,463 rows; columns `film_num`, `date_filed`, `name_type`, `name_status`, `corp_name`. `name_status` A=4,313,513; I=3,179,950. This is name history, not a full inactive registry with process addresses.
 

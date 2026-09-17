@@ -4,7 +4,9 @@ Definitions live in [`PROJECT_BRIEF.md`](PROJECT_BRIEF.md) §3. This file record
 
 ## Names-only LLM constraint
 
-When the LLM fallback lands (M3), prompts will receive owner **names only**. Addresses and other personal context are not sent. Model ID comes from `ANTHROPIC_MODEL`.
+Prompts receive owner **names only**. Addresses and other personal context are not sent. Model ID comes from `ANTHROPIC_MODEL` (never hardcoded). Prompt version `2026-09-17.1` asks for JSON `{owner_class, rationale}` at temperature 0.
+
+Only `R999_unknown` names are sent. First-match rules have no conflict path. Results are cached in DuckDB on `(owner_key, prompt_version, model_id)`. A USD cost cap and a max-name cap abort the run (`OH_LLM_COST_CAP`, `OH_LLM_MAX_NAMES`). The test split is never used to tune the prompt. `oh eval --with-llm` writes rules-only and rules+LLM macro-F1 side by side.
 
 ## Building-type map (NYC)
 
@@ -48,7 +50,7 @@ First match wins. Each rule has a positive and a negative unit test.
 | `R110_individual` | `individual` | `ET AL` / `JTWROS` / `&` households (only if the stem is person-like), or 2–5 alphabetic tokens, hyphens allowed, without entity/`CONDOMINIUM` words |
 | `R999_unknown` | `unknown` | everything else, including blank-looking trade names such as `ACME REALTY` |
 
-Unmatched names stay `unknown` and stay in the private denominator. They are not sent to an LLM in M1.
+Unmatched names stay `unknown` and stay in the private denominator until the LLM fallback (`oh eval --with-llm` / optional live classify). The test split is not used to retune rules or the prompt.
 
 ## Stock metrics
 
@@ -96,7 +98,18 @@ Condo unit lots map through DCP PAD (`billboro` / `billblock` / `billlot` and th
 
 Staten Island is effectively out of the headline flow. SI legal lots exist, but the linked Master rows in a live sample are `RPTT` (NYC real property transfer tax), which ADR 0005 leaves as `other`. Treating `RPTT` as a sale is an open question, not a silent retune.
 
-## What will be documented here later
+## Opacity tiers (M3)
 
-- Opacity-tier tests and evidence fields
-- LLM prompt version
+Entity-owned private residential owners only (`llc` + `corp` + `partnership`). Trusts stay a sensitivity series and do not get a tier. Rules version `OPACITY_VERSION = 2026-09-17.1` (ADR 0007):
+
+| rule_id | Tier | Test |
+|---|---|---|
+| `T010_hpd_person` | O1 | HPD `HeadOfficer` / `IndividualOwner` / `JointOwner` / `Officer` / `Shareholder` with first+last |
+| `T020_dos_chairman` | O1 | NY DOS `chairman_name` classifies as `individual` |
+| `T030_cluster_o1` | O2 | No own person; another cluster member is O1 |
+| `T040_entity_chain` | O4 | No person; HPD `CorporateOwner` or DOS process name is a *different* entity |
+| `T050_no_person` | O3 | Residual |
+
+`agent_address_only` is evidence, not a gate. Agent / SiteManager / Lessee names are not O1 and are not person-links.
+
+Portfolio links (ADR 0008): cluster edges are shared O1 persons and HPD `CorporateOwner` exact names, among **entity** owners only. Shared addresses and seed agent names still set `agent_address_only` / the denylist; they are not union-find edges (address + officer mixing collapsed the graph). The top-20 cluster review lists **entity names only**.

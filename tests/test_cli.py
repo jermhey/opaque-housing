@@ -11,6 +11,9 @@ MASTER = Path("tests/fixtures/nyc/acris_master.csv")
 LEGALS = Path("tests/fixtures/nyc/acris_legals.csv")
 PARTIES = Path("tests/fixtures/nyc/acris_parties.csv")
 PAD = Path("tests/fixtures/nyc/pad_bbl_sample.csv")
+HPD_REGS = Path("tests/fixtures/nyc/hpd_registrations.csv")
+HPD_CONTACTS = Path("tests/fixtures/nyc/hpd_contacts.csv")
+DOS = Path("tests/fixtures/nyc/nys_dos.csv")
 
 
 def test_help() -> None:
@@ -21,6 +24,7 @@ def test_help() -> None:
     assert "label" in result.stdout
     assert "eval" in result.stdout
     assert "flow" in result.stdout
+    assert "opacity" in result.stdout
 
 
 def test_version() -> None:
@@ -159,3 +163,44 @@ def test_flow_on_committed_fixtures(tmp_path: Path) -> None:
     assert (derived / "history_by_year.csv").exists()
     assert (derived / "consistency.json").exists()
     assert (derived / "flow_manifest.json").exists()
+
+
+def test_opacity_on_committed_fixtures(tmp_path: Path) -> None:
+    derived = tmp_path / "derived"
+    built = runner.invoke(
+        app,
+        [
+            "build",
+            "--source",
+            str(FIXTURE),
+            "--equiv",
+            str(EQUIV),
+            "--out-dir",
+            str(derived),
+        ],
+    )
+    assert built.exit_code == 0, built.stdout + built.stderr
+    review = tmp_path / "review.md"
+    result = runner.invoke(
+        app,
+        [
+            "opacity",
+            "--parcels",
+            str(derived / "parcels_classified.parquet"),
+            "--registrations",
+            str(HPD_REGS),
+            "--contacts",
+            str(HPD_CONTACTS),
+            "--dos",
+            str(DOS),
+            "--out-dir",
+            str(derived),
+            "--review-out",
+            str(review),
+        ],
+    )
+    assert result.exit_code == 0, result.stdout + result.stderr
+    assert (derived / "opacity_headlines.json").exists()
+    assert (derived / "opacity_manifest.json").exists()
+    assert review.exists()
+    assert "entity names" in review.read_text().lower()
