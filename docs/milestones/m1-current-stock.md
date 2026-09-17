@@ -1,14 +1,15 @@
 # Milestone 1: Current-stock baseline (rules only)
 
-Date: 2026-09-16. Metro: NYC. PLUTO **26v2**. Rules `2026-09-16.1`.
+Date: 2026-09-16. Metro: NYC. PLUTO **26v2**. Rules `2026-09-16.2` (dev-only retune after gold).
 
 ## What was built
 
 - Name normalization and an ordered rules classifier (`R001`–`R999`)
 - `oh ingest` for PLUTO `64uk-42ks` and tract–NTA `hm78-6dwm`
 - `oh build` → classified parcels + stock tables under `data/derived/nyc/` (local only)
-- `oh label` + a 600-row stratified queue at `eval/gold/queue.csv` (gitignored)
+- `oh label` + a 600-row stratified queue at `eval/gold/queue.csv` (gitignored), now fully labeled
 - `oh eval` + a synthetic CI gold file (`eval/gold/ci_dev.csv`, test-split macro-F1 = 1.0)
+- Test-split Rogan–Gladen correction with bootstrap intervals in `data/derived/nyc/headlines.json`
 
 ## Verified vs assumed
 
@@ -17,11 +18,11 @@ Date: 2026-09-16. Metro: NYC. PLUTO **26v2**. Rules `2026-09-16.1`.
 | PLUTO row count 858,284 and fields used in `$select` | Verified on 2026-09-16 extract (67,098,962 bytes) |
 | Tract–NTA 2,327 rows | Verified (197,482 bytes) |
 | Residential filter before/after | Verified in run manifest: 858,284 → 770,593 |
-| Private denominator | Verified: 770,593 → 767,897 (`public` + `nonprofit_religious` out) |
+| Private denominator | Verified: 770,593 → 768,516 (`public` + `nonprofit_religious` out). Wider than 16.1 because bare `USA`/`NYS` no longer pull private firms into `public` |
 | Co-op buildings counted as entity-owned | They are not. Entity share on `coop_building` is 0 |
 | PLUTO condo rows are unit owners | They are not (billing lots). `condo_unit` shares are complex-level |
-| Confusion-matrix correction of citywide shares | Harness exists; **not applied**. Waiting on hand labels |
-| Bootstrap intervals | Implemented as a function; not run on 768k parcels in this build |
+| Confusion-matrix correction of citywide shares | Applied. Test-split Rogan–Gladen, n=305. See corrected table below |
+| Bootstrap intervals | 1,000-resample percentile CI on gold-set sens/spec. Citywide `p_hat` treated as a census |
 
 ## Raw headline shares (uncorrected)
 
@@ -29,12 +30,31 @@ Private residential lots only. **Entity-owned** = LLC + corp + partnership. Trus
 
 | Series | Parcels | Units | Entity parcel share | Entity unit share |
 |---|---:|---:|---:|---:|
-| Private, entity only | 767,897 | 3,530,373 | **15.3%** | **39.2%** |
-| Private, entity + trust | 767,897 | 3,530,373 | 22.3% | 42.0% |
-| `sfr_1_4` + `condo_unit`, entity only | 659,629 | 1,219,592 | **7.8%** | **11.5%** |
-| `sfr_1_4` + `condo_unit`, entity + trust | 659,629 | 1,219,592 | 15.5% | 18.5% |
+| Private, entity only | 768,516 | 3,535,741 | **15.4%** | **39.2%** |
+| Private, entity + trust | 768,516 | 3,535,741 | 22.4% | 42.0% |
+| `sfr_1_4` + `condo_unit`, entity only | 659,875 | 1,220,134 | **7.8%** | **11.5%** |
+| `sfr_1_4` + `condo_unit`, entity + trust | 659,875 | 1,220,134 | 15.6% | 18.5% |
 
-These are **raw rule assignments**. Do not treat them as the published finding until the gold set is labeled and the Rogan–Gladen correction is applied.
+These are **raw rule assignments**. Corrected headlines are in the next table.
+
+## Corrected headline shares (test-split Rogan–Gladen)
+
+Gold set labeled 2026-09-17. Rules then retuned on the **dev** split only (`2026-09-16.2`). Correction uses the **test** split only. Entity sensitivity 97.4%, specificity 97.8%. Intervals are 95% percentile bootstrap of the labeled pairs.
+
+| Series | Weight | Raw | Corrected | 95% CI |
+|---|---|---:|---:|---|
+| Private, entity only | units | 39.2% | **38.9%** | 37.0–41.0% |
+| Private, entity only | parcels | 15.4% | **13.8%** | 11.9–15.5% |
+| Private, entity + trust | units | 42.0% | **42.7%** | 40.6–44.9% |
+| Private, entity + trust | parcels | 22.4% | **21.7%** | 19.5–23.5% |
+| `sfr_1_4` + `condo_unit`, entity only | units | 11.5% | **9.8%** | 7.7–11.4% |
+| `sfr_1_4` + `condo_unit`, entity only | parcels | 7.8% | **5.9%** | 3.8–7.6% |
+| `sfr_1_4` + `condo_unit`, entity + trust | units | 18.5% | **17.5%** | 15.3–19.3% |
+| `sfr_1_4` + `condo_unit`, entity + trust | parcels | 15.6% | **14.4%** | 12.1–16.1% |
+
+After the retune, raw and corrected citywide unit shares agree. The correction now *lowers* the small-building series (11.5% → 9.8%) because remaining errors are more false entity calls than misses. Test-split rules macro-F1 = 0.91 (was 0.79). Dev accuracy 98.0%; six residuals left on purpose (trade-name individuals, `LIFESPIRE`, official coop lots whose names look like addresses).
+
+Caveats: the same name-level confusion matrix is applied to unit-weighted and small-building series. The gold set is stratified by rule, not a simple random sample of lots. Misclassification is probably worse on large buildings with trade names, so the 45.0% citywide unit figure may still be low.
 
 ### Entity unit share by building type (private, entity only)
 
@@ -82,27 +102,36 @@ Unknown is 2.9% of residential parcels but 252,485 units — large buildings wit
 
 NTA × building-type cells: 5,802 rows, 251 suppressed (< 10 units). 229 private lots have a null NTA.
 
-## Gold set (gate for you)
+## Gold set
 
-A 600-name queue is at `eval/gold/queue.csv` (295 dev / 305 test), stratified by rule, borough, and building type. Individuals, trusts, estates, and unknowns are also copied to `eval/gold/individuals/` and are gitignored.
+600 rows labeled (596 unique `owner_key`s; NYCHA and DCAS each appear twice). 295 dev / 305 test. Local only: `eval/gold/queue.csv`.
 
-Label it:
+Test-split rules macro-F1 = 0.79. Weak classes: `public` (USA/NYS token), `lender_reo` (`NA` as a name), `unknown` (hyphens and wrapped `TR UST`). Do not retune on the test split.
 
-```bash
-uv run oh label
-```
+### Low-confidence review
 
-Accepted values are the `OwnerClass` strings (`individual`, `llc`, `corp`, …). `s` skips, `q` saves and quits.
-
-Until that file is labeled, **corrected shares and intervals are not available**. The synthetic CI file is not a substitute.
+| Name | First label | After review | Why |
+|---|---|---|---|
+| `MCFARLAND MICHAEL C REV` | `trust` | **`individual`** | `REV` is Reverend, not revocable |
+| `SST HOME OWNERS CORP` | `corp` | **`coop_corp`** | `HOME OWNERS CORP` is the coop name pattern |
+| `BUZ, FREDERICK H/LWT/DEF` | `estate` | `estate` | `LWT` is last-will; slash-split drops it from the classified token |
+| `GEORGE BARBEE LIMITE` | `corp` | `corp` | truncated `LIMITED` |
+| `CITY COLLEGE DORMS` | `public` | `public` | CUNY dorms; universities otherwise go `nonprofit_religious` |
+| `KINGS 18 REALTY SAMUEL HALBERG` | `unknown` | `unknown` | trade name plus a person, no legal form |
+| `123-125 HETT AVE OWNERS CORP` | `coop_corp` | `coop_corp` | name-based coop on an `sfr_1_4` lot |
+| `1316 JG OWNERS CORP` | `coop_corp` | `coop_corp` | same |
 
 ## Open questions
 
-None that block M1 engineering. The remaining M1 done-when item is your labels.
+- Should slash-split keep `LWT` / `DEF` suffixes as estate evidence? ADR 0004 currently classifies only the first party.
+- Should CUNY / public-college housing be `public` or `nonprofit_religious`? We used `public` here.
+- Apply a unit-weighted or building-type-specific confusion matrix later? The current correction is name-level and citywide.
 
 ## What this milestone is not
 
 - No ACRIS flow or historical stock (M2)
 - No LLM fallback, HPD, or DOS opacity tiers (M3)
 - No public site (M4)
-- No GitHub remote yet (`gh` is not logged in)
+- No rule retune on the test split
+
+Do not start M2 until confirmed.

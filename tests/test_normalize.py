@@ -26,3 +26,12 @@ def test_split_on_slash_not_ampersand() -> None:
     assert split_owner_names("SMITH JOHN & MARY") == ["SMITH JOHN & MARY"]
     assert split_owner_names("ACME LLC / JONES JOHN") == ["ACME LLC", "JONES JOHN"]
     assert primary_owner_name("Acme LLC / Jones John") == "ACME LLC"
+
+
+def test_later_slash_parts_estate_tokens() -> None:
+    from opaque_housing.normalize.names import later_parts_estate_evidence, normalize_name
+
+    parts = split_owner_names(normalize_name("BUZ, FREDERICK H/LWT/DEF"))
+    assert later_parts_estate_evidence(parts)
+    deft = split_owner_names(normalize_name("SECURE REAL ESTATE CORP/DEFT"))
+    assert not later_parts_estate_evidence(deft)

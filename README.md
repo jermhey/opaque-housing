@@ -2,7 +2,7 @@
 
 A public, reproducible investigation of how much residential housing is held behind opaque ownership (LLCs, corporations, trusts, shell chains), and whether that share is growing.
 
-This is an investigation, not a product. **Milestone 1** (rules classifier, stock shares, labeling/eval harness) is in the repo. Citywide headlines are raw until the gold set is labeled.
+This is an investigation, not a product. **Milestone 1** (rules classifier, stock shares, gold labels, raw and corrected headlines) is in the repo. Corrected shares use the held-out test split only.
 
 ## Setup
 
@@ -27,7 +27,7 @@ uv run oh eval --gold eval/gold/ci_dev.csv --split test
 
 `oh ingest` writes immutable CSVs under `data/raw/nyc/<dataset>/<date>/` using verified Socrata IDs (`64uk-42ks`, `hm78-6dwm`). `oh build` classifies residential lots and writes aggregate stock tables under `data/derived/nyc/`.
 
-Raw (uncorrected) NYC stock shares are in [`docs/milestones/m1-current-stock.md`](docs/milestones/m1-current-stock.md). Corrected headlines wait on gold-set labels (`uv run oh label`).
+Raw and gold-corrected NYC stock shares are in [`docs/milestones/m1-current-stock.md`](docs/milestones/m1-current-stock.md). The gold queue stays local (`uv run oh label`).
 
 ## Honest limits
 

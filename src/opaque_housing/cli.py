@@ -23,7 +23,7 @@ from opaque_housing.labeling.sample import (
     assign_splits,
     stratified_owner_sample,
 )
-from opaque_housing.metrics.correction import corrected_prevalence
+from opaque_housing.metrics.correction import bootstrap_corrected_prevalence
 from opaque_housing.metrics.evaluation import evaluation_report
 from opaque_housing.metrics.stock import headline_shares, private_residential, stock_breakdowns
 from opaque_housing.paths import derived_dir, latest_raw_file, raw_dir
@@ -112,6 +112,9 @@ def build(
     breakdowns = stock_breakdowns(private)
 
     labeled = _read_labeled_gold(gold) if gold else None
+    if labeled:
+        test_only = [row for row in labeled if row.get("split") == "test"]
+        labeled = test_only or labeled
     correction = _correction_block(headlines, labeled) if labeled else None
     if correction:
         headlines = {**headlines, "correction": correction}
@@ -226,6 +229,11 @@ def label(
         return
     classes = ", ".join(item.value for item in OwnerClass)
     updated = table.to_dicts()
+
+    def persist() -> int:
+        pl.DataFrame(updated).write_csv(queue)
+        return sum(1 for row in updated if not str(row.get("label") or "").strip())
+
     for offset, index in enumerate(pending, start=1):
         row = updated[index]
         typer.echo(
@@ -233,27 +241,30 @@ def label(
             f"pred={row.get('owner_class')}  type={row.get('building_type')}  "
             f"borough={row.get('geo_borough')}  rule={row.get('rule_id')}  split={row.get('split')}"
         )
-        answer = typer.prompt(f"class [{row.get('owner_class')}] or s=skip, q=quit, ?=list")
-        text = answer.strip().lower()
-        if text in {"q", "quit"}:
-            break
-        if text in {"s", "skip"}:
-            continue
-        if text in {"?", "help"}:
-            typer.echo(classes)
-            answer = typer.prompt(f"class [{row.get('owner_class')}]")
+        while True:
+            answer = typer.prompt(f"class [{row.get('owner_class')}] or s=skip, q=quit, ?=list")
             text = answer.strip().lower()
-        if not text:
-            text = str(row.get("owner_class") or "")
-        try:
-            OwnerClass(text)
-        except ValueError:
-            typer.echo(f"unknown class {text}; expected one of: {classes}", err=True)
-            raise typer.Exit(code=1) from None
-        updated[index]["label"] = text
-        updated[index]["labeled_at"] = datetime.now(tz=UTC).isoformat()
-    pl.DataFrame(updated).write_csv(queue)
-    remaining = sum(1 for row in updated if not str(row.get("label") or "").strip())
+            if text in {"q", "quit"}:
+                remaining = persist()
+                typer.echo(f"saved {queue}; unlabeled remaining={remaining}")
+                return
+            if text in {"s", "skip"}:
+                break
+            if text in {"?", "help"}:
+                typer.echo(classes)
+                continue
+            if not text:
+                text = str(row.get("owner_class") or "")
+            try:
+                OwnerClass(text)
+            except ValueError:
+                typer.echo(f"unknown class {text}; expected one of: {classes}")
+                continue
+            updated[index]["label"] = text
+            updated[index]["labeled_at"] = datetime.now(tz=UTC).isoformat()
+            persist()
+            break
+    remaining = persist()
     typer.echo(f"saved {queue}; unlabeled remaining={remaining}")
 
 
@@ -281,22 +292,33 @@ def _read_labeled_gold(path: Path) -> list[dict[str, str]]:
     return rows
 
 
+_ENTITY_PLUS_TRUST = _ENTITY_VALUES | {OwnerClass.TRUST.value}
+_HEADLINE_INCLUDES_TRUST = {
+    "private_all_entity_plus_trust",
+    "sfr_condo_entity_plus_trust",
+}
+
+
 def _correction_block(
     headlines: dict[str, object],
     labeled: list[dict[str, str]],
 ) -> dict[str, object]:
-    y_true = [row["owner_class"] in _ENTITY_VALUES for row in labeled]
-    y_pred = [
-        _predict_class(row["name_raw"], row.get("building_type")) in _ENTITY_VALUES
-        for row in labeled
-    ]
     block: dict[str, object] = {}
     for key, payload in headlines.items():
         if not isinstance(payload, dict) or "unit_share" not in payload:
             continue
+        positive = _ENTITY_PLUS_TRUST if key in _HEADLINE_INCLUDES_TRUST else _ENTITY_VALUES
+        y_true = [row["owner_class"] in positive for row in labeled]
+        y_pred = [
+            _predict_class(row["name_raw"], row.get("building_type")) in positive for row in labeled
+        ]
         block[key] = {
-            "unit": corrected_prevalence(float(payload["unit_share"]), y_true, y_pred),
-            "parcel": corrected_prevalence(float(payload["parcel_share"]), y_true, y_pred),
+            "unit": bootstrap_corrected_prevalence(float(payload["unit_share"]), y_true, y_pred),
+            "parcel": bootstrap_corrected_prevalence(
+                float(payload["parcel_share"]), y_true, y_pred
+            ),
+            "n_labeled": len(labeled),
+            "positive_includes_trust": key in _HEADLINE_INCLUDES_TRUST,
         }
     return block
 

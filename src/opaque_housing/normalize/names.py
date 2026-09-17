@@ -23,8 +23,12 @@ _TRUST_PHRASES = (
     (re.compile(r"\bTRUSTEE\b"), "TRUSTEE"),
     (re.compile(r"\bTTEE\b"), "TRUSTEE"),
     (re.compile(r"\bTRST\b"), "TRUST"),
+    (re.compile(r"\bTR UST\b"), "TRUST"),
     (re.compile(r"\bLIVING TRUST\b"), "TRUST"),
 )
+
+# Later slash parts that are probate marks, not a second owner (ADR 0004).
+_ESTATE_SUFFIX_PARTS = frozenset({"LWT", "DEF", "EST", "ESTATE", "EST OF", "ESTATE OF"})
 
 _CORP_PHRASES = (
     (re.compile(r"\bINCORPORATED\b"), "INC"),
@@ -66,3 +70,8 @@ def primary_owner_name(raw: str | None) -> str:
     normalized = normalize_name(raw)
     parts = split_owner_names(normalized)
     return parts[0] if parts else ""
+
+
+def later_parts_estate_evidence(parts: list[str]) -> bool:
+    """True when a non-first slash part is a last-will / estate token."""
+    return any(part in _ESTATE_SUFFIX_PARTS for part in parts[1:])

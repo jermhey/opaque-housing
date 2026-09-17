@@ -29,3 +29,15 @@ def test_sens_spec_and_correction_from_labels() -> None:
 def test_bootstrap_interval_covers_mean() -> None:
     mean, lo, hi = bootstrap_mean_interval([0.0, 1.0, 1.0, 0.0], n_boot=200, seed=1)
     assert lo <= mean <= hi
+
+
+def test_bootstrap_corrected_covers_point() -> None:
+    from opaque_housing.metrics.correction import bootstrap_corrected_prevalence
+
+    y_true = [True, True, False, False, True, False]
+    y_pred = [True, False, False, False, True, False]
+    result = bootstrap_corrected_prevalence(0.3, y_true, y_pred, n_boot=200, seed=1)
+    assert result["corrected"] is not None
+    assert result["corrected_lo"] is not None
+    assert result["corrected_hi"] is not None
+    assert result["corrected_lo"] <= result["corrected"] <= result["corrected_hi"]

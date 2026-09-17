@@ -94,3 +94,22 @@ def test_label_sample_from_build(tmp_path: Path) -> None:
     assert sampled.exit_code == 0, sampled.stdout + sampled.stderr
     assert queue.exists()
     assert "label" in queue.read_text()
+
+
+def test_label_reprompts_on_typo_and_saves(tmp_path: Path) -> None:
+    queue = tmp_path / "queue.csv"
+    queue.write_text(
+        "name_normalized,name_raw,owner_key,building_type,geo_borough,"
+        "rule_id,owner_class,split,label,labeled_at\n"
+        "ACME LLC,ACME LLC,abc123,sfr_1_4,Brooklyn,R080_llc,llc,dev,,\n"
+    )
+    labeled = runner.invoke(
+        app,
+        ["label", "--queue", str(queue)],
+        input="unkown\nllc\n",
+    )
+    assert labeled.exit_code == 0, labeled.stdout + labeled.stderr
+    assert "unknown class unkown" in labeled.stdout
+    text = queue.read_text()
+    assert ",llc," in text
+    assert "2026-" in text or "T" in text

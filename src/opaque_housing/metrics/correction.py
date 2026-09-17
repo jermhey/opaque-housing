@@ -49,6 +49,48 @@ def corrected_prevalence(
     }
 
 
+def bootstrap_corrected_prevalence(
+    p_hat: float,
+    y_true: Sequence[bool],
+    y_pred: Sequence[bool],
+    n_boot: int = 1000,
+    seed: int = 20260916,
+    alpha: float = 0.05,
+) -> dict[str, float | None]:
+    """Point Rogan–Gladen estimate plus a percentile interval from resampling labels.
+
+    Citywide ``p_hat`` is treated as a census. Uncertainty comes from gold-set
+    sensitivity and specificity only.
+    """
+    result = corrected_prevalence(p_hat, y_true, y_pred)
+    pairs = list(zip(list(y_true), list(y_pred), strict=True))
+    if not pairs:
+        result["corrected_lo"] = None
+        result["corrected_hi"] = None
+        result["n_boot"] = 0.0
+        return result
+    rng = random.Random(seed)
+    n = len(pairs)
+    estimates: list[float] = []
+    for _ in range(n_boot):
+        sample = [pairs[rng.randrange(n)] for _ in range(n)]
+        sens, spec = binary_sens_spec([item[0] for item in sample], [item[1] for item in sample])
+        estimate = rogan_gladen(p_hat, sens, spec)
+        if estimate is not None:
+            estimates.append(estimate)
+    if not estimates:
+        result["corrected_lo"] = None
+        result["corrected_hi"] = None
+        result["n_boot"] = 0.0
+        return result
+    estimates.sort()
+    count = len(estimates)
+    result["corrected_lo"] = estimates[int(math.floor(alpha / 2 * count))]
+    result["corrected_hi"] = estimates[min(count - 1, int(math.ceil((1 - alpha / 2) * count)) - 1)]
+    result["n_boot"] = float(count)
+    return result
+
+
 def bootstrap_mean_interval(
     values: Sequence[float],
     n_boot: int = 1000,

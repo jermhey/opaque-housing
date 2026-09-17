@@ -22,9 +22,11 @@ PLUTO condo rows are billing-lot / complex grain, not unit owners (ADR 0002). Ow
 - LLC / trust / corporation phrases are canonicalized (`L.L.C.` → `LLC`, `TTEE` → `TRUSTEE`, `INCORPORATED` → `INC`)
 - multiple owners split on `/` only; `&` stays one household (ADR 0004)
 - classification uses the first slash-separated party
-- `owner_key` is `sha256(name_normalized)[:16]`
+- a later slash part that is exactly `LWT` / `EST` / `ESTATE` / `DEF` (not `DEFT`) assigns `estate` (`R051`)
+- wrapped `TR UST` is canonicalized to `TRUST`
+- `owner_key` is `sha256(name_normalized)[:16]` of the first party
 
-## Owner-class rules (`RULES_VERSION = 2026-09-16.1`)
+## Owner-class rules (`RULES_VERSION = 2026-09-16.2`)
 
 First match wins. Each rule has a positive and a negative unit test.
 
@@ -32,17 +34,18 @@ First match wins. Each rule has a positive and a negative unit test.
 |---|---|---|
 | `R001_blank` | `unknown` | empty after normalize |
 | `R010_hdfc` | `hdfc` | `HDFC` or `HOUSING DEVELOPMENT FUND` |
-| `R020_public` | `public` | NYC/state/federal housing-authority phrases |
-| `R030_lender` | `lender_reo` | GSEs, `BANK OF`, `NA`, `MORTGAGE`, `REO`, … — not if the name is an LLC |
-| `R040_nonprofit` | `nonprofit_religious` | church/university/hospital tokens — not `COLLEGE POINT` |
-| `R050_estate` | `estate` | starts with `ESTATE`, or `ESTATE OF` / `EST OF` — not `REAL ESTATE` |
+| `R020_public` | `public` | Agency phrases (`CITY OF NEW YORK`, `NYCHA`, `NYS OFFICE`, …). Not bare `USA`/`NYS`/`FEDERAL`. Not an LLC. `CITY COLLEGE` is public (CUNY). |
+| `R030_lender` | `lender_reo` | GSEs, `BANK`, `MORTGAGE`, `REO`, `J P MORGAN CHASE`. Not standalone `NA` or `CHASE`. Not an LLC. |
+| `R040_nonprofit` | `nonprofit_religious` | church/university/hospital/ministry tokens — not `COLLEGE AVE` / `COLLEGE POINT`, not an LLC, not `CHURCH`+`REALTY` |
+| `R050_estate` | `estate` | starts with `ESTATE`, or `ESTATE OF` / `EST OF` — not `REAL ESTATE`, not if INC/LLC/CORP |
+| `R051_estate_suffix` | `estate` | later slash part is `LWT` / `EST` / `DEF` (ADR 0004 amendment) |
 | `R060_trust` | `trust` | `TRUSTEE`, `TRUST`, or a trailing ` TR` |
 | `R070_coop_building` | `coop_corp` | official `coop_building` type, regardless of name |
-| `R071_coop_name` | `coop_corp` | `CO-OP` / `COOPERATIVE` / `TENANTS CORP` / `OWNERS CORP` on a non-coop lot |
+| `R071_coop_name` | `coop_corp` | `CO-OP` / `COOPERATIVE` / `TENANTS CORP` / `OWNERS CORP` on a non-coop lot — not if the name is an LLC |
 | `R080_llc` | `llc` | `LLC` |
 | `R090_partnership` | `partnership` | `LP` / `LLP` / `LLLP` / partnership phrases |
-| `R100_corp` | `corp` | `CORP` / `INC` / `LTD` / `PC` / `COMPANY` / `CO` / `PLC` |
-| `R110_individual` | `individual` | `ET AL` / `JTWROS` / `&` households, or 2–5 alphabetic tokens without entity words |
+| `R100_corp` | `corp` | `CORP` / `INC` / `LTD` / `LIMITED` / `PC` / `COMPANY` / `CO` / `PLC`, or `CORP` glued to the previous word (`OPERATINGCORP`) |
+| `R110_individual` | `individual` | `ET AL` / `JTWROS` / `&` households (only if the stem is person-like), or 2–5 alphabetic tokens, hyphens allowed, without entity/`CONDOMINIUM` words |
 | `R999_unknown` | `unknown` | everything else, including blank-looking trade names such as `ACME REALTY` |
 
 Unmatched names stay `unknown` and stay in the private denominator. They are not sent to an LLM in M1.
@@ -58,17 +61,25 @@ Unmatched names stay `unknown` and stay in the private denominator. They are not
 
 ## Misclassification correction
 
-When a labeled gold set exists, binary entity vs. not-entity sensitivity and specificity are applied with a Rogan–Gladen correction to each headline share. CI uses a synthetic file (`eval/gold/ci_dev.csv`) and fails if test-split macro-F1 falls below `eval/reports/baseline_macro_f1.json`.
+When a labeled gold set exists, binary entity vs. not-entity sensitivity and specificity are applied with a Rogan–Gladen correction to each headline share. Entity-plus-trust series use a separate binary that treats `trust` as positive. Correction uses the **test** split only (`n=305`). Intervals are percentile bootstrap of the gold pairs (1,000 resamples); citywide `p_hat` is treated as a census.
 
-Corrected citywide headlines are **not** published until the hand-labeled ~600-name set exists. The harness is in place; the labels are not.
+CI still uses the synthetic file (`eval/gold/ci_dev.csv`) and fails if test-split macro-F1 falls below `eval/reports/baseline_macro_f1.json`.
+
+The same name-level confusion matrix is applied to unit-weighted and `sfr_1_4`+`condo_unit` series. That assumes misclassification rates do not vary by building size or type. The gold set is stratified by rule, not a simple random sample of lots, so the binary rates are an approximation.
 
 ## External sanity checks
 
-Not started. Citations will be added here; we will not tune results to match them.
+These are **different quantities** from this project's stock shares. Direction and rough magnitude only. We do not tune rules or corrections to match them.
+
+- **NAR (2022), using Black Knight deeds.** “Institutional” = company / corporation / LLC on the deed. 13.2% of U.S. residential *purchases* in 2021 (11.8% in 2020). This is a **flow** metric with a legal-form definition close to our entity headline, not a stock share, and it is national. [Impact of Institutional Buyers on Home Sales and Single-Family Rentals](https://www.nar.realtor/sites/default/files/documents/2022-impact-of-institutional-buyers-on-home-sales-and-single-family-rentals-05-12-2022.pdf).
+- **CoreLogic (Malone, 2023).** Investor share of U.S. *single-family purchases* about 26–27% in spring/summer 2023 (28.7% in December 2023). “Investor” is a buyer-type / occupancy construct, not LLC vs person. [Summary](https://nationalmortgageprofessional.com/news/us-home-investor-share-remained-high-early-summer-2023).
+- **Urban Institute (2023).** Entities owning ≥100 one-unit rentals held about 574,000 homes as of June 2022, **3.8%** of 15.1 million one-unit rentals. This is **portfolio size**, not legal form; most entity owners in our data would not meet the 100-home cutoff. [A Profile of Institutional Investor-Owned Single-Family Rental Properties](https://www.urban.org/sites/default/files/2023-08/A%20Profile%20of%20Institutional%20Investor%E2%80%93Owned%20Single-Family%20Rental%20Properties.pdf).
+- **Harwood, Ellen, and O’Regan (Furman Center).** NYC multifamily *corporate vs non-corporate* landlords, 2012–2023, for tenant-outcome differences — not a citywide ownership share. Useful as a local corporate-landlord literature pointer. [The Rise of Corporate Landlords](https://www.furmancenter.org/news/examining-the-behavioral-differences-of-corporate-landlords/).
+
+Our informative series (entity share of `sfr_1_4` + `condo_unit` **stock**) is not comparable to the national purchase-flow figures. M2 flow metrics are the right place to put them side by side.
 
 ## What will be documented here later
 
 - Arm's-length sale filter and sensitivity parameters
 - Opacity-tier tests and evidence fields
 - LLM prompt version
-- Citations for published investor-purchase research
