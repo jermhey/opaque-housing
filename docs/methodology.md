@@ -78,8 +78,23 @@ These are **different quantities** from this project's stock shares. Direction a
 
 Our informative series (entity share of `sfr_1_4` + `condo_unit` **stock**) is not comparable to the national purchase-flow figures. M2 flow metrics are the right place to put them side by side.
 
+## Arm's-length sale filter (M2)
+
+Canonical `doc_type` mapping is ADR 0005. Official codes only.
+
+- **`sale_deed`:** `DEED`, `DEED, RC`, `DEEDP`, `DEEDO`, `REIT`, `ASTU`
+- **`nonsale_deed`:** other `DEEDS AND OTHER CONVEYANCES` (correction, confirmatory, TOD, in-rem, life estate, timeshare, contract, lease, easement, condo declaration, …)
+- **`other`:** mortgages, UCC, everything else
+
+A flow-metric sale is a `sale_deed` with a named grantee (`party_type=2`) and `document_amt >= 10000`. Zero consideration fails the default cut. Sensitivity: `$0` / `$1` / `$10k` / `$100k`, treat-zero-as-missing, drop `ASTU` or `DEEDO`, same-surname exclusion, require `percent_trans=100`. `percent_trans=0` is unspecified, not a 0% interest.
+
+Historical stock uses every `sale_deed` with a named grantee (no amount cut). Buyer class is the first named grantee, name-only — parcel `building_type` is not passed into the buyer rules.
+
+Coverage window: recorded years **2003–2025** (ADR 0006). Year is `recorded_datetime`. Property borough is Legals `borough`. Snapshot rows are collapsed to the latest `good_through_date`.
+
+Condo unit lots map through DCP PAD (`billboro` / `billblock` / `billlot` and the official lo–hi range). A mapped unit counts as `condo_unit` with 1 unit, not the billing-lot complex size. Without a PAD file, only exact-BBL PLUTO matches enter the residential universe.
+
 ## What will be documented here later
 
-- Arm's-length sale filter and sensitivity parameters
 - Opacity-tier tests and evidence fields
 - LLM prompt version

@@ -7,6 +7,10 @@ from opaque_housing.cli import app
 runner = CliRunner()
 FIXTURE = Path("tests/fixtures/nyc/pluto_sample.csv")
 EQUIV = Path("tests/fixtures/nyc/tract_nta_equiv_sample.csv")
+MASTER = Path("tests/fixtures/nyc/acris_master.csv")
+LEGALS = Path("tests/fixtures/nyc/acris_legals.csv")
+PARTIES = Path("tests/fixtures/nyc/acris_parties.csv")
+PAD = Path("tests/fixtures/nyc/pad_bbl_sample.csv")
 
 
 def test_help() -> None:
@@ -16,6 +20,7 @@ def test_help() -> None:
     assert "build" in result.stdout
     assert "label" in result.stdout
     assert "eval" in result.stdout
+    assert "flow" in result.stdout
 
 
 def test_version() -> None:
@@ -113,3 +118,44 @@ def test_label_reprompts_on_typo_and_saves(tmp_path: Path) -> None:
     text = queue.read_text()
     assert ",llc," in text
     assert "2026-" in text or "T" in text
+
+
+def test_flow_on_committed_fixtures(tmp_path: Path) -> None:
+    derived = tmp_path / "derived"
+    built = runner.invoke(
+        app,
+        [
+            "build",
+            "--source",
+            str(FIXTURE),
+            "--equiv",
+            str(EQUIV),
+            "--out-dir",
+            str(derived),
+        ],
+    )
+    assert built.exit_code == 0, built.stdout + built.stderr
+    flowed = runner.invoke(
+        app,
+        [
+            "flow",
+            "--master",
+            str(MASTER),
+            "--legals",
+            str(LEGALS),
+            "--parties",
+            str(PARTIES),
+            "--parcels",
+            str(derived / "parcels_classified.parquet"),
+            "--pad",
+            str(PAD),
+            "--out-dir",
+            str(derived),
+        ],
+    )
+    assert flowed.exit_code == 0, flowed.stdout + flowed.stderr
+    assert (derived / "flow_headlines.json").exists()
+    assert (derived / "flow_sensitivity.csv").exists()
+    assert (derived / "history_by_year.csv").exists()
+    assert (derived / "consistency.json").exists()
+    assert (derived / "flow_manifest.json").exists()

@@ -13,8 +13,16 @@ from dotenv import load_dotenv
 
 from opaque_housing import __version__
 from opaque_housing.adapters.http import stream_to_path
+from opaque_housing.adapters.nyc.acris import NycAcrisAdapter
+from opaque_housing.adapters.nyc.pad import load_pad_crosswalk
 from opaque_housing.adapters.nyc.pluto import NycPlutoAdapter
-from opaque_housing.adapters.nyc.sources import NYC_SOURCES, PLUTO_SNAPSHOT_DATE
+from opaque_housing.adapters.nyc.sources import (
+    ACRIS_SOURCES,
+    NYC_SOURCES,
+    PLUTO_SNAPSHOT_DATE,
+    resolve_ingest_specs,
+)
+from opaque_housing.adapters.soda import write_soda_parquet
 from opaque_housing.classify.apply import classify_parcel_frame
 from opaque_housing.classify.pipeline import classify_owner
 from opaque_housing.classify.rules import RULES_VERSION
@@ -25,6 +33,22 @@ from opaque_housing.labeling.sample import (
 )
 from opaque_housing.metrics.correction import bootstrap_corrected_prevalence
 from opaque_housing.metrics.evaluation import evaluation_report
+from opaque_housing.metrics.flow import (
+    attach_residential,
+    classify_buyers,
+    flow_breakdowns,
+    flow_headlines,
+    history_only_sales,
+    in_coverage_window,
+    sensitivity_table,
+    with_year_and_borough,
+)
+from opaque_housing.metrics.history import consistency_check, historical_stock_table, year_end_dates
+from opaque_housing.metrics.sale_filter import (
+    SaleFilterConfig,
+    apply_sale_filter,
+    attach_primary_parties,
+)
 from opaque_housing.metrics.stock import headline_shares, private_residential, stock_breakdowns
 from opaque_housing.paths import derived_dir, latest_raw_file, raw_dir
 from opaque_housing.quality.manifest import RunManifest
@@ -57,19 +81,33 @@ def ingest(
         typer.echo(f"ingest is only wired for nyc (got {metro})", err=True)
         raise typer.Exit(code=1)
     day = date.fromisoformat(retrieval_date) if retrieval_date else date.today()
-    names = list(NYC_SOURCES) if dataset == "all" else [dataset]
-    for name in names:
-        spec = NYC_SOURCES.get(name)
-        if spec is None:
-            typer.echo(f"unknown dataset {name}", err=True)
-            raise typer.Exit(code=1)
+    try:
+        specs = resolve_ingest_specs(dataset)
+    except KeyError:
+        typer.echo(f"unknown dataset {dataset}", err=True)
+        raise typer.Exit(code=1) from None
+    for spec in specs:
         dest = raw_dir(metro, spec.name, day) / spec.filename
         if dest.exists() and not force:
             typer.echo(f"skip existing {dest}")
             continue
         typer.echo(f"downloading {spec.dataset_id} -> {dest}")
-        stream_to_path(spec.csv_url, dest)
-        typer.echo(f"wrote {dest} ({dest.stat().st_size} bytes)")
+        if spec.paged:
+            stats = write_soda_parquet(
+                dest,
+                spec.dataset_id,
+                select=spec.select,
+                where=spec.where,
+                key=spec.key,
+                page_size=spec.limit,
+            )
+            typer.echo(
+                f"wrote {dest} pages={stats['pages']} rows={stats['rows']} "
+                f"({dest.stat().st_size} bytes)"
+            )
+        else:
+            stream_to_path(spec.csv_url, dest)
+            typer.echo(f"wrote {dest} ({dest.stat().st_size} bytes)")
 
 
 @app.command()
@@ -143,6 +181,122 @@ def build(
     )
     (dest / "run_manifest.json").write_text(json.dumps(manifest.to_dict(), indent=2) + "\n")
     typer.echo(f"wrote {dest} parcels={classified.height} private={private.height}")
+
+
+@app.command()
+def flow(
+    metro: Annotated[str, typer.Option(help="Metro id, e.g. nyc.")] = "nyc",
+    master: Annotated[Path | None, typer.Option(help="ACRIS Master extract.")] = None,
+    legals: Annotated[Path | None, typer.Option(help="ACRIS Legals extract.")] = None,
+    parties: Annotated[Path | None, typer.Option(help="ACRIS Parties extract.")] = None,
+    parcels: Annotated[
+        Path | None, typer.Option(help="Classified parcels parquet from oh build.")
+    ] = None,
+    pad: Annotated[Path | None, typer.Option(help="Optional PAD BBL crosswalk.")] = None,
+    out_dir: Annotated[Path | None, typer.Option(help="Derived output directory.")] = None,
+    min_consideration: Annotated[float, typer.Option(help="Arm's-length amount cut.")] = 10_000.0,
+    snapshot_date: Annotated[
+        str, typer.Option(help="As-of date for the PLUTO consistency check.")
+    ] = PLUTO_SNAPSHOT_DATE,
+) -> None:
+    """Entity-buyer flow, reconstructed history, and PLUTO consistency."""
+    if metro != "nyc":
+        typer.echo(f"flow is only wired for nyc (got {metro})", err=True)
+        raise typer.Exit(code=1)
+    master_path = master or latest_raw_file(
+        metro, "acris_master", ACRIS_SOURCES["acris_master"].filename
+    )
+    legals_path = legals or latest_raw_file(
+        metro, "acris_legals", ACRIS_SOURCES["acris_legals"].filename
+    )
+    parties_path = parties or latest_raw_file(
+        metro, "acris_parties", ACRIS_SOURCES["acris_parties"].filename
+    )
+    parcel_path = parcels or (derived_dir(metro) / "parcels_classified.parquet")
+    missing = [
+        label
+        for label, path in (
+            ("master", master_path),
+            ("legals", legals_path),
+            ("parties", parties_path),
+            ("parcels", parcel_path),
+        )
+        if path is None or not path.exists()
+    ]
+    if missing:
+        typer.echo(f"missing inputs: {', '.join(missing)}", err=True)
+        raise typer.Exit(code=1)
+    assert master_path is not None and legals_path is not None and parties_path is not None
+    dest = out_dir or derived_dir(metro)
+    dest.mkdir(parents=True, exist_ok=True)
+    started = datetime.now(tz=UTC)
+
+    adapter = NycAcrisAdapter()
+    transfers = adapter.load_transfers(master_path, legals_path)
+    party_rows = adapter.load_transfer_parties(parties_path)
+    transfers = attach_primary_parties(transfers, party_rows)
+    parcel_frame = pl.read_parquet(parcel_path)
+    pad_frame = load_pad_crosswalk(pad) if pad is not None else None
+
+    flow_sales, flow_counts = apply_sale_filter(
+        transfers, SaleFilterConfig(min_consideration=min_consideration)
+    )
+    flow_buyers = classify_buyers(flow_sales)
+    flow_matched, join_counts = attach_residential(flow_buyers, parcel_frame, pad_frame)
+    flow_matched = with_year_and_borough(flow_matched)
+    flow_matched, window_count = in_coverage_window(flow_matched)
+    breakdowns = flow_breakdowns(flow_matched)
+    headlines = flow_headlines(flow_matched)
+    sensitivity = sensitivity_table(transfers, parcel_frame, pad_frame)
+
+    hist_sales, hist_counts = history_only_sales(transfers)
+    hist_buyers = classify_buyers(hist_sales)
+    hist_matched, hist_join = attach_residential(hist_buyers, parcel_frame, pad_frame)
+    hist_matched = with_year_and_borough(hist_matched)
+    history = historical_stock_table(hist_matched, parcel_frame, year_end_dates())
+    as_of = date.fromisoformat(snapshot_date)
+    consistency = consistency_check(hist_matched, parcel_frame, as_of)
+
+    for name, table in breakdowns.items():
+        table.write_csv(dest / f"flow_{name}.csv")
+    sensitivity.write_csv(dest / "flow_sensitivity.csv")
+    history.write_csv(dest / "history_by_year.csv")
+    (dest / "flow_headlines.json").write_text(json.dumps(headlines, indent=2) + "\n")
+    (dest / "consistency.json").write_text(json.dumps(consistency, indent=2) + "\n")
+
+    manifest = RunManifest(
+        metro_id=metro,
+        started_at=started.isoformat(),
+        finished_at=datetime.now(tz=UTC).isoformat(),
+        source_paths={
+            "acris_master": str(master_path),
+            "acris_legals": str(legals_path),
+            "acris_parties": str(parties_path),
+            "parcels": str(parcel_path),
+            "pad": str(pad) if pad else "",
+        },
+        source_versions={"acris": adapter.source_version, "rules": RULES_VERSION},
+        rules_version=RULES_VERSION,
+        filter_counts=[
+            *adapter.filter_counts,
+            *flow_counts,
+            *join_counts,
+            window_count,
+            *hist_counts,
+            *hist_join,
+        ],
+        notes=[
+            "flow uses sale_deed + named grantee + consideration cut (ADR 0005)",
+            "history uses every sale_deed with a named grantee",
+            "coverage window recorded years 2003-2025 (ADR 0006)",
+            "trusts are not in the entity headline",
+        ],
+    )
+    (dest / "flow_manifest.json").write_text(json.dumps(manifest.to_dict(), indent=2) + "\n")
+    typer.echo(
+        f"wrote {dest} flow_sales={headlines['private_residential']['sales']} "
+        f"entity_share={headlines['private_residential']['sale_share']:.4f}"
+    )
 
 
 @app.command("eval")
