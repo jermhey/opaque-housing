@@ -17,6 +17,14 @@ from opaque_housing.adapters.nyc.building_type import (
 from opaque_housing.quality.filters import FilterCount
 from opaque_housing.schema import ParcelSnapshot
 
+_BOROUGH = {
+    "1": "Manhattan",
+    "2": "Bronx",
+    "3": "Brooklyn",
+    "4": "Queens",
+    "5": "Staten Island",
+}
+
 LOOKUP_DIR = Path(__file__).parent / "lookups"
 BORO_FIPS_PATH = LOOKUP_DIR / "nyc_boro_county_fips.csv"
 
@@ -129,6 +137,11 @@ class NycPlutoAdapter:
             pl.lit(self.snapshot_date).alias("snapshot_date"),
             pl.Series("geo_tract", geo_tracts, dtype=pl.Utf8),
             pl.Series("geo_neighborhood", geo_neighborhoods, dtype=pl.Utf8),
+            pl.col("bbl")
+            .map_elements(format_bbl, return_dtype=pl.Utf8)
+            .str.slice(0, 1)
+            .replace_strict(_BOROUGH, default=None)
+            .alias("geo_borough"),
             building_type_expr().alias("building_type"),
             _units_int_expr().alias("res_units"),
             pl.col("ownername").cast(pl.Utf8).alias("owner_name_raw"),
@@ -141,6 +154,7 @@ class NycPlutoAdapter:
             "snapshot_date",
             "geo_tract",
             "geo_neighborhood",
+            "geo_borough",
             "building_type",
             "res_units",
             "owner_name_raw",

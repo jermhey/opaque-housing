@@ -1,6 +1,6 @@
 # Public site
 
-Static HTML for the investigation. Pages read `data/site.json`, which `oh publish` writes from allowlisted citywide and NTA-or-coarser aggregates (ADR 0009).
+Static HTML for the investigation. Pages read `data/site.json` (NYC) and `data/phl/site.json` (Philadelphia). `oh publish` writes allowlisted citywide and NTA-or-ZIP aggregates (ADR 0009, ADR 0010). The compare page is `compare.html`.
 
 This is not Evidence.dev. Do not add a Node site generator without a new ADR.
 

@@ -347,6 +347,44 @@ function renderBuildings(data) {
   }
 }
 
+async function renderCompare(nyc) {
+  const host = $("#phl-missing");
+  let phl = null;
+  try {
+    const response = await fetch("./data/phl/site.json");
+    if (response.ok) phl = await response.json();
+  } catch (_err) {
+    phl = null;
+  }
+  if (!phl) {
+    if (host) host.hidden = false;
+    return;
+  }
+  const nycAll = (nyc.stock && nyc.stock.private_all_entity_only) || {};
+  const phlAll = (phl.stock && phl.stock.private_all_entity_only) || {};
+  const nycInfo = (nyc.stock && nyc.stock.sfr_condo_entity_only) || {};
+  const phlInfo = (phl.stock && phl.stock.sfr_condo_entity_only) || {};
+  const nycParcel = correction(nyc.stock, "private_all_entity_only", "parcel") || {};
+  setText("nyc-parcel", pct(nycParcel.corrected ?? nycAll.parcel_share));
+  setText(
+    "nyc-parcel-sub",
+    `${num(nycAll.entity_parcels)} of ${num(nycAll.parcels)} private lots. Corrected ${pct(nycParcel.corrected)} from raw ${pct(nycAll.parcel_share)}.`,
+  );
+  setText("phl-parcel", pct(phlAll.parcel_share));
+  setText(
+    "phl-parcel-sub",
+    `${num(phlAll.entity_parcels)} of ${num(phlAll.parcels)} private lots. Raw only; no PHL gold set.`,
+  );
+  setText("nyc-sfr", pct(nycInfo.parcel_share));
+  setText("nyc-sfr-sub", `${num(nycInfo.entity_parcels)} of ${num(nycInfo.parcels)} 1–4 family + condo lots.`);
+  setText("phl-sfr", pct(phlInfo.parcel_share));
+  setText("phl-sfr-sub", `${num(phlInfo.entity_parcels)} of ${num(phlInfo.parcels)} 1–4 family + condo lots.`);
+  setText(
+    "unit-compare",
+    `NYC entity unit share ${pct(nycAll.unit_share)} (corrected ${pct((correction(nyc.stock, "private_all_entity_only", "unit") || {}).corrected)}). Philadelphia lower-bound unit share ${pct(phlAll.unit_share)} — not a dwelling census.`,
+  );
+}
+
 function renderFreshness(data) {
   const fresh = data.freshness || {};
   const stock = fresh.stock || {};
@@ -386,6 +424,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (page === "trends") renderTrends(data);
     if (page === "buildings") renderBuildings(data);
     if (page === "freshness") renderFreshness(data);
+    if (page === "compare") await renderCompare(data);
   } catch (err) {
     showError(err);
   }

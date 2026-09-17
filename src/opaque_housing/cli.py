@@ -12,6 +12,7 @@ import typer
 from dotenv import load_dotenv
 
 from opaque_housing import __version__
+from opaque_housing.adapters.carto import write_carto_csv
 from opaque_housing.adapters.http import stream_to_path
 from opaque_housing.adapters.nyc.acris import NycAcrisAdapter
 from opaque_housing.adapters.nyc.hpd import NycHpdAdapter
@@ -26,6 +27,8 @@ from opaque_housing.adapters.nyc.sources import (
     PLUTO_SNAPSHOT_DATE,
     resolve_ingest_specs,
 )
+from opaque_housing.adapters.phl.opa import PhlOpaAdapter
+from opaque_housing.adapters.phl.sources import OPA_SNAPSHOT_DATE, resolve_phl_specs
 from opaque_housing.adapters.soda import write_soda_parquet
 from opaque_housing.classify.apply import classify_parcel_frame
 from opaque_housing.classify.llm import apply_llm_label, needs_llm
@@ -111,10 +114,25 @@ def ingest(
     ] = None,
 ) -> None:
     """Download raw source extracts into data/raw/<metro>/<dataset>/<date>/."""
-    if metro != "nyc":
-        typer.echo(f"ingest is only wired for nyc (got {metro})", err=True)
-        raise typer.Exit(code=1)
     day = date.fromisoformat(retrieval_date) if retrieval_date else date.today()
+    if metro == "phl":
+        try:
+            carto_specs = resolve_phl_specs(dataset)
+        except KeyError:
+            typer.echo(f"unknown dataset {dataset}", err=True)
+            raise typer.Exit(code=1) from None
+        for spec in carto_specs:
+            dest = raw_dir(metro, spec.name, day) / spec.filename
+            if dest.exists() and not force:
+                typer.echo(f"skip existing {dest}")
+                continue
+            typer.echo(f"downloading {spec.table} -> {dest}")
+            write_carto_csv(dest, spec)
+            typer.echo(f"wrote {dest} ({dest.stat().st_size} bytes)")
+        return
+    if metro != "nyc":
+        typer.echo(f"ingest is only wired for nyc and phl (got {metro})", err=True)
+        raise typer.Exit(code=1)
     try:
         specs = resolve_ingest_specs(dataset)
     except KeyError:
@@ -154,31 +172,42 @@ def build(
     equiv: Annotated[Path | None, typer.Option(help="Tract-NTA equivalency CSV.")] = None,
     out_dir: Annotated[Path | None, typer.Option(help="Derived output directory.")] = None,
     snapshot_date: Annotated[
-        str, typer.Option(help="Canonical snapshot date.")
-    ] = PLUTO_SNAPSHOT_DATE,
+        str | None, typer.Option(help="Canonical snapshot date. Default depends on metro.")
+    ] = None,
     gold: Annotated[
         Path | None,
         typer.Option(help="Optional labeled gold CSV for Rogan–Gladen correction."),
     ] = None,
 ) -> None:
     """Classify residential parcels and write stock shares."""
-    if metro != "nyc":
-        typer.echo(f"build is only wired for nyc (got {metro})", err=True)
-        raise typer.Exit(code=1)
-    source_path = source or latest_raw_file(metro, "pluto", NYC_SOURCES["pluto"].filename)
-    if source_path is None or not source_path.exists():
-        typer.echo("no PLUTO extract; pass --source or run oh ingest", err=True)
-        raise typer.Exit(code=1)
-    equiv_path = equiv or latest_raw_file(metro, "tract_nta", NYC_SOURCES["tract_nta"].filename)
     dest = out_dir or derived_dir(metro)
     dest.mkdir(parents=True, exist_ok=True)
-
     started = datetime.now(tz=UTC)
-    adapter = NycPlutoAdapter(
-        snapshot_date=date.fromisoformat(snapshot_date),
-        tract_equiv_path=equiv_path,
-    )
-    parcels = adapter.load_parcels_snapshot(source_path)
+    if metro == "phl":
+        source_path = source or latest_raw_file(metro, "opa", "opa_properties_public.csv")
+        if source_path is None or not source_path.exists():
+            typer.echo("no OPA extract; pass --source or run oh ingest --metro phl", err=True)
+            raise typer.Exit(code=1)
+        snap = date.fromisoformat(snapshot_date or OPA_SNAPSHOT_DATE)
+        adapter = PhlOpaAdapter(snapshot_date=snap)
+        parcels = adapter.load_parcels_snapshot(source_path)
+        source_label = "opa"
+        extra_paths = {}
+        equiv_path = None
+    elif metro == "nyc":
+        source_path = source or latest_raw_file(metro, "pluto", NYC_SOURCES["pluto"].filename)
+        if source_path is None or not source_path.exists():
+            typer.echo("no PLUTO extract; pass --source or run oh ingest", err=True)
+            raise typer.Exit(code=1)
+        equiv_path = equiv or latest_raw_file(metro, "tract_nta", NYC_SOURCES["tract_nta"].filename)
+        snap = date.fromisoformat(snapshot_date or PLUTO_SNAPSHOT_DATE)
+        adapter = NycPlutoAdapter(snapshot_date=snap, tract_equiv_path=equiv_path)
+        parcels = adapter.load_parcels_snapshot(source_path)
+        source_label = "pluto"
+        extra_paths = {"tract_nta": str(equiv_path) if equiv_path else ""}
+    else:
+        typer.echo(f"build is only wired for nyc and phl (got {metro})", err=True)
+        raise typer.Exit(code=1)
     classified = classify_parcel_frame(parcels)
     private, private_count = private_residential(classified)
     headlines = headline_shares(private)
@@ -202,11 +231,8 @@ def build(
         metro_id=metro,
         started_at=started.isoformat(),
         finished_at=datetime.now(tz=UTC).isoformat(),
-        source_paths={
-            "pluto": str(source_path),
-            "tract_nta": str(equiv_path) if equiv_path else "",
-        },
-        source_versions={"pluto": ",".join(versions)},
+        source_paths={source_label: str(source_path), **extra_paths},
+        source_versions={source_label: ",".join(versions)},
         rules_version=RULES_VERSION,
         filter_counts=[*adapter.filter_counts, private_count],
         notes=[
@@ -568,19 +594,22 @@ def publish(
     ] = 0.20,
 ) -> None:
     """Copy allowlisted aggregates. Never writes names, addresses, or owner keys."""
-    if metro != "nyc":
-        typer.echo(f"publish is only wired for nyc (got {metro})", err=True)
+    if metro not in {"nyc", "phl"}:
+        typer.echo(f"publish is only wired for nyc and phl (got {metro})", err=True)
         raise typer.Exit(code=1)
     src = derived or derived_dir(metro)
     dest = out_dir or published_dir(metro)
     prior = reuse_dir or dest
+    site_dest = site_data
+    if metro != "nyc" and site_data == Path("site/data"):
+        site_dest = Path("site/data") / metro
     try:
         _publish_aggregates(
             metro=metro,
             derived=src,
             dest=dest,
             prior=prior,
-            site_data=site_data,
+            site_data=site_dest,
             equiv=equiv or latest_raw_file(metro, "tract_nta", NYC_SOURCES["tract_nta"].filename),
             max_stock_change=max_stock_change,
         )
@@ -923,6 +952,11 @@ def _publish_aggregates(
         names = nta_name_lookup(pl.read_csv(equiv, infer_schema_length=0))
         assert_safe_columns(names.columns, origin="nta_names")
     neighborhoods = neighborhood_table(nta_type, names)
+    if metro == "phl":
+        neighborhoods = neighborhoods.with_columns(
+            pl.lit("Philadelphia").alias("borough"),
+            pl.col("nta").alias("nta_name"),
+        )
     boroughs = None
     borough_path = resolved.get("stock_by_borough_type.csv")
     if borough_path is not None:

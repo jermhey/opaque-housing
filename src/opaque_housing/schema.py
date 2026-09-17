@@ -67,6 +67,7 @@ class ParcelSnapshot(BaseModel):
     snapshot_date: date
     geo_tract: str | None = None
     geo_neighborhood: str | None = None
+    geo_borough: str | None = None
     building_type: BuildingType
     res_units: int
     owner_name_raw: str | None = None

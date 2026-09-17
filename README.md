@@ -2,7 +2,7 @@
 
 A public, reproducible investigation of how much residential housing is held behind opaque ownership (LLCs, corporations, trusts, shell chains), and whether that share is growing.
 
-This is an investigation, not a product. **Milestones 1–3** (stock, flow, opacity) and **Milestone 4** (static site, `oh publish`, scheduled stock refresh) are in the repo. Corrected stock shares use the held-out test split only.
+This is an investigation, not a product. **Milestones 1–5** are in the repo: NYC stock/flow/opacity, a static site, and a Philadelphia adapter with a NYC vs PHL compare page. Corrected stock shares use the held-out NYC test split only.
 
 Public site (after GitHub Pages is enabled): [https://jermhey.github.io/opaque-housing/](https://jermhey.github.io/opaque-housing/). The site is static HTML reading committed aggregates under `site/data/` (ADR 0009). It is not Evidence.dev.
 
@@ -27,13 +27,16 @@ uv run oh build --metro nyc
 uv run oh flow --metro nyc
 uv run oh opacity --metro nyc
 uv run oh publish --metro nyc
+uv run oh ingest --metro phl
+uv run oh build --metro phl
+uv run oh publish --metro phl
 uv run oh label --sample-from data/derived/nyc/parcels_classified.parquet
 uv run oh label
 uv run oh eval --gold eval/gold/ci_dev.csv --split test
 uv run oh eval --gold eval/gold/queue.csv --split test --with-llm
 ```
 
-`oh ingest` writes immutable extracts under `data/raw/nyc/<dataset>/<date>/`. Default `all` is PLUTO + tract–NTA (`64uk-42ks`, `hm78-6dwm`). `--dataset acris` pages Master / Legals / Parties (`bnx9-e6tj`, `8h5j-fqxa`, `636b-3b5g`) for recorded years 2003–2026. `--dataset opacity` pulls HPD registrations + contacts (`tesw-yqqr`, `feu5-w2e2`) and NY DOS active corporations (`n9v6-gdp6` on data.ny.gov). `oh build` classifies residential lots. `oh flow` writes entity-buyer series. `oh opacity` writes O-tier shares, cluster links, and the top-20 entity-name review. `oh publish` copies allowlisted citywide and NTA-or-coarser aggregates into `data/published/nyc/` and `site/data/`. It refuses parcel files, owner keys, person names, and addresses.
+`oh ingest` writes immutable extracts under `data/raw/nyc/<dataset>/<date>/`. Default `all` is PLUTO + tract–NTA (`64uk-42ks`, `hm78-6dwm`). `--dataset acris` pages Master / Legals / Parties (`bnx9-e6tj`, `8h5j-fqxa`, `636b-3b5g`) for recorded years 2003–2026. `--dataset opacity` pulls HPD registrations + contacts (`tesw-yqqr`, `feu5-w2e2`) and NY DOS active corporations (`n9v6-gdp6` on data.ny.gov). `oh build` classifies residential lots. `oh flow` writes entity-buyer series. `oh opacity` writes O-tier shares, cluster links, and the top-20 entity-name review. `oh publish` copies allowlisted citywide and NTA-or-coarser aggregates into `data/published/<metro>/` and `site/data/` (Philadelphia under `site/data/phl/`). It refuses parcel files, owner keys, person names, and addresses. `oh ingest --metro phl` pulls OPA `opa_properties_public` from Carto.
 
 Reproduce stock from a raw-data volume:
 

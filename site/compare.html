@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NYC vs Philadelphia — Opaque residential ownership</title>
+  <link rel="stylesheet" href="./assets/style.css">
+</head>
+<body data-page="compare">
+  <header class="site">
+    <div class="wrap">
+      <p class="kicker">Investigation · two metros</p>
+      <h1><a href="./index.html">Opaque residential ownership</a></h1>
+      <nav>
+        <a href="./index.html">Findings</a>
+        <a href="./neighborhoods.html">Neighborhoods</a>
+        <a href="./trends.html">Trends</a>
+        <a href="./buildings.html">Building types</a>
+        <a href="./compare.html" aria-current="page">Compare</a>
+        <a href="./methodology.html">Methodology</a>
+        <a href="./dictionary.html">Dictionary</a>
+        <a href="./limitations.html">Limitations</a>
+        <a href="./freshness.html">Freshness</a>
+        <a href="./data.html">Downloads</a>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap">
+    <h2>New York City vs Philadelphia</h2>
+    <p class="lede">Same owner-class rules. Entity-owned is still LLC + corporation + partnership. Trusts stay a sensitivity series. Public and nonprofit owners leave the private denominator.</p>
+    <p class="caveat">The comparable headline is <strong>parcel share</strong>. Philadelphia OPA has no dwelling-unit census; unit-weighted PHL figures use the lower bound of the official building-code description (ADR 0010). NYC neighborhoods are 2020 NTAs; PHL “neighborhoods” are ZIP codes. NYC gold correction is not applied to Philadelphia.</p>
+    <div class="stat-grid">
+      <article class="stat">
+        <div class="label">NYC entity lot share</div>
+        <p class="value" id="nyc-parcel">—</p>
+        <p class="sub" id="nyc-parcel-sub"></p>
+      </article>
+      <article class="stat">
+        <div class="label">Philadelphia entity lot share</div>
+        <p class="value" id="phl-parcel">—</p>
+        <p class="sub" id="phl-parcel-sub"></p>
+      </article>
+      <article class="stat">
+        <div class="label">NYC 1–4 + condo lot share</div>
+        <p class="value" id="nyc-sfr">—</p>
+        <p class="sub" id="nyc-sfr-sub"></p>
+      </article>
+      <article class="stat">
+        <div class="label">Philadelphia 1–4 + condo lot share</div>
+        <p class="value" id="phl-sfr">—</p>
+        <p class="sub" id="phl-sfr-sub"></p>
+      </article>
+    </div>
+    <h3>Unit-weighted (not the comparable headline)</h3>
+    <p class="note" id="unit-compare"></p>
+    <p id="phl-missing" class="caveat" hidden>Philadelphia aggregates are not on this site yet. Run <code>oh ingest --metro phl</code>, <code>oh build --metro phl</code>, and <code>oh publish --metro phl</code>.</p>
+  </main>
+  <footer class="site">
+    <div class="wrap">OPA <code>opa_properties_public</code> and NYC PLUTO 26v2. PA DOS has no officer names, so PHL has no O-tiers.</div>
+  </footer>
+  <script src="./assets/app.js"></script>
+</body>
+</html>

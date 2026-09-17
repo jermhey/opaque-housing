@@ -8,7 +8,7 @@ from dataclasses import dataclass
 
 from opaque_housing.schema import BuildingType, OwnerClass
 
-RULES_VERSION = "2026-09-16.2"
+RULES_VERSION = "2026-09-17.3"
 
 _TokenPred = Callable[[str], bool]
 
@@ -44,7 +44,8 @@ _NOT_PERSON = re.compile(
 
 # Agency phrases only. Bare USA / NYS / FEDERAL over-fired on private firms (dev gold).
 _PUBLIC = re.compile(
-    r"\bCITY OF NEW YORK\b|\bNEW YORK CITY\b|\bNYCHA\b|\bHOUSING AUTHORITY\b"
+    r"\bCITY OF NEW YORK\b|\bNEW YORK CITY\b|\bNYCHA\b|\bHOUSING AUTH"
+    r"|\bCITY OF PHILADELPHIA\b"
     r"|\bUNITED STATES\b|\bUS GOVERNMENT\b"
     r"|\bSTATE OF NEW YORK\b|\bNEW YORK STATE\b"
     r"|\bPORT AUTHORITY\b|\bMTA\b|\bMETROPOLITAN TRANSPORTATION\b"

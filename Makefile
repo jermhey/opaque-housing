@@ -16,5 +16,6 @@ fmt:
 
 publish:
 	uv run oh publish --metro nyc
+	uv run oh publish --metro phl
 
 ci: lint typecheck test

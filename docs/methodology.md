@@ -28,7 +28,7 @@ PLUTO condo rows are billing-lot / complex grain, not unit owners (ADR 0002). Ow
 - wrapped `TR UST` is canonicalized to `TRUST`
 - `owner_key` is `sha256(name_normalized)[:16]` of the first party
 
-## Owner-class rules (`RULES_VERSION = 2026-09-16.2`)
+## Owner-class rules (`RULES_VERSION = 2026-09-17.3`)
 
 First match wins. Each rule has a positive and a negative unit test.
 
@@ -36,7 +36,7 @@ First match wins. Each rule has a positive and a negative unit test.
 |---|---|---|
 | `R001_blank` | `unknown` | empty after normalize |
 | `R010_hdfc` | `hdfc` | `HDFC` or `HOUSING DEVELOPMENT FUND` |
-| `R020_public` | `public` | Agency phrases (`CITY OF NEW YORK`, `NYCHA`, `NYS OFFICE`, …). Not bare `USA`/`NYS`/`FEDERAL`. Not an LLC. `CITY COLLEGE` is public (CUNY). |
+| `R020_public` | `public` | Agency phrases (`CITY OF NEW YORK`, `NYCHA`, `CITY OF PHILADELPHIA`, `HOUSING AUTH` / `HOUSING AUTHORITY`, `NYS OFFICE`, …). Not bare `USA`/`NYS`/`FEDERAL`. Not an LLC. `CITY COLLEGE` is public (CUNY). |
 | `R030_lender` | `lender_reo` | GSEs, `BANK`, `MORTGAGE`, `REO`, `J P MORGAN CHASE`. Not standalone `NA` or `CHASE`. Not an LLC. |
 | `R040_nonprofit` | `nonprofit_religious` | church/university/hospital/ministry tokens — not `COLLEGE AVE` / `COLLEGE POINT`, not an LLC, not `CHURCH`+`REALTY` |
 | `R050_estate` | `estate` | starts with `ESTATE`, or `ESTATE OF` / `EST OF` — not `REAL ESTATE`, not if INC/LLC/CORP |
@@ -113,6 +113,10 @@ Entity-owned private residential owners only (`llc` + `corp` + `partnership`). T
 `agent_address_only` is evidence, not a gate. Agent / SiteManager / Lessee names are not O1 and are not person-links.
 
 Portfolio links (ADR 0008): cluster edges are shared O1 persons and HPD `CorporateOwner` exact names, among **entity** owners only. Shared addresses and seed agent names still set `agent_address_only` / the denylist; they are not union-find edges (address + officer mixing collapsed the graph). The top-20 cluster review lists **entity names only**.
+
+## Philadelphia stock (M5)
+
+OPA `opa_properties_public` via Carto. Residential filter and unit lower bounds are ADR 0010. `geo_borough` is `Philadelphia`; `geo_neighborhood` is ZIP; `geo_tract` is null. Classify `owner_1` only. Parcel share is the NYC vs PHL headline. PA DOS `3urc-uaba` has no officer names, so PHL has no O-tiers.
 
 ## Public aggregates (M4)
 

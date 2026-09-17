@@ -1,0 +1,23 @@
+{
+  "metro": "phl",
+  "origins": {
+    "headlines.json": "derived",
+    "run_manifest.json": "derived",
+    "stock_by_borough_type.csv": "derived",
+    "stock_by_building_type.csv": "derived",
+    "stock_by_class.csv": "derived",
+    "stock_by_nta_type.csv": "derived"
+  },
+  "files": [
+    "freshness.json",
+    "headlines.json",
+    "neighborhoods.csv",
+    "publish_manifest.json",
+    "run_manifest.json",
+    "site.json",
+    "stock_by_borough_type.csv",
+    "stock_by_building_type.csv",
+    "stock_by_class.csv",
+    "stock_by_nta_type.csv"
+  ]
+}

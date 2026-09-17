@@ -298,4 +298,40 @@ A full ACRIS Parties pull is still the binding constraint. Whether a monthly Git
 - Byte size of a **full** 108-column PLUTO CSV and of a cold ACRIS Parties extract.
 - A complete PAD file. Portal and guessed `s-media` zip URLs 403/404 from this environment (2026-09-17). Official layout is `padlayout.pdf` (`billboro` / `billblock` / `billlot`). SODA `bc8t-ecyu` remains 403. Mapper is fixture-tested; live join is exact-BBL until a PAD extract is on disk.
 - Staten Island deeds as `DEED`. The 2026-09-17 sale-type Master extract overlaps 194,407 unique SI legal `document_id`s in **one** row. A live lookup of eight SI legal IDs returned `RPTT` (transfer tax) on every one. `RPTT` is official class `OTHER DOCUMENTS`.
-- Philadelphia sources (M5).
+
+---
+
+## 10. Philadelphia OPA property assessments
+
+Retrieval date: **2026-09-17**. Client User-Agent: `opaque-housing/0.1 (residential-ownership-research)`.
+
+| | |
+|---|---|
+| Portal | https://opendataphilly.org/datasets/philadelphia-properties-and-assessment-history/ |
+| Live table | `opa_properties_public` on `https://phl.carto.com/api/v2/sql` |
+| Rows (live count by category) | 581,772 including non-res; 522,675 in categories 1/2/3/14 |
+| Ingest | `oh ingest --metro phl` |
+
+Verified fields used for `parcels_snapshot`: `parcel_number`, `owner_1`, `owner_2` (not classified), `mailing_street` / `mailing_address_1` / `mailing_city_state` / `mailing_zip`, `category_code`, `category_code_description`, `building_code_description`, `zip_code`, `unit`, `assessment_date`. `census_tract` is 1–3 digits and is **not** mapped to a 2020 GEOID.
+
+Residential categories (live descriptions): 1 Single Family (463,036); 2 Multi Family (41,411); 3 Mixed Use (14,165); 14 Apartments > 4 Units (4,063).
+
+## 11. Philadelphia real estate transfers
+
+| | |
+|---|---|
+| Portal | https://opendataphilly.org/datasets/real-estate-transfers/ |
+| Live table | `rtt_summary` |
+| Verified fields | `document_id`, `document_type`, `recording_date`, `grantors`, `grantees`, `total_consideration`, `opa_account_num` |
+| Sale type used | `DEED` only (1,102,535 rows). `DEED SHERIFF` / `SHERIFF'S DEED` are not in the headline set |
+| Consideration-filtered DEED years | Recording years 2000–2025 are populated at ~18k–39k / year |
+
+## 12. Pennsylvania Department of State businesses
+
+| | |
+|---|---|
+| Portal | https://data.pa.gov/Licenses-Certificates/Filtered-View-Distinct-Registered-Businesses-in-PA/3urc-uaba |
+| Dataset ID | `3urc-uaba` (filter of `xvd7-5r2c`) |
+| Rows | 2,360,829 |
+| Verified fields | `business_name`, `filing_number`, `address_line1`, `typeofbusinessregistration`, `shortcountyname` |
+| Officer names | **None.** O-tiers are not computed for Philadelphia (ADR 0010). |

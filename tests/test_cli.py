@@ -205,3 +205,39 @@ def test_opacity_on_committed_fixtures(tmp_path: Path) -> None:
     assert (derived / "opacity_manifest.json").exists()
     assert review.exists()
     assert "entity names" in review.read_text().lower()
+
+
+def test_phl_build_and_publish(tmp_path: Path) -> None:
+    derived = tmp_path / "derived"
+    built = runner.invoke(
+        app,
+        [
+            "build",
+            "--metro",
+            "phl",
+            "--source",
+            "tests/fixtures/phl/opa_sample.csv",
+            "--out-dir",
+            str(derived),
+        ],
+    )
+    assert built.exit_code == 0, built.stdout + built.stderr
+    assert (derived / "headlines.json").exists()
+    dest = tmp_path / "published"
+    published = runner.invoke(
+        app,
+        [
+            "publish",
+            "--metro",
+            "phl",
+            "--derived",
+            str(derived),
+            "--out-dir",
+            str(dest),
+            "--site-data",
+            str(tmp_path / "site-phl"),
+        ],
+    )
+    assert published.exit_code == 0, published.stdout + published.stderr
+    assert (dest / "site.json").exists()
+    assert (dest / "neighborhoods.csv").exists()

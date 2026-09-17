@@ -34,6 +34,9 @@ def nyc_borough(parcel_id: str) -> str | None:
 
 
 def with_borough(parcels: pl.DataFrame) -> pl.DataFrame:
+    """Use adapter-supplied ``geo_borough`` when present (ADR 0010)."""
+    if "geo_borough" in parcels.columns:
+        return parcels
     return parcels.with_columns(
         pl.col("parcel_id")
         .cast(pl.Utf8)

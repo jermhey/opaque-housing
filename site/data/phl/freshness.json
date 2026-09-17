@@ -1,0 +1,38 @@
+{
+  "metro": "phl",
+  "generated_at": "2026-09-17T20:13:42.163186+00:00",
+  "stock": {
+    "metro_id": "phl",
+    "started_at": "2026-09-17T20:13:32.400795+00:00",
+    "finished_at": "2026-09-17T20:13:41.866011+00:00",
+    "source_versions": {
+      "opa": "2026-09-13"
+    },
+    "rules_version": "2026-09-17.3",
+    "filter_counts": [
+      {
+        "stage": "opa_to_parcels",
+        "rule_id": "opa_residential_only",
+        "rows_in": 583772,
+        "rows_out": 515116
+      },
+      {
+        "stage": "stock_private_denominator",
+        "rule_id": "exclude_public_nonprofit",
+        "rows_in": 515116,
+        "rows_out": 511336
+      }
+    ],
+    "notes": [
+      "raw shares only",
+      "trusts are not in the entity headline"
+    ]
+  },
+  "reused": {},
+  "flow_present": false,
+  "opacity_present": false,
+  "notes": [
+    "GitHub-hosted refresh updates PLUTO + tract\u2013NTA stock only (ADR 0009).",
+    "Flow and opacity are reused from the last full local run when missing."
+  ]
+}
