@@ -1,0 +1,66 @@
+{
+  "metro_id": "nyc",
+  "started_at": "2026-09-17T18:32:40.248615+00:00",
+  "finished_at": "2026-09-17T18:33:27.261944+00:00",
+  "source_versions": {
+    "hpd": "open-data-2026-09-17",
+    "nys_dos": "open-ny-2026-09-17",
+    "opacity": "2026-09-17.1"
+  },
+  "rules_version": "2026-09-16.2",
+  "filter_counts": [
+    {
+      "stage": "hpd_registrations",
+      "rule_id": "valid_bbl",
+      "rows_in": 203887,
+      "rows_out": 203887
+    },
+    {
+      "stage": "hpd_registrations",
+      "rule_id": "latest_per_bbl",
+      "rows_in": 203887,
+      "rows_out": 182495
+    },
+    {
+      "stage": "hpd_contacts",
+      "rule_id": "loaded",
+      "rows_in": 810494,
+      "rows_out": 810494
+    },
+    {
+      "stage": "hpd_contacts",
+      "rule_id": "latest_registration",
+      "rows_in": 810494,
+      "rows_out": 1087183
+    },
+    {
+      "stage": "nys_dos",
+      "rule_id": "loaded",
+      "rows_in": 4281406,
+      "rows_out": 4281406
+    },
+    {
+      "stage": "nys_dos",
+      "rule_id": "name_match",
+      "rows_in": 4281406,
+      "rows_out": 94276
+    },
+    {
+      "stage": "stock_private_denominator",
+      "rule_id": "exclude_public_nonprofit",
+      "rows_in": 770593,
+      "rows_out": 768516
+    },
+    {
+      "stage": "opacity",
+      "rule_id": "entity_owned",
+      "rows_in": 768516,
+      "rows_out": 117994
+    }
+  ],
+  "notes": [
+    "O-tiers on entity-owned private residential lots only (ADR 0007)",
+    "address degree threshold 20 (ADR 0008)",
+    "cluster review lists entity names only"
+  ]
+}

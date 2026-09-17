@@ -1,0 +1,44 @@
+name: refresh
+
+on:
+  schedule:
+    - cron: "0 12 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  stock:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+      - run: uv sync --frozen
+      - name: Check PLUTO catalog timestamp
+        run: |
+          uv run python - <<'PY'
+          from opaque_housing.adapters.soda import fetch_view_meta
+          meta = fetch_view_meta("64uk-42ks")
+          print(meta["dataset_id"], meta["name"], "rowsUpdatedAt", meta["rows_updated_at"])
+          PY
+      - name: Ingest PLUTO and tract–NTA
+        run: uv run oh ingest --metro nyc --dataset all
+      - name: Rebuild stock
+        run: uv run oh build --metro nyc
+      - name: Publish allowlisted aggregates
+        run: uv run oh publish --metro nyc
+      - name: Commit published files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/published/nyc site/data
+          if git diff --cached --quiet; then
+            echo "no published-file changes"
+          else
+            git commit -m "refresh published NYC stock aggregates"
+            git push
+          fi

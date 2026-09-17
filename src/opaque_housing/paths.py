@@ -20,6 +20,10 @@ def derived_dir(metro: str) -> Path:
     return data_root() / "derived" / metro
 
 
+def published_dir(metro: str) -> Path:
+    return data_root() / "published" / metro
+
+
 def latest_raw_file(metro: str, dataset: str, filename: str) -> Path | None:
     root = data_root() / "raw" / metro / dataset
     if not root.exists():

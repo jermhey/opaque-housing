@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Limitations — Opaque residential ownership</title>
+  <link rel="stylesheet" href="./assets/style.css">
+</head>
+<body>
+  <header class="site">
+    <div class="wrap">
+      <p class="kicker">Investigation · New York City</p>
+      <h1><a href="./index.html">Opaque residential ownership</a></h1>
+      <nav>
+        <a href="./index.html">Findings</a>
+        <a href="./neighborhoods.html">Neighborhoods</a>
+        <a href="./trends.html">Trends</a>
+        <a href="./buildings.html">Building types</a>
+        <a href="./methodology.html">Methodology</a>
+        <a href="./dictionary.html">Dictionary</a>
+        <a href="./limitations.html" aria-current="page">Limitations</a>
+        <a href="./freshness.html">Freshness</a>
+        <a href="./data.html">Downloads</a>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap">
+    <h2>Limitations</h2>
+    <ul class="plain">
+      <li><strong>LLC membership-interest sales generate no deed.</strong> Flow undercounts entity turnover.</li>
+      <li><strong>Co-op buildings are corporate-owned by design.</strong> They are never counted as opaque.</li>
+      <li><strong>Trusts are not entities.</strong> Most NYC living trusts are probate-avoidance vehicles. They appear only as a sensitivity series.</li>
+      <li><strong>PLUTO has no owner mailing address</strong> and stores condos as billing lots, not unit owners.</li>
+      <li><strong>Staten Island sales are almost missing</strong> from the DEED-based headline. Those ACRIS rows are mostly RPTT.</li>
+      <li><strong>No live PAD file.</strong> Condo unit-lot ↔ billing-lot mapping is fixture-tested only.</li>
+      <li><strong>Historical stock is not a full-city panel.</strong> It is lots with a named sale deed in 2003–2025, attributed with current PLUTO building type and units. 2025 coverage is about 62% of current private lots.</li>
+      <li><strong>NY DOS is active entities only.</strong> Dissolved corporations are missing (survivorship bias).</li>
+      <li><strong>O1 is a person on that owner’s filing</strong>, not a beneficial owner. Registered agents are denied. Cluster 1 (590 owners) is a likely false merge on shared officer names.</li>
+      <li><strong>Gold correction</strong> uses a stratified name sample, not a simple random sample of lots. The same name-level matrix is applied to unit-weighted shares.</li>
+      <li><strong>GitHub-hosted refresh cannot cold-pull ACRIS or NY DOS</strong> (ADR 0009). Monthly Actions may update PLUTO stock and reuse the last flow and opacity series.</li>
+      <li><strong>No individual names or addresses</strong> are published. There are no entity or portfolio pages.</li>
+    </ul>
+  </main>
+  <footer class="site">
+    <div class="wrap">Honest limits are also in the repository README.</div>
+  </footer>
+</body>
+</html>

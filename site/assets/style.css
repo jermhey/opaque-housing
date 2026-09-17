@@ -1,0 +1,365 @@
+:root {
+  --ink: #1c1917;
+  --muted: #57534e;
+  --paper: #f7f4ef;
+  --card: #fffdf8;
+  --line: #d6d0c4;
+  --accent: #9a3412;
+  --accent-soft: #ffedd5;
+  --ok: #3f6212;
+  --warn: #854d0e;
+  --max: 72rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  line-height: 1.5;
+}
+
+body {
+  min-height: 100vh;
+}
+
+a {
+  color: var(--accent);
+}
+
+a:hover {
+  color: #7c2d12;
+}
+
+.wrap {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 1.25rem 3rem;
+}
+
+header.site {
+  border-bottom: 1px solid var(--line);
+  background: var(--card);
+}
+
+header.site .wrap {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.kicker {
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 0.25rem;
+}
+
+header.site h1 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+header.site h1 a {
+  color: inherit;
+  text-decoration: none;
+}
+
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  margin-top: 0.75rem;
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 0.88rem;
+}
+
+nav a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+nav a[aria-current="page"],
+nav a:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
+.lede {
+  font-size: 1.25rem;
+  max-width: 42rem;
+}
+
+.note,
+.caveat {
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 0.92rem;
+  color: var(--muted);
+  max-width: 46rem;
+}
+
+.stat-grid,
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0.85rem;
+  margin: 1.5rem 0;
+}
+
+.stat,
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  padding: 1rem 1.1rem;
+}
+
+.stat .label,
+.card .label {
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.stat .value {
+  font-size: 2rem;
+  line-height: 1.1;
+  margin: 0.35rem 0;
+}
+
+.stat .sub {
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: end;
+  margin: 1rem 0;
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+}
+
+.toolbar label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.toolbar input,
+.toolbar select {
+  font: inherit;
+  color: var(--ink);
+  background: var(--card);
+  border: 1px solid var(--line);
+  padding: 0.35rem 0.5rem;
+  min-width: 12rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 0.88rem;
+  background: var(--card);
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.45rem 0.55rem;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+
+th {
+  font-size: 0.75rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+th[data-sort][aria-sort="ascending"]::after {
+  content: " ↑";
+}
+
+th[data-sort][aria-sort="descending"]::after {
+  content: " ↓";
+}
+
+td.num,
+th.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+}
+
+.borough-map {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-areas:
+    ". bx qn"
+    "mn bk qn2"
+    ". si .";
+  gap: 0.6rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.boro {
+  border: 1px solid var(--line);
+  background: var(--accent-soft);
+  min-height: 6.2rem;
+  padding: 0.7rem;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+
+.boro[data-borough="Bronx"] {
+  grid-area: bx;
+}
+
+.boro[data-borough="Manhattan"] {
+  grid-area: mn;
+}
+
+.boro[data-borough="Brooklyn"] {
+  grid-area: bk;
+}
+
+.boro[data-borough="Queens"] {
+  grid-area: qn;
+}
+
+.boro[data-borough="Staten Island"] {
+  grid-area: si;
+}
+
+.boro .name {
+  font-weight: 600;
+}
+
+.boro .share {
+  font-size: 1.4rem;
+}
+
+.boro[aria-pressed="true"] {
+  outline: 2px solid var(--ink);
+}
+
+.chart {
+  width: 100%;
+  height: auto;
+  background: var(--card);
+  border: 1px solid var(--line);
+}
+
+.legend {
+  display: flex;
+  gap: 1rem;
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 0.85rem;
+  margin: 0.6rem 0 1.2rem;
+}
+
+.legend span::before {
+  content: "";
+  display: inline-block;
+  width: 0.8rem;
+  height: 0.25rem;
+  margin-right: 0.35rem;
+  vertical-align: middle;
+  background: currentColor;
+}
+
+.legend .sale {
+  color: var(--ink);
+}
+
+.legend .unit {
+  color: var(--accent);
+}
+
+.bar-row {
+  display: grid;
+  grid-template-columns: 11rem 1fr 4.2rem;
+  gap: 0.6rem;
+  align-items: center;
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 0.88rem;
+  margin: 0.35rem 0;
+}
+
+.bar-track {
+  background: #e7e0d4;
+  height: 0.7rem;
+}
+
+.bar-fill {
+  background: var(--accent);
+  height: 100%;
+}
+
+footer.site {
+  border-top: 1px solid var(--line);
+  padding: 1.2rem 0 2rem;
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+h2 {
+  font-size: 1.45rem;
+  margin: 2rem 0 0.6rem;
+}
+
+h3 {
+  font-size: 1.1rem;
+  margin: 1.4rem 0 0.4rem;
+}
+
+ul.plain {
+  padding-left: 1.1rem;
+}
+
+.download li {
+  margin: 0.35rem 0;
+}
+
+@media (max-width: 720px) {
+  .borough-map {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "mn bx"
+      "bk qn"
+      "si si";
+  }
+
+  .bar-row {
+    grid-template-columns: 1fr;
+  }
+
+  header.site h1 {
+    font-size: 1.15rem;
+  }
+}

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Data freshness — Opaque residential ownership</title>
+  <link rel="stylesheet" href="./assets/style.css">
+</head>
+<body data-page="freshness">
+  <header class="site">
+    <div class="wrap">
+      <p class="kicker">Investigation · New York City</p>
+      <h1><a href="./index.html">Opaque residential ownership</a></h1>
+      <nav>
+        <a href="./index.html">Findings</a>
+        <a href="./neighborhoods.html">Neighborhoods</a>
+        <a href="./trends.html">Trends</a>
+        <a href="./buildings.html">Building types</a>
+        <a href="./methodology.html">Methodology</a>
+        <a href="./dictionary.html">Dictionary</a>
+        <a href="./limitations.html">Limitations</a>
+        <a href="./freshness.html" aria-current="page">Freshness</a>
+        <a href="./data.html">Downloads</a>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap">
+    <h2>Data freshness</h2>
+    <p class="note">Timestamps come from sanitized run manifests. Local file paths are stripped before publish.</p>
+    <div class="stat-grid">
+      <article class="stat">
+        <div class="label">This publish</div>
+        <p class="value" id="fresh-generated" style="font-size:1.1rem">—</p>
+        <p class="sub">UTC clock on <code>oh publish</code>.</p>
+      </article>
+      <article class="stat">
+        <div class="label">PLUTO version</div>
+        <p class="value" id="fresh-pluto">—</p>
+        <p class="sub">Stock finished <span id="fresh-stock-time">—</span>. Rules <span id="fresh-rules">—</span>.</p>
+      </article>
+    </div>
+    <p id="fresh-reused" class="note"></p>
+    <p id="fresh-flow" class="note"></p>
+    <p id="fresh-opacity" class="note"></p>
+    <p class="caveat">A GitHub-hosted monthly job may ingest PLUTO and tract–NTA, then rebuild stock. It does not pull HPD, ACRIS Parties (~25 million rows), or the 4.3 million-row NY DOS extract. When those files are absent, flow and opacity stay at the last full local run.</p>
+  </main>
+  <footer class="site">
+    <div class="wrap">See ADR 0009 for the refresh boundary.</div>
+  </footer>
+  <script src="./assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Trends — Opaque residential ownership</title>
+  <link rel="stylesheet" href="./assets/style.css">
+</head>
+<body data-page="trends">
+  <header class="site">
+    <div class="wrap">
+      <p class="kicker">Investigation · New York City</p>
+      <h1><a href="./index.html">Opaque residential ownership</a></h1>
+      <nav>
+        <a href="./index.html">Findings</a>
+        <a href="./neighborhoods.html">Neighborhoods</a>
+        <a href="./trends.html" aria-current="page">Trends</a>
+        <a href="./buildings.html">Building types</a>
+        <a href="./methodology.html">Methodology</a>
+        <a href="./dictionary.html">Dictionary</a>
+        <a href="./limitations.html">Limitations</a>
+        <a href="./freshness.html">Freshness</a>
+        <a href="./data.html">Downloads</a>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap">
+    <h2>Entity buyers over time</h2>
+    <p class="lede" id="trend-lede">Loading…</p>
+    <p class="legend"><span class="sale">Sale share</span><span class="unit">Unit-weighted share</span></p>
+    <h3>All private residential sales</h3>
+    <svg id="chart-all" class="chart" role="img" aria-label="Entity buyer share by year"></svg>
+    <h3>1–4 family and condo billing lots</h3>
+    <svg id="chart-sfr" class="chart" role="img" aria-label="Entity buyer share for houses and condos"></svg>
+    <p class="caveat">LLC membership-interest sales generate no deed, so flow undercounts entity turnover. $0-amount deeds are out of the headline series. Staten Island is almost absent: its ACRIS rows in this window are mostly RPTT, not DEED. Historical stock is only lots with a post-2003 named sale deed, not the full city.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Year</th>
+            <th class="num">Sales</th>
+            <th class="num">Entity sale share</th>
+            <th class="num">Entity unit share</th>
+            <th class="num">Reconstructed year-end unit share</th>
+          </tr>
+        </thead>
+        <tbody id="trend-body"></tbody>
+      </table>
+    </div>
+  </main>
+  <footer class="site">
+    <div class="wrap">Window: recorded years 2003–2025 (ADR 0006). Sensitivity table is in the downloads.</div>
+  </footer>
+  <script src="./assets/app.js"></script>
+</body>
+</html>

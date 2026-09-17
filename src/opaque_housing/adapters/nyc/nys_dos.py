@@ -62,9 +62,7 @@ class NycDosAdapter:
         self.source_version = source_version
         self.filter_counts: list[FilterCount] = []
 
-    def load_entities(
-        self, path: Path, owner_keys: pl.DataFrame | None = None
-    ) -> pl.DataFrame:
+    def load_entities(self, path: Path, owner_keys: pl.DataFrame | None = None) -> pl.DataFrame:
         raw = _normalize_columns(_read_table(path))
         missing = [col for col in REQUIRED if col not in raw.columns]
         if missing:
@@ -151,9 +149,7 @@ class NycDosAdapter:
             return entities.head(0)
         keys = owner_keys.select("owner_key").unique()
         matched = entities.join(keys, on="owner_key", how="inner")
-        self.filter_counts.append(
-            FilterCount("nys_dos", "name_match", rows_in, matched.height)
-        )
+        self.filter_counts.append(FilterCount("nys_dos", "name_match", rows_in, matched.height))
         return matched
 
 

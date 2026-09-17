@@ -57,6 +57,21 @@ from opaque_housing.metrics.opacity import (
     opacity_headlines,
     top_cluster_review,
 )
+from opaque_housing.metrics.publish import (
+    ALLOWED_FILES,
+    FORBIDDEN_FILENAMES,
+    REQUIRED_FILES,
+    PublishError,
+    assemble_site_payload,
+    assert_allowed_filename,
+    assert_safe_columns,
+    assert_stock_stable,
+    borough_table,
+    neighborhood_table,
+    nta_name_lookup,
+    reattach_correction,
+    sanitize_manifest,
+)
 from opaque_housing.metrics.sale_filter import (
     SaleFilterConfig,
     apply_sale_filter,
@@ -65,7 +80,7 @@ from opaque_housing.metrics.sale_filter import (
 from opaque_housing.metrics.stock import headline_shares, private_residential, stock_breakdowns
 from opaque_housing.opacity.build import attach_parcel_owners, run_opacity
 from opaque_housing.opacity.tiers import OPACITY_VERSION
-from opaque_housing.paths import derived_dir, latest_raw_file, raw_dir
+from opaque_housing.paths import derived_dir, latest_raw_file, published_dir, raw_dir
 from opaque_housing.quality.manifest import RunManifest
 from opaque_housing.resolve.cluster import component_sizes
 from opaque_housing.resolve.denylist import ADDRESS_DEGREE_THRESHOLD, seed_agent_names
@@ -536,10 +551,43 @@ def eval_cmd(
 
 
 @app.command()
-def publish() -> None:
-    """Publish aggregate parquet/csv. Not wired in Milestone 1."""
-    typer.echo("publish is not implemented", err=True)
-    raise typer.Exit(code=1)
+def publish(
+    metro: Annotated[str, typer.Option(help="Metro id, e.g. nyc.")] = "nyc",
+    derived: Annotated[Path | None, typer.Option(help="Derived directory from build/flow.")] = None,
+    out_dir: Annotated[Path | None, typer.Option(help="Public aggregate directory.")] = None,
+    site_data: Annotated[
+        Path | None, typer.Option(help="Optional copy of public files for the static site.")
+    ] = Path("site/data"),
+    reuse_dir: Annotated[
+        Path | None,
+        typer.Option(help="Prior published dir for flow/opacity reuse. Default: --out-dir."),
+    ] = None,
+    equiv: Annotated[Path | None, typer.Option(help="Tract-NTA equivalency CSV.")] = None,
+    max_stock_change: Annotated[
+        float, typer.Option(help="Fail if private parcel count moves more than this.")
+    ] = 0.20,
+) -> None:
+    """Copy allowlisted aggregates. Never writes names, addresses, or owner keys."""
+    if metro != "nyc":
+        typer.echo(f"publish is only wired for nyc (got {metro})", err=True)
+        raise typer.Exit(code=1)
+    src = derived or derived_dir(metro)
+    dest = out_dir or published_dir(metro)
+    prior = reuse_dir or dest
+    try:
+        _publish_aggregates(
+            metro=metro,
+            derived=src,
+            dest=dest,
+            prior=prior,
+            site_data=site_data,
+            equiv=equiv or latest_raw_file(metro, "tract_nta", NYC_SOURCES["tract_nta"].filename),
+            max_stock_change=max_stock_change,
+        )
+    except PublishError as exc:
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(code=1) from exc
+    typer.echo(f"wrote {dest}")
 
 
 @app.command()
@@ -706,9 +754,7 @@ def _cluster_review_markdown(
         return "\n".join(lines)
     for index, row in enumerate(review, start=1):
         names_raw = row["entity_names"]
-        names = (
-            ", ".join(str(name) for name in names_raw) if isinstance(names_raw, list) else ""
-        )
+        names = ", ".join(str(name) for name in names_raw) if isinstance(names_raw, list) else ""
         flag = f" **{row['flag']}**" if row.get("flag") else ""
         lines.extend(
             [
@@ -795,3 +841,178 @@ def _write_queue(path: Path, sample: pl.DataFrame) -> None:
         out = out.with_columns(pl.col("name_normalized").alias("name_raw"))
     out = out.with_columns(pl.lit("").alias("label"), pl.lit("").alias("labeled_at"))
     out.write_csv(path)
+
+
+def _read_json(path: Path) -> dict[str, object]:
+    payload = json.loads(path.read_text())
+    if not isinstance(payload, dict):
+        raise PublishError(f"{path} is not a JSON object")
+    return payload
+
+
+def _optional_csv(path: Path | None) -> pl.DataFrame | None:
+    if path is None or not path.exists():
+        return None
+    table = pl.read_csv(path, infer_schema_length=0)
+    assert_safe_columns(table.columns, origin=path.name)
+    return table
+
+
+def _resolve_publish_file(name: str, derived: Path, prior: Path) -> tuple[Path | None, str]:
+    assert_allowed_filename(name)
+    current = derived / name
+    if current.exists():
+        return current, "derived"
+    reused = prior / name
+    if reused.exists():
+        return reused, "reused"
+    return None, "missing"
+
+
+def _write_json(path: Path, payload: object) -> None:
+    path.write_text(json.dumps(payload, indent=2) + "\n")
+
+
+def _publish_aggregates(
+    *,
+    metro: str,
+    derived: Path,
+    dest: Path,
+    prior: Path,
+    site_data: Path | None,
+    equiv: Path | None,
+    max_stock_change: float,
+) -> None:
+    for name in FORBIDDEN_FILENAMES:
+        if (dest / name).exists():
+            raise PublishError(f"{dest / name} must not be published")
+    origins: dict[str, str] = {}
+    resolved: dict[str, Path] = {}
+    for name in sorted(ALLOWED_FILES):
+        path, origin = _resolve_publish_file(name, derived, prior)
+        if path is None:
+            if name in REQUIRED_FILES:
+                raise PublishError(f"missing required aggregate {name}")
+            continue
+        origins[name] = origin
+        resolved[name] = path
+
+    headlines = _read_json(resolved["headlines.json"])
+    prior_headlines: dict[str, object] | None = None
+    prior_head_path = prior / "headlines.json"
+    current_head = resolved["headlines.json"].resolve()
+    if prior_head_path.exists() and prior_head_path.resolve() != current_head:
+        prior_headlines = _read_json(prior_head_path)
+    headlines = reattach_correction(headlines, prior_headlines)
+
+    private = headlines.get("private_all_entity_only")
+    current_parcels = 0
+    if isinstance(private, dict) and "parcels" in private:
+        current_parcels = int(private["parcels"])
+    previous_parcels = None
+    if prior_headlines:
+        prior_private = prior_headlines.get("private_all_entity_only")
+        if isinstance(prior_private, dict) and "parcels" in prior_private:
+            previous_parcels = int(prior_private["parcels"])
+    assert_stock_stable(previous_parcels, current_parcels, max_change=max_stock_change)
+
+    nta_type = pl.read_csv(resolved["stock_by_nta_type.csv"], infer_schema_length=0)
+    assert_safe_columns(nta_type.columns, origin="stock_by_nta_type.csv")
+    names = None
+    if equiv is not None and equiv.exists():
+        names = nta_name_lookup(pl.read_csv(equiv, infer_schema_length=0))
+        assert_safe_columns(names.columns, origin="nta_names")
+    neighborhoods = neighborhood_table(nta_type, names)
+    boroughs = None
+    borough_path = resolved.get("stock_by_borough_type.csv")
+    if borough_path is not None:
+        boroughs = borough_table(pl.read_csv(borough_path, infer_schema_length=0))
+
+    dest.mkdir(parents=True, exist_ok=True)
+    for name, path in resolved.items():
+        target = dest / name
+        if name.endswith(".json"):
+            payload = _read_json(path)
+            if name.endswith("_manifest.json") or name == "run_manifest.json":
+                payload = sanitize_manifest(payload)
+            if name == "headlines.json":
+                payload = headlines
+            _write_json(target, payload)
+        else:
+            table = pl.read_csv(path, infer_schema_length=0)
+            assert_safe_columns(table.columns, origin=name)
+            table.write_csv(target)
+
+    neighborhoods.write_csv(dest / "neighborhoods.csv")
+    if names is not None:
+        names.write_csv(dest / "nta_names.csv")
+
+    flow_hl = (
+        _read_json(resolved["flow_headlines.json"]) if "flow_headlines.json" in resolved else None
+    )
+    opacity_hl = (
+        _read_json(resolved["opacity_headlines.json"])
+        if "opacity_headlines.json" in resolved
+        else None
+    )
+    consistency = (
+        _read_json(resolved["consistency.json"]) if "consistency.json" in resolved else None
+    )
+    run_manifest = (
+        sanitize_manifest(_read_json(resolved["run_manifest.json"]))
+        if ("run_manifest.json" in resolved)
+        else {}
+    )
+    freshness = {
+        "metro": metro,
+        "generated_at": datetime.now(tz=UTC).isoformat(),
+        "stock": run_manifest,
+        "reused": {name: origin for name, origin in origins.items() if origin == "reused"},
+        "flow_present": "flow_headlines.json" in resolved,
+        "opacity_present": "opacity_headlines.json" in resolved,
+        "notes": [
+            "GitHub-hosted refresh updates PLUTO + tract–NTA stock only (ADR 0009).",
+            "Flow and opacity are reused from the last full local run when missing.",
+        ],
+    }
+    _write_json(dest / "freshness.json", freshness)
+    payload = assemble_site_payload(
+        metro=metro,
+        generated_at=str(freshness["generated_at"]),
+        headlines=headlines,
+        neighborhoods=neighborhoods,
+        boroughs=boroughs,
+        stock_by_class=_optional_csv(resolved.get("stock_by_class.csv")),
+        stock_by_type=_optional_csv(resolved.get("stock_by_building_type.csv")),
+        flow_headlines=flow_hl,
+        flow_by_year=_optional_csv(resolved.get("flow_by_year.csv")),
+        flow_sfr_condo=_optional_csv(resolved.get("flow_sfr_condo_by_year.csv")),
+        flow_sensitivity=_optional_csv(resolved.get("flow_sensitivity.csv")),
+        history_by_year=_optional_csv(resolved.get("history_by_year.csv")),
+        consistency=consistency,
+        opacity_headlines=opacity_hl,
+        opacity_by_type=_optional_csv(resolved.get("opacity_by_type.csv")),
+        freshness=freshness,
+        reused={name: origin for name, origin in origins.items() if origin == "reused"},
+    )
+    _write_json(dest / "site.json", payload)
+    _write_json(
+        dest / "publish_manifest.json",
+        {"metro": metro, "origins": origins, "files": sorted(p.name for p in dest.iterdir())},
+    )
+
+    for path in dest.iterdir():
+        if path.name in FORBIDDEN_FILENAMES:
+            raise PublishError(f"refusing to leave {path.name} in {dest}")
+        if path.suffix == ".csv":
+            assert_safe_columns(pl.read_csv(path, n_rows=0).columns, origin=path.name)
+        elif path.suffix == ".json":
+            dumped = json.loads(path.read_text())
+            if isinstance(dumped, dict):
+                assert_safe_columns(list(dumped.keys()), origin=path.name)
+
+    if site_data is not None:
+        site_data.mkdir(parents=True, exist_ok=True)
+        for path in dest.iterdir():
+            target = site_data / path.name
+            target.write_bytes(path.read_bytes())

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Neighborhoods — Opaque residential ownership</title>
+  <link rel="stylesheet" href="./assets/style.css">
+</head>
+<body data-page="neighborhoods">
+  <header class="site">
+    <div class="wrap">
+      <p class="kicker">Investigation · New York City</p>
+      <h1><a href="./index.html">Opaque residential ownership</a></h1>
+      <nav>
+        <a href="./index.html">Findings</a>
+        <a href="./neighborhoods.html" aria-current="page">Neighborhoods</a>
+        <a href="./trends.html">Trends</a>
+        <a href="./buildings.html">Building types</a>
+        <a href="./methodology.html">Methodology</a>
+        <a href="./dictionary.html">Dictionary</a>
+        <a href="./limitations.html">Limitations</a>
+        <a href="./freshness.html">Freshness</a>
+        <a href="./data.html">Downloads</a>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap">
+    <h2>Entity share by neighborhood</h2>
+    <p class="note">2020 NTA geography from DCP <code>hm78-6dwm</code>. Cells with fewer than 10 residential units have shares suppressed. Click a borough to filter. This is not a parcel map and does not list owners.</p>
+    <div id="borough-map" class="borough-map"></div>
+    <div class="toolbar">
+      <label>Search <input id="nta-search" type="search" placeholder="Name or NTA code"></label>
+      <label>Borough
+        <select id="nta-borough">
+          <option value="">All boroughs</option>
+        </select>
+      </label>
+      <label><input id="nta-small" type="checkbox"> Show suppressed cells</label>
+      <p class="note" id="nta-count"></p>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th data-sort="nta_name">Neighborhood</th>
+            <th data-sort="nta">NTA</th>
+            <th data-sort="borough">Borough</th>
+            <th class="num" data-sort="units">Units</th>
+            <th class="num" data-sort="entity_unit_share">Entity unit share</th>
+            <th class="num" data-sort="entity_parcel_share">Entity lot share</th>
+            <th class="num" data-sort="sfr_condo_entity_unit_share">1–4 + condo unit share</th>
+            <th>Flag</th>
+          </tr>
+        </thead>
+        <tbody id="nta-body"></tbody>
+      </table>
+    </div>
+  </main>
+  <footer class="site">
+    <div class="wrap">Aggregates only, NTA or coarser. No individual names or addresses.</div>
+  </footer>
+  <script src="./assets/app.js"></script>
+</body>
+</html>

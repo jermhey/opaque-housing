@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Methodology — Opaque residential ownership</title>
+  <link rel="stylesheet" href="./assets/style.css">
+</head>
+<body>
+  <header class="site">
+    <div class="wrap">
+      <p class="kicker">Investigation · New York City</p>
+      <h1><a href="./index.html">Opaque residential ownership</a></h1>
+      <nav>
+        <a href="./index.html">Findings</a>
+        <a href="./neighborhoods.html">Neighborhoods</a>
+        <a href="./trends.html">Trends</a>
+        <a href="./buildings.html">Building types</a>
+        <a href="./methodology.html" aria-current="page">Methodology</a>
+        <a href="./dictionary.html">Dictionary</a>
+        <a href="./limitations.html">Limitations</a>
+        <a href="./freshness.html">Freshness</a>
+        <a href="./data.html">Downloads</a>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap">
+    <h2>Methodology</h2>
+    <p class="lede">The pipeline classifies the recorded owner name on each residential tax lot, then measures stock, sales, and whether a natural person appears on linked filings. Full rules and ADRs live in the repository.</p>
+
+    <h3>Owner classes</h3>
+    <p>One class per owner record. First matching rule wins (<code>RULES_VERSION 2026-09-16.2</code>). Entity-owned = <code>llc</code> + <code>corp</code> + <code>partnership</code>. Trusts are a sensitivity series and are not in the headline. Public and nonprofit owners leave the private denominator before shares are computed. Co-op buildings are identified by official building class, not by name.</p>
+
+    <h3>Stock</h3>
+    <p>Current snapshot: DCP PLUTO <code>64uk-42ks</code> version 26v2, residential lots only (ADR 0003). Neighborhoods are 2020 NTAs via <code>hm78-6dwm</code> (<code>bct2020</code> → <code>boroct2020</code>). Shares are parcel-weighted and unit-weighted. NTA cells with fewer than 10 residential units have shares nulled.</p>
+    <p>Corrected headlines use Rogan–Gladen on the held-out gold test split (n=305). Citywide <code>p_hat</code> is treated as a census; uncertainty is from gold sensitivity and specificity only.</p>
+
+    <h3>Flow and history</h3>
+    <p>ACRIS Master / Legals / Parties. Headline sale deeds: <code>DEED</code>, <code>DEED, RC</code>, <code>DEEDP</code>, <code>DEEDO</code>, <code>REIT</code>, <code>ASTU</code> (ADR 0005). Flow keeps <code>document_amt ≥ $10,000</code>. History uses all named sale deeds. Coverage window is recorded years 2003–2025 (ADR 0006). Buyer class is name-only. Property borough is Legals <code>borough</code>.</p>
+
+    <h3>Opacity</h3>
+    <p>O1 if HPD HeadOfficer / IndividualOwner / JointOwner / Officer / Shareholder has a first and last name, or a NY DOS chairman name classifies as an individual. O2 if a cluster parent is O1. O4 if the chain is entities only. O3 is the residual no-person set (ADR 0007). Clustering uses entity owner keys only; Agent / SiteManager / Lessee are never person-links or exact-name hubs; addresses are evidence, not edges (ADR 0008).</p>
+
+    <h3>What is published</h3>
+    <p>Citywide and NTA-or-coarser aggregates. <code>oh publish</code> refuses owner keys, person names, addresses, and parcel files. There are no entity or portfolio pages.</p>
+
+    <p class="note">See <a href="https://github.com/jermhey/opaque-housing/blob/main/docs/methodology.md">docs/methodology.md</a> and <a href="https://github.com/jermhey/opaque-housing/tree/main/docs/decisions">ADRs</a>.</p>
+  </main>
+  <footer class="site">
+    <div class="wrap">This page is a summary. The repository is the specification.</div>
+  </footer>
+</body>
+</html>

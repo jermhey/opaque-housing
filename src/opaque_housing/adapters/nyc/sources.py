@@ -35,8 +35,7 @@ class SourceSpec:
     @property
     def csv_url(self) -> str:
         url = (
-            f"{self.host}/resource/{self.dataset_id}.csv"
-            f"?$select={self.select}&$limit={self.limit}"
+            f"{self.host}/resource/{self.dataset_id}.csv?$select={self.select}&$limit={self.limit}"
         )
         if self.where:
             url += f"&$where={quote(self.where, safe=",()'>=<* ")}"
@@ -107,10 +106,7 @@ ACRIS_SOURCES: dict[str, SourceSpec] = {
 HPD_REGISTRATIONS = SourceSpec(
     dataset_id="tesw-yqqr",
     name="hpd_registrations",
-    select=(
-        "registrationid,buildingid,boroid,block,lot,"
-        "lastregistrationdate,registrationenddate"
-    ),
+    select=("registrationid,buildingid,boroid,block,lot,lastregistrationdate,registrationenddate"),
     limit=1_000_000,
     filename="tesw-yqqr.csv",
 )

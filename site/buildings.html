@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Building types — Opaque residential ownership</title>
+  <link rel="stylesheet" href="./assets/style.css">
+</head>
+<body data-page="buildings">
+  <header class="site">
+    <div class="wrap">
+      <p class="kicker">Investigation · New York City</p>
+      <h1><a href="./index.html">Opaque residential ownership</a></h1>
+      <nav>
+        <a href="./index.html">Findings</a>
+        <a href="./neighborhoods.html">Neighborhoods</a>
+        <a href="./trends.html">Trends</a>
+        <a href="./buildings.html" aria-current="page">Building types</a>
+        <a href="./methodology.html">Methodology</a>
+        <a href="./dictionary.html">Dictionary</a>
+        <a href="./limitations.html">Limitations</a>
+        <a href="./freshness.html">Freshness</a>
+        <a href="./data.html">Downloads</a>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap">
+    <h2>Entity share by building type</h2>
+    <p class="note">Unit-weighted share of private residential lots whose recorded owner is an LLC, corporation, or partnership. Co-op buildings are a separate class and are not treated as opaque.</p>
+    <div id="type-bars"></div>
+    <h2>Opacity tiers among entity-owned units</h2>
+    <p class="note">O1 = a natural person is named on that owner’s HPD or DOS record. O2 = no person on this owner, but a cluster parent is O1. O4 = linked records point only to other entities. O3 = residual no-person. Trusts have no tier.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Building type</th>
+            <th class="num">O1</th>
+            <th class="num">O2</th>
+            <th class="num">O3</th>
+            <th class="num">O4</th>
+          </tr>
+        </thead>
+        <tbody id="opacity-body"></tbody>
+      </table>
+    </div>
+  </main>
+  <footer class="site">
+    <div class="wrap">Condo rows are PLUTO billing lots, not unit owners (ADR 0002).</div>
+  </footer>
+  <script src="./assets/app.js"></script>
+</body>
+</html>

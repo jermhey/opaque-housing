@@ -172,9 +172,9 @@ class NycHpdAdapter:
             pl.Series("is_care_of", care_of),
             pl.Series("person_name_normalized", person_names),
         ).with_columns(
-            pl.col("address_normalized").map_elements(address_key, return_dtype=pl.Utf8).alias(
-                "address_key"
-            ),
+            pl.col("address_normalized")
+            .map_elements(address_key, return_dtype=pl.Utf8)
+            .alias("address_key"),
             pl.col("person_name_normalized")
             .map_elements(lambda name: owner_key(name) if name else "", return_dtype=pl.Utf8)
             .alias("person_key"),
@@ -190,14 +190,10 @@ class NycHpdAdapter:
             name_col="corporation_name_normalized",
             key_col="corporation_owner_key",
         )
-        self.filter_counts.append(
-            FilterCount("hpd_contacts", "loaded", rows_in, contacts.height)
-        )
+        self.filter_counts.append(FilterCount("hpd_contacts", "loaded", rows_in, contacts.height))
         return contacts
 
-    def contacts_on_latest(
-        self, contacts: pl.DataFrame, latest: pl.DataFrame
-    ) -> pl.DataFrame:
+    def contacts_on_latest(self, contacts: pl.DataFrame, latest: pl.DataFrame) -> pl.DataFrame:
         rows_in = contacts.height
         if contacts.is_empty() or latest.is_empty():
             self.filter_counts.append(

@@ -1,0 +1,96 @@
+{
+  "metro_id": "nyc",
+  "started_at": "2026-09-17T17:59:55.383617+00:00",
+  "finished_at": "2026-09-17T18:01:32.896050+00:00",
+  "source_versions": {
+    "acris": "open-data-2026-09-17",
+    "rules": "2026-09-16.2"
+  },
+  "rules_version": "2026-09-16.2",
+  "filter_counts": [
+    {
+      "stage": "acris_master",
+      "rule_id": "snapshot_dedup_document_id",
+      "rows_in": 1642007,
+      "rows_out": 1638258
+    },
+    {
+      "stage": "acris_legals",
+      "rule_id": "snapshot_dedup_document_lot",
+      "rows_in": 12544492,
+      "rows_out": 12420726
+    },
+    {
+      "stage": "acris_parties",
+      "rule_id": "snapshot_dedup_party",
+      "rows_in": 25464157,
+      "rows_out": 25387936
+    },
+    {
+      "stage": "acris_parties",
+      "rule_id": "party_type_grantor_grantee",
+      "rows_in": 25387936,
+      "rows_out": 25341311
+    },
+    {
+      "stage": "sale_filter",
+      "rule_id": "sale_deed_type",
+      "rows_in": 1473135,
+      "rows_out": 1473135
+    },
+    {
+      "stage": "sale_filter",
+      "rule_id": "named_grantee",
+      "rows_in": 1473135,
+      "rows_out": 1473135
+    },
+    {
+      "stage": "sale_filter",
+      "rule_id": "min_consideration",
+      "rows_in": 1473135,
+      "rows_out": 923819
+    },
+    {
+      "stage": "flow_residential_join",
+      "rule_id": "pluto_or_pad_residential",
+      "rows_in": 923819,
+      "rows_out": 558182
+    },
+    {
+      "stage": "coverage_window",
+      "rule_id": "recorded_year_2003_2025",
+      "rows_in": 567206,
+      "rows_out": 555100
+    },
+    {
+      "stage": "sale_filter",
+      "rule_id": "sale_deed_type",
+      "rows_in": 1638258,
+      "rows_out": 1473996
+    },
+    {
+      "stage": "sale_filter",
+      "rule_id": "named_grantee",
+      "rows_in": 1473996,
+      "rows_out": 1473135
+    },
+    {
+      "stage": "sale_filter",
+      "rule_id": "min_consideration",
+      "rows_in": 1473135,
+      "rows_out": 1473135
+    },
+    {
+      "stage": "flow_residential_join",
+      "rule_id": "pluto_or_pad_residential",
+      "rows_in": 1473135,
+      "rows_out": 990195
+    }
+  ],
+  "notes": [
+    "flow uses sale_deed + named grantee + consideration cut (ADR 0005)",
+    "history uses every sale_deed with a named grantee",
+    "coverage window recorded years 2003-2025 (ADR 0006)",
+    "trusts are not in the entity headline"
+  ]
+}

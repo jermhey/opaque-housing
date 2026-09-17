@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Data dictionary — Opaque residential ownership</title>
+  <link rel="stylesheet" href="./assets/style.css">
+</head>
+<body>
+  <header class="site">
+    <div class="wrap">
+      <p class="kicker">Investigation · New York City</p>
+      <h1><a href="./index.html">Opaque residential ownership</a></h1>
+      <nav>
+        <a href="./index.html">Findings</a>
+        <a href="./neighborhoods.html">Neighborhoods</a>
+        <a href="./trends.html">Trends</a>
+        <a href="./buildings.html">Building types</a>
+        <a href="./methodology.html">Methodology</a>
+        <a href="./dictionary.html" aria-current="page">Dictionary</a>
+        <a href="./limitations.html">Limitations</a>
+        <a href="./freshness.html">Freshness</a>
+        <a href="./data.html">Downloads</a>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap">
+    <h2>Data dictionary</h2>
+    <p class="note">Fields on the public files only. Source extracts keep owner names locally and are not posted.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Field</th><th>Meaning</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>owner_class</code></td><td>One of individual, trust, estate, llc, corp, partnership, coop_corp, hdfc, public, nonprofit_religious, lender_reo, unknown.</td></tr>
+          <tr><td><code>building_type</code></td><td>sfr_1_4, condo_unit, small_mf, large_mf, mixed_use_res, coop_building, other_res.</td></tr>
+          <tr><td><code>class_parcels</code> / <code>class_units</code></td><td>Lots or residential units in that class inside the cell.</td></tr>
+          <tr><td><code>parcels</code> / <code>units</code></td><td>Cell totals (repeated on each class row).</td></tr>
+          <tr><td><code>parcel_share</code> / <code>unit_share</code></td><td>Class count ÷ cell total. Null when <code>suppressed</code>.</td></tr>
+          <tr><td><code>suppressed</code></td><td>True when the cell has fewer than 10 residential units.</td></tr>
+          <tr><td><code>geo_neighborhood</code> / <code>nta</code></td><td>2020 NTA code (e.g. QN0104).</td></tr>
+          <tr><td><code>nta_name</code></td><td>Official NTA name from <code>hm78-6dwm</code>.</td></tr>
+          <tr><td><code>geo_borough</code> / <code>borough</code></td><td>Manhattan, Bronx, Brooklyn, Queens, Staten Island.</td></tr>
+          <tr><td><code>entity_*_share</code></td><td>LLC + corp + partnership as a share of the private cell.</td></tr>
+          <tr><td><code>sfr_condo_*</code></td><td>Same shares restricted to 1–4 family and condo billing lots.</td></tr>
+          <tr><td><code>sale_share</code></td><td>Share of arm’s-length sales with an entity buyer.</td></tr>
+          <tr><td><code>opacity_tier</code></td><td>O1 identifiable, O2 cluster-parent identifiable, O3 residual no-person, O4 entity chain.</td></tr>
+          <tr><td><code>corrected</code> / <code>corrected_lo</code> / <code>corrected_hi</code></td><td>Rogan–Gladen point and bootstrap interval on the test gold split.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+  <footer class="site">
+    <div class="wrap">Source field names are in <a href="https://github.com/jermhey/opaque-housing/blob/main/docs/data_sources.md">docs/data_sources.md</a>.</div>
+  </footer>
+</body>
+</html>

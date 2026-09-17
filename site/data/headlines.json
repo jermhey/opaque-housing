@@ -1,0 +1,132 @@
+{
+  "private_all_entity_only": {
+    "parcels": 768516,
+    "units": 3535741,
+    "entity_parcels": 117994,
+    "entity_units": 1385595,
+    "parcel_share": 0.15353486459618276,
+    "unit_share": 0.3918824936555025
+  },
+  "private_all_entity_plus_trust": {
+    "parcels": 768516,
+    "units": 3535741,
+    "entity_parcels": 172043,
+    "entity_units": 1484609,
+    "parcel_share": 0.2238639143492133,
+    "unit_share": 0.4198862416675882
+  },
+  "sfr_condo_entity_only": {
+    "parcels": 659875,
+    "units": 1220134,
+    "entity_parcels": 51551,
+    "entity_units": 140352,
+    "parcel_share": 0.07812237166129948,
+    "unit_share": 0.1150299885094588
+  },
+  "sfr_condo_entity_plus_trust": {
+    "parcels": 659875,
+    "units": 1220134,
+    "entity_parcels": 102645,
+    "entity_units": 225806,
+    "parcel_share": 0.15555218791437772,
+    "unit_share": 0.18506655826327273
+  },
+  "correction": {
+    "private_all_entity_only": {
+      "unit": {
+        "observed": 0.3918824936555025,
+        "sensitivity": 0.9736842105263158,
+        "specificity": 0.9781659388646288,
+        "n_labeled": 305.0,
+        "corrected": 0.38876753106243894,
+        "corrected_lo": 0.3704884353010384,
+        "corrected_hi": 0.4097464680257959,
+        "n_boot": 1000.0
+      },
+      "parcel": {
+        "observed": 0.15353486459618276,
+        "sensitivity": 0.9736842105263158,
+        "specificity": 0.9781659388646288,
+        "n_labeled": 305.0,
+        "corrected": 0.13836295927996892,
+        "corrected_lo": 0.11888805915600446,
+        "corrected_hi": 0.15486770745607759,
+        "n_boot": 1000.0
+      },
+      "n_labeled": 305,
+      "positive_includes_trust": false
+    },
+    "private_all_entity_plus_trust": {
+      "unit": {
+        "observed": 0.4198862416675882,
+        "sensitivity": 0.956140350877193,
+        "specificity": 0.9790575916230366,
+        "n_labeled": 305.0,
+        "corrected": 0.42658758660659357,
+        "corrected_lo": 0.40612844113941093,
+        "corrected_hi": 0.44888129469862464,
+        "n_boot": 1000.0
+      },
+      "parcel": {
+        "observed": 0.2238639143492133,
+        "sensitivity": 0.956140350877193,
+        "specificity": 0.9790575916230366,
+        "n_labeled": 305.0,
+        "corrected": 0.21698241276038757,
+        "corrected_lo": 0.19533276420117346,
+        "corrected_hi": 0.2348376356408415,
+        "n_boot": 1000.0
+      },
+      "n_labeled": 305,
+      "positive_includes_trust": true
+    },
+    "sfr_condo_entity_only": {
+      "unit": {
+        "observed": 0.1150299885094588,
+        "sensitivity": 0.9736842105263158,
+        "specificity": 0.9781659388646288,
+        "n_labeled": 305.0,
+        "corrected": 0.09791029337309078,
+        "corrected_lo": 0.07746122365605748,
+        "corrected_hi": 0.11416608891633802,
+        "n_boot": 1000.0
+      },
+      "parcel": {
+        "observed": 0.07812237166129948,
+        "sensitivity": 0.9736842105263158,
+        "specificity": 0.9781659388646288,
+        "n_labeled": 305.0,
+        "corrected": 0.05913568492051517,
+        "corrected_lo": 0.03757860226817419,
+        "corrected_hi": 0.0755399921305042,
+        "n_boot": 1000.0
+      },
+      "n_labeled": 305,
+      "positive_includes_trust": false
+    },
+    "sfr_condo_entity_plus_trust": {
+      "unit": {
+        "observed": 0.18506655826327273,
+        "sensitivity": 0.956140350877193,
+        "specificity": 0.9790575916230366,
+        "n_labeled": 305.0,
+        "corrected": 0.17549669693191078,
+        "corrected_lo": 0.1533093387763233,
+        "corrected_hi": 0.19253800640550445,
+        "n_boot": 1000.0
+      },
+      "parcel": {
+        "observed": 0.15555218791437772,
+        "sensitivity": 0.956140350877193,
+        "specificity": 0.9790575916230366,
+        "n_labeled": 305.0,
+        "corrected": 0.14393720668112073,
+        "corrected_lo": 0.12067692084193475,
+        "corrected_hi": 0.1608654021119809,
+        "n_boot": 1000.0
+      },
+      "n_labeled": 305,
+      "positive_includes_trust": true
+    }
+  }
+}

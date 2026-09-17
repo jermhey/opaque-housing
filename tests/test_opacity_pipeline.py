@@ -36,8 +36,7 @@ def test_fixture_pipeline_assigns_o1_and_o4() -> None:
     tagged = attach_opacity(parcels, results)
     entities, _ = entity_owned(tagged)
     by_name = {
-        rec["name_normalized"]: rec["opacity_tier"]
-        for rec in entities.iter_rows(named=True)
+        rec["name_normalized"]: rec["opacity_tier"] for rec in entities.iter_rows(named=True)
     }
     assert by_name["EXAMPLE HOLDINGS LLC"] == OpacityTier.O1.value
     assert by_name["EXAMPLE APARTMENTS LLC"] == OpacityTier.O4.value

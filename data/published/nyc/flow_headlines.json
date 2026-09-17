@@ -1,0 +1,22 @@
+{
+  "window": {
+    "start": 2003,
+    "end": 2025
+  },
+  "private_residential": {
+    "sales": 546257,
+    "units": 2199598,
+    "entity_sales": 132349,
+    "entity_units": 1310337,
+    "sale_share": 0.24228339408007585,
+    "unit_share": 0.5957165809388807
+  },
+  "sfr_condo": {
+    "sales": 473935,
+    "units": 842143,
+    "entity_sales": 79099,
+    "entity_units": 160790,
+    "sale_share": 0.16689841433951913,
+    "unit_share": 0.1909295689686906
+  }
+}

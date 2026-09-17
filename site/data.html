@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Downloads — Opaque residential ownership</title>
+  <link rel="stylesheet" href="./assets/style.css">
+</head>
+<body>
+  <header class="site">
+    <div class="wrap">
+      <p class="kicker">Investigation · New York City</p>
+      <h1><a href="./index.html">Opaque residential ownership</a></h1>
+      <nav>
+        <a href="./index.html">Findings</a>
+        <a href="./neighborhoods.html">Neighborhoods</a>
+        <a href="./trends.html">Trends</a>
+        <a href="./buildings.html">Building types</a>
+        <a href="./methodology.html">Methodology</a>
+        <a href="./dictionary.html">Dictionary</a>
+        <a href="./limitations.html">Limitations</a>
+        <a href="./freshness.html">Freshness</a>
+        <a href="./data.html" aria-current="page">Downloads</a>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap">
+    <h2>Downloadable aggregates</h2>
+    <p class="note">These files are the public allowlist. They do not include owner names, addresses, owner keys, or parcel-level rows.</p>
+    <ul class="download">
+      <li><a href="./data/site.json"><code>site.json</code></a> — bundled payload for this site</li>
+      <li><a href="./data/headlines.json"><code>headlines.json</code></a> — raw and corrected stock shares</li>
+      <li><a href="./data/stock_by_class.csv"><code>stock_by_class.csv</code></a></li>
+      <li><a href="./data/stock_by_building_type.csv"><code>stock_by_building_type.csv</code></a></li>
+      <li><a href="./data/stock_by_borough_type.csv"><code>stock_by_borough_type.csv</code></a></li>
+      <li><a href="./data/stock_by_nta_type.csv"><code>stock_by_nta_type.csv</code></a> — NTA × type × class; small cells suppressed</li>
+      <li><a href="./data/neighborhoods.csv"><code>neighborhoods.csv</code></a> — one row per NTA</li>
+      <li><a href="./data/flow_headlines.json"><code>flow_headlines.json</code></a></li>
+      <li><a href="./data/flow_by_year.csv"><code>flow_by_year.csv</code></a></li>
+      <li><a href="./data/flow_sfr_condo_by_year.csv"><code>flow_sfr_condo_by_year.csv</code></a></li>
+      <li><a href="./data/flow_sensitivity.csv"><code>flow_sensitivity.csv</code></a></li>
+      <li><a href="./data/history_by_year.csv"><code>history_by_year.csv</code></a></li>
+      <li><a href="./data/consistency.json"><code>consistency.json</code></a> — reconstructed current owner vs PLUTO</li>
+      <li><a href="./data/opacity_headlines.json"><code>opacity_headlines.json</code></a></li>
+      <li><a href="./data/opacity_by_type.csv"><code>opacity_by_type.csv</code></a></li>
+      <li><a href="./data/freshness.json"><code>freshness.json</code></a></li>
+    </ul>
+    <p class="caveat">Cite dataset IDs and versions from the freshness file. NYC Open Data and OPEN NY terms apply to the underlying extracts; this site republishes aggregates only.</p>
+  </main>
+  <footer class="site">
+    <div class="wrap">Reproduce with <code>docker run … oh build --metro nyc</code> against a raw-data volume, then <code>oh publish</code>.</div>
+  </footer>
+</body>
+</html>

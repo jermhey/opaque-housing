@@ -1,0 +1,70 @@
+{
+  "entity_owned": {
+    "parcels": 117994,
+    "units": 1385595,
+    "by_tier": {
+      "O1": {
+        "parcels": 78905,
+        "units": 1274734,
+        "parcel_share": 0.6687204434123769,
+        "unit_share": 0.9199903290644091
+      },
+      "O2": {
+        "parcels": 99,
+        "units": 209,
+        "parcel_share": 0.0008390257131718562,
+        "unit_share": 0.00015083772675276687
+      },
+      "O3": {
+        "parcels": 34901,
+        "units": 97647,
+        "parcel_share": 0.29578622641829244,
+        "unit_share": 0.07047297370443745
+      },
+      "O4": {
+        "parcels": 4089,
+        "units": 13005,
+        "parcel_share": 0.03465430445615879,
+        "unit_share": 0.009385859504400636
+      }
+    }
+  },
+  "sfr_condo": {
+    "parcels": 51551,
+    "units": 140352,
+    "by_tier": {
+      "O1": {
+        "parcels": 24987,
+        "units": 89679,
+        "parcel_share": 0.4847044674206126,
+        "unit_share": 0.6389577633378933
+      },
+      "O2": {
+        "parcels": 69,
+        "units": 114,
+        "parcel_share": 0.0013384803398576166,
+        "unit_share": 0.0008122435020519836
+      },
+      "O3": {
+        "parcels": 23451,
+        "units": 44917,
+        "parcel_share": 0.45490873115943437,
+        "unit_share": 0.32003106475148196
+      },
+      "O4": {
+        "parcels": 3044,
+        "units": 5642,
+        "parcel_share": 0.05904832108009544,
+        "unit_share": 0.04019892840857273
+      }
+    }
+  },
+  "clusters": {
+    "entity_owners": 104490,
+    "components": 67367,
+    "largest_owners": 590,
+    "large_components": 2,
+    "dos_matched": 94276,
+    "dos_owner_keys": 104490
+  }
+}

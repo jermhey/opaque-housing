@@ -123,3 +123,19 @@ def write_soda_parquet(
                 parts_dir.rmdir()
             except OSError:
                 pass
+
+
+def fetch_view_meta(dataset_id: str, host: str = "data.cityofnewyork.us") -> dict[str, str]:
+    """Catalog metadata for a Socrata view. Field names verified on 64uk-42ks."""
+    url = f"https://{host}/api/views/{dataset_id}.json"
+    with http_client() as http:
+        response = http.get(url)
+        response.raise_for_status()
+        payload = response.json()
+    return {
+        "dataset_id": str(payload.get("id") or dataset_id),
+        "name": str(payload.get("name") or ""),
+        "rows_updated_at": str(payload.get("rowsUpdatedAt") or ""),
+        "view_last_modified": str(payload.get("viewLastModified") or ""),
+        "description": str(payload.get("description") or ""),
+    }

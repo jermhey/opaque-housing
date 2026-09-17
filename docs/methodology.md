@@ -113,3 +113,7 @@ Entity-owned private residential owners only (`llc` + `corp` + `partnership`). T
 `agent_address_only` is evidence, not a gate. Agent / SiteManager / Lessee names are not O1 and are not person-links.
 
 Portfolio links (ADR 0008): cluster edges are shared O1 persons and HPD `CorporateOwner` exact names, among **entity** owners only. Shared addresses and seed agent names still set `agent_address_only` / the denylist; they are not union-find edges (address + officer mixing collapsed the graph). The top-20 cluster review lists **entity names only**.
+
+## Public aggregates (M4)
+
+`oh publish` copies an allowlist of citywide and NTA-or-coarser files. Parcel extracts, `owner_key`, HPD person names, addresses, and cluster member lists are refused. NTA cells with fewer than 10 units keep `suppressed=true`. The static site reads `site/data/site.json`. GitHub-hosted refresh updates PLUTO stock only; ACRIS and NY DOS are not cold-pulled (ADR 0009).

@@ -1,0 +1,27 @@
+{
+  "metro_id": "nyc",
+  "started_at": "2026-09-17T05:27:16.710173+00:00",
+  "finished_at": "2026-09-17T05:27:29.995002+00:00",
+  "source_versions": {
+    "pluto": "26v2"
+  },
+  "rules_version": "2026-09-16.2",
+  "filter_counts": [
+    {
+      "stage": "pluto_to_parcels",
+      "rule_id": "pluto_residential_only",
+      "rows_in": 858284,
+      "rows_out": 770593
+    },
+    {
+      "stage": "stock_private_denominator",
+      "rule_id": "exclude_public_nonprofit",
+      "rows_in": 770593,
+      "rows_out": 768516
+    }
+  ],
+  "notes": [
+    "raw shares plus gold-set correction",
+    "trusts are not in the entity headline"
+  ]
+}

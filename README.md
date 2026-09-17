@@ -2,7 +2,9 @@
 
 A public, reproducible investigation of how much residential housing is held behind opaque ownership (LLCs, corporations, trusts, shell chains), and whether that share is growing.
 
-This is an investigation, not a product. **Milestone 1** (rules classifier, stock shares, gold labels, raw and corrected headlines), **Milestone 2** (ACRIS flow, reconstructed history, 2003–2025 window), and **Milestone 3** (LLM fallback, HPD + NY DOS, portfolio clusters, O-tiers) are in the repo. Corrected stock shares use the held-out test split only.
+This is an investigation, not a product. **Milestones 1–3** (stock, flow, opacity) and **Milestone 4** (static site, `oh publish`, scheduled stock refresh) are in the repo. Corrected stock shares use the held-out test split only.
+
+Public site (after GitHub Pages is enabled): [https://jermhey.github.io/opaque-housing/](https://jermhey.github.io/opaque-housing/). The site is static HTML reading committed aggregates under `site/data/` (ADR 0009). It is not Evidence.dev.
 
 ## Setup
 
@@ -24,15 +26,24 @@ uv run oh ingest --metro nyc --dataset opacity
 uv run oh build --metro nyc
 uv run oh flow --metro nyc
 uv run oh opacity --metro nyc
+uv run oh publish --metro nyc
 uv run oh label --sample-from data/derived/nyc/parcels_classified.parquet
 uv run oh label
 uv run oh eval --gold eval/gold/ci_dev.csv --split test
 uv run oh eval --gold eval/gold/queue.csv --split test --with-llm
 ```
 
-`oh ingest` writes immutable extracts under `data/raw/nyc/<dataset>/<date>/`. Default `all` is PLUTO + tract–NTA (`64uk-42ks`, `hm78-6dwm`). `--dataset acris` pages Master / Legals / Parties (`bnx9-e6tj`, `8h5j-fqxa`, `636b-3b5g`) for recorded years 2003–2026. `--dataset opacity` pulls HPD registrations + contacts (`tesw-yqqr`, `feu5-w2e2`) and NY DOS active corporations (`n9v6-gdp6` on data.ny.gov). `oh build` classifies residential lots. `oh flow` writes entity-buyer series. `oh opacity` writes O-tier shares, cluster links, and the top-20 entity-name review.
+`oh ingest` writes immutable extracts under `data/raw/nyc/<dataset>/<date>/`. Default `all` is PLUTO + tract–NTA (`64uk-42ks`, `hm78-6dwm`). `--dataset acris` pages Master / Legals / Parties (`bnx9-e6tj`, `8h5j-fqxa`, `636b-3b5g`) for recorded years 2003–2026. `--dataset opacity` pulls HPD registrations + contacts (`tesw-yqqr`, `feu5-w2e2`) and NY DOS active corporations (`n9v6-gdp6` on data.ny.gov). `oh build` classifies residential lots. `oh flow` writes entity-buyer series. `oh opacity` writes O-tier shares, cluster links, and the top-20 entity-name review. `oh publish` copies allowlisted citywide and NTA-or-coarser aggregates into `data/published/nyc/` and `site/data/`. It refuses parcel files, owner keys, person names, and addresses.
 
-Raw and gold-corrected NYC stock shares are in [`docs/milestones/m1-current-stock.md`](docs/milestones/m1-current-stock.md). The gold queue stays local (`uv run oh label`).
+Reproduce stock from a raw-data volume:
+
+```bash
+docker build -t opaque-housing .
+docker run --rm -v "$PWD/data:/app/data" opaque-housing build --metro nyc
+docker run --rm -v "$PWD/data:/app/data" -v "$PWD/site:/app/site" opaque-housing publish --metro nyc
+```
+
+Raw and gold-corrected NYC stock shares are in [`docs/milestones/m1-current-stock.md`](docs/milestones/m1-current-stock.md). M4 site notes are in [`docs/milestones/m4-site-and-refresh.md`](docs/milestones/m4-site-and-refresh.md). The gold queue stays local (`uv run oh label`).
 
 ## Honest limits
 
@@ -45,9 +56,10 @@ Raw and gold-corrected NYC stock shares are in [`docs/milestones/m1-current-stoc
 - **Cluster review never lists HPD person names.** Seed registered-agent names are denied. Address sharing is evidence, not a cluster edge (ADR 0008).
 - **Most entity *units* have a named HPD officer** (large multifamily). Most 1–4 family *entity parcels* do not. Do not quote the citywide O1 unit share as “opaque housing is rare.”
 - **No entity-level or portfolio-level public pages** until an explicit review and sign-off.
-- Full-city refresh size vs. GitHub-hosted runners is not yet measured (an ADR will follow if the monthly job does not fit). M2 pages a 2003–2026 ACRIS slice, not the full 46.6M-row Parties table.
+- **GitHub-hosted refresh cannot cold-pull ACRIS or NY DOS** (ADR 0009). `refresh.yml` may update PLUTO stock monthly and reuse the last published flow and opacity series. A full local run is required to refresh those series.
+- The public URL needs GitHub Pages on this repo plus a working `gh` login to push and enable it. Until that deploy succeeds, serve `site/` locally after `oh publish`.
 - **Flow undercounts LLC membership-interest sales** (no deed) and drops $0-amount deeds from the headline series. Historical stock keeps those $0 sale deeds. See ADR 0005.
-- Docker Desktop is not required for local `make test`; `docker run ... oh build --metro nyc` is a later-milestone target.
+- Docker Desktop is not required for local `make test`. The image entrypoint is `oh`; mount `data/` (and `site/` for publish) as shown above.
 - **PLUTO has no owner mailing address** and stores condos as billing lots, not unit owners. See `docs/data_sources.md`.
 - **Stock snapshots are residential lots only.** Vacant land and non-res uses are dropped in the adapter, with before/after counts.
 

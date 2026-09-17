@@ -25,6 +25,7 @@ def test_help() -> None:
     assert "eval" in result.stdout
     assert "flow" in result.stdout
     assert "opacity" in result.stdout
+    assert "publish" in result.stdout
 
 
 def test_version() -> None:
