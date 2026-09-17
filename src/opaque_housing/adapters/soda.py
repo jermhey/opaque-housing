@@ -15,6 +15,17 @@ SOCRATA_NYC = "https://data.cityofnewyork.us"
 SOCRATA_PAGE = 50_000
 
 
+def _page_frame(page: list[dict[str, Any]]) -> pl.DataFrame:
+    """Coerce a SODA JSON page to strings. Types are mixed across rows."""
+    keys: list[str] = []
+    for row in page:
+        for key in row:
+            if key not in keys:
+                keys.append(key)
+    data = {key: ["" if row.get(key) is None else str(row[key]) for row in page] for key in keys}
+    return pl.DataFrame(data)
+
+
 def iter_soda_pages(
     dataset_id: str,
     *,
@@ -90,11 +101,12 @@ def write_soda_parquet(
                 http=http,
             )
         ):
-            frame = pl.DataFrame(page, infer_schema_length=0)
+            frame = _page_frame(page)
             part = parts_dir / f"{index:05d}.parquet"
             frame.write_parquet(part)
             parts.append(part)
             rows_out += frame.height
+            print(f"  {dataset_id} page {index + 1} rows={rows_out}", flush=True)
         if not parts:
             pl.DataFrame().write_parquet(dest)
         elif len(parts) == 1:
