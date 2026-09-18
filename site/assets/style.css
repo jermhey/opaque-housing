@@ -213,6 +213,14 @@ th.num {
   border: 1px solid var(--line);
 }
 
+.flash {
+  border: 1px solid var(--line);
+  background: var(--accent-soft);
+  padding: 0.7rem 0.9rem;
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 0.9rem;
+}
+
 .borough-map {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;

@@ -1,0 +1,17 @@
+<div class="bar-legend">
+  <span><i class="swatch nyc"></i> {{ left_label }}</span>
+  <span><i class="swatch other"></i> {{ right_label }}</span>
+</div>
+{% for row in bars %}
+<div class="bar-pair">
+  <div class="bar-label">{{ row.label }}</div>
+  <div class="bar-track" title="{{ left_label }} {{ row.reference|pct }}">
+    <div class="bar-fill" style="width: {{ row.reference_width }}%"></div>
+  </div>
+  <div class="bar-pct">{{ row.reference|pct }}</div>
+  <div class="bar-track other" title="{{ right_label }} {{ row.other|pct }}">
+    <div class="bar-fill" style="width: {{ row.other_width }}%"></div>
+  </div>
+  <div class="bar-pct">{{ row.other|pct }}</div>
+</div>
+{% endfor %}

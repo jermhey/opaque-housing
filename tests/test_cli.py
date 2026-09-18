@@ -261,3 +261,111 @@ def test_phl_build_and_publish(tmp_path: Path) -> None:
     assert flowed.exit_code == 0, flowed.stdout + flowed.stderr
     assert (derived / "flow_headlines.json").exists()
     assert (derived / "flow_by_year.csv").exists()
+
+
+def test_cook_build_flow_and_publish(tmp_path: Path) -> None:
+    derived = tmp_path / "derived"
+    built = runner.invoke(
+        app,
+        [
+            "build",
+            "--metro",
+            "cook",
+            "--source",
+            "tests/fixtures/cook/universe.csv",
+            "--addresses",
+            "tests/fixtures/cook/addresses.csv",
+            "--characteristics",
+            "tests/fixtures/cook/characteristics.csv",
+            "--condo",
+            "tests/fixtures/cook/condo.csv",
+            "--out-dir",
+            str(derived),
+        ],
+    )
+    assert built.exit_code == 0, built.stdout + built.stderr
+    assert (derived / "headlines.json").exists()
+    dest = tmp_path / "published"
+    published = runner.invoke(
+        app,
+        [
+            "publish",
+            "--metro",
+            "cook",
+            "--derived",
+            str(derived),
+            "--out-dir",
+            str(dest),
+            "--site-data",
+            str(tmp_path / "site-cook"),
+        ],
+    )
+    assert published.exit_code == 0, published.stdout + published.stderr
+    assert (dest / "site.json").exists()
+    flowed = runner.invoke(
+        app,
+        [
+            "flow",
+            "--metro",
+            "cook",
+            "--sales",
+            "tests/fixtures/cook/sales.csv",
+            "--parcels",
+            str(derived / "parcels_classified.parquet"),
+            "--out-dir",
+            str(derived),
+        ],
+    )
+    assert flowed.exit_code == 0, flowed.stdout + flowed.stderr
+    assert (derived / "flow_headlines.json").exists()
+
+
+def test_dade_build_flow_and_publish(tmp_path: Path) -> None:
+    derived = tmp_path / "derived"
+    built = runner.invoke(
+        app,
+        [
+            "build",
+            "--metro",
+            "dade",
+            "--source",
+            "tests/fixtures/dade/gis_sample.csv",
+            "--out-dir",
+            str(derived),
+        ],
+    )
+    assert built.exit_code == 0, built.stdout + built.stderr
+    assert (derived / "headlines.json").exists()
+    dest = tmp_path / "published"
+    published = runner.invoke(
+        app,
+        [
+            "publish",
+            "--metro",
+            "dade",
+            "--derived",
+            str(derived),
+            "--out-dir",
+            str(dest),
+            "--site-data",
+            str(tmp_path / "site-dade"),
+        ],
+    )
+    assert published.exit_code == 0, published.stdout + published.stderr
+    assert (dest / "site.json").exists()
+    flowed = runner.invoke(
+        app,
+        [
+            "flow",
+            "--metro",
+            "dade",
+            "--sdf",
+            "tests/fixtures/dade/sdf_sample.csv",
+            "--parcels",
+            str(derived / "parcels_classified.parquet"),
+            "--out-dir",
+            str(derived),
+        ],
+    )
+    assert flowed.exit_code == 0, flowed.stdout + flowed.stderr
+    assert (derived / "flow_headlines.json").exists()

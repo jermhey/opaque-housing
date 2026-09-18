@@ -1,4 +1,4 @@
-# Fly.io hosts the insight app (ADR 0011). GitHub Pages still serves the static snapshot.
+# Fly.io is the canonical public host (ADR 0011). GitHub Pages is a static snapshot.
 
 app = "opaque-housing-insight"
 primary_region = "sjc"
@@ -17,7 +17,7 @@ primary_region = "sjc"
   force_https = true
   auto_stop_machines = "stop"
   auto_start_machines = true
-  min_machines_running = 0
+  min_machines_running = 1
   processes = ["app"]
 
 [[vm]]

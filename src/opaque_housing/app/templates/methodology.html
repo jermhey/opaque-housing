@@ -6,12 +6,12 @@
 <h3>Owner classes</h3>
 <p>One class per owner record. First matching rule wins. Entity-owned = <code>llc</code> + <code>corp</code> + <code>partnership</code>. Trusts are a sensitivity series. Public and nonprofit owners leave the private denominator. Co-op buildings are identified by official building class, not by name.</p>
 <h3>Mix-adjusted compare</h3>
-<p>From <code>stock_by_building_type.csv</code> in both metros. Philadelphia rates are applied to New York’s building-type mix (weights renormalized on types both metros have). Kitagawa decomposition uses Philadelphia as the reference mix: NYC − PHL = rate effect + mix effect. NYC co-ops have no Philadelphia analogue and are excluded from the standardized rates.</p>
+<p>From <code>stock_by_building_type.csv</code>. Each other metro’s rates are applied to New York’s building-type mix (weights renormalized on types both metros have). Kitagawa decomposition uses the other metro as the reference mix: NYC − other = rate effect + mix effect. Types that exist in only one metro are excluded from the standardized rates. Charts are CSS bars and SVG sparklines from those cubes — not a choropleth and not a parcel map.</p>
 <h3>Definition playground</h3>
 <p>Stock slices come from the four headline series already in <code>headlines.json</code> (all private vs 1–4+condo; entity-only vs entity+trust; lot vs unit). Flow slices come from <code>flow_sensitivity.csv</code> ($0 / $10k / $100k, PHL exclude-sheriff). Nothing is reclassified at request time.</p>
 <h3>Anonymous concentration</h3>
 <p>HHI and top-N shares are computed on the laptop from classified parcels, keyed by <code>owner_key</code> (or opacity <code>cluster_id</code> when present). Published files contain neighborhood totals only. Citywide ranked portfolios are not published: opacity cluster 1 is a known likely false merge (officer-name chain).</p>
 <h3>Correction</h3>
-<p>NYC headlines may include Rogan–Gladen on the held-out gold test split. Philadelphia has no gold correction. Claim cards show raw and corrected when both exist.</p>
+<p>NYC headlines may include Rogan–Gladen on the held-out gold test split. Philadelphia, Cook County, and Miami-Dade have no gold correction. Claim cards show raw and corrected when both exist. Charts say Cook County and Miami-Dade County, not Chicago or Miami.</p>
 <p class="note">Full rules, ADRs, and filter counts live in the repository under <code>docs/</code>.</p>
 {% endblock %}

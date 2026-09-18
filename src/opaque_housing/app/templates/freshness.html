@@ -2,10 +2,10 @@
 {% block title %}Freshness — Opaque residential ownership{% endblock %}
 {% block main %}
 <h2>Freshness</h2>
-<p class="lede">Source catalog time versus last publish. Monthly Actions can refresh NYC PLUTO and PHL OPA stock. Flow and opacity stay laptop-only.</p>
+<p class="lede">Source catalog time versus last publish. Monthly Actions can refresh NYC PLUTO, PHL OPA, and Cook County stock+sales. Miami-Dade, ACRIS, NY DOS, PHL RTT, and NYC/PHL flow and opacity stay laptop-only.</p>
 <p><a href="/freshness?live=true">Check live Socrata timestamps</a>{% if live %} · showing live catalog{% endif %}</p>
 {% for metro, block in data.published.items() %}
-<h3>{{ metro|upper }} last publish</h3>
+<h3>{{ metro_label(metro) }} last publish</h3>
 {% if block %}
 <dl class="claim">
   <div class="label">{{ metro }}</div>
@@ -19,7 +19,7 @@
 <p class="note">No freshness document for {{ metro }}.</p>
 {% endif %}
 {% endfor %}
-<h3>Live Socrata (NYC)</h3>
+<h3>Live Socrata catalog</h3>
 <div class="table-wrap">
   <table>
     <thead>

@@ -1,4 +1,15 @@
 <p class="caveat">{{ data.caveat }}</p>
+{% if data.ranked %}
+<h3>Highest entity lot share</h3>
+<p class="note">Unsuppressed neighborhoods, ranked. No geocoding, no parcel dots.</p>
+{% for row in data.ranked %}
+<div class="bar-row">
+  <div class="bar-label">{{ row.label }}</div>
+  <div class="bar-track"><div class="bar-fill" style="width: {{ row.width }}%"></div></div>
+  <div class="bar-pct">{{ row.value|pct }}</div>
+</div>
+{% endfor %}
+{% endif %}
 {% if data.has_concentration %}
 <h3>Anonymous concentration</h3>
 <p class="note">HHI is 0–1 on recorded name-keys. Top-N is the share of units (or lots) held by the largest 5 / 10 / 20 keys. No names.</p>

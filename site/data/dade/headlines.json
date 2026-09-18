@@ -1,0 +1,34 @@
+{
+  "private_all_entity_only": {
+    "parcels": 814410,
+    "units": 1081055,
+    "entity_parcels": 143384,
+    "entity_units": 355307,
+    "parcel_share": 0.17605874191132231,
+    "unit_share": 0.32866690408906113
+  },
+  "private_all_entity_plus_trust": {
+    "parcels": 814410,
+    "units": 1081055,
+    "entity_parcels": 146140,
+    "entity_units": 359621,
+    "parcel_share": 0.17944278680271608,
+    "unit_share": 0.33265745036099
+  },
+  "sfr_condo_entity_only": {
+    "parcels": 805126,
+    "units": 844316,
+    "entity_parcels": 137966,
+    "entity_units": 151787,
+    "parcel_share": 0.17135951391459225,
+    "unit_share": 0.1797751078979908
+  },
+  "sfr_condo_entity_plus_trust": {
+    "parcels": 805126,
+    "units": 844316,
+    "entity_parcels": 140652,
+    "entity_units": 154771,
+    "parcel_share": 0.1746956377014281,
+    "unit_share": 0.18330932968225166
+  }
+}

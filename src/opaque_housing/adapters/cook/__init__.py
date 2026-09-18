@@ -1,0 +1,1 @@
+"""Cook County assessor adapters."""

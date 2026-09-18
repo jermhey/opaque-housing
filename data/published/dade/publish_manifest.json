@@ -1,0 +1,26 @@
+{
+  "metro": "dade",
+  "origins": {
+    "concentration_by_neighborhood.csv": "derived",
+    "headlines.json": "derived",
+    "run_manifest.json": "derived",
+    "stock_by_borough_type.csv": "derived",
+    "stock_by_building_type.csv": "derived",
+    "stock_by_class.csv": "derived",
+    "stock_by_nta_type.csv": "derived"
+  },
+  "files": [
+    "concentration_by_neighborhood.csv",
+    "freshness.json",
+    "headlines.json",
+    "neighborhoods.csv",
+    "publish_manifest.json",
+    "run_manifest.json",
+    "site.json",
+    "stock_by_borough_type.csv",
+    "stock_by_building_type.csv",
+    "stock_by_class.csv",
+    "stock_by_nta_type.csv",
+    "stock_sensitivity.csv"
+  ]
+}

@@ -335,3 +335,53 @@ Residential categories (live descriptions): 1 Single Family (463,036); 2 Multi F
 | Rows | 2,360,829 |
 | Verified fields | `business_name`, `filing_number`, `address_line1`, `typeofbusinessregistration`, `shortcountyname` |
 | Officer names | **None.** O-tiers are not computed for Philadelphia (ADR 0010). |
+
+---
+
+## 13. Cook County Assessor parcel universe
+
+Retrieval date: **2026-09-18**. Client User-Agent: `opaque-housing/0.1 (residential-ownership-research)`.
+
+| | |
+|---|---|
+| Portal | https://datacatalog.cookcountyil.gov/Property-Taxation/Assessor-Parcel-Universe-Current-Year-Only-/pabr-t5kh |
+| Dataset ID | `pabr-t5kh` |
+| Rows (live) | 1,863,562 (tax year 2026 only) |
+| Ingest | `oh ingest --metro cook` (monthly runner after 2026-09-18 timing) |
+
+Verified fields: `pin`, `class`, `triad_name`, `township_name`, `nbhd_code`, `zip_code`, `cook_municipality_name`, `census_tract_geoid`, `year`, `row_id`.
+
+Owner-name join is current-year **only** (`3723-97qp`, `year=2026`): `owner_address_name`, `mail_address_name`, `owner_address_full`. Do not download the historic address file. Units: `x54s-btds` (`char_apts`) and condo flags `3r7i-mrz4` (`is_parking_space`, `is_common_area`).
+
+## 14. Cook County Assessor parcel sales
+
+| | |
+|---|---|
+| Portal | https://datacatalog.cookcountyil.gov/Property-Taxation/Assessor-Parcel-Sales/wvhk-k5uv |
+| Dataset ID | `wvhk-k5uv` |
+| Ingest | `oh ingest --metro cook --dataset sales` |
+
+Verified fields: `pin`, `doc_no`, `sale_date`, `sale_price`, `deed_type`, `mydec_deed_type`, `buyer_name`, `seller_name`, `is_multisale`, `sale_filter_deed_type`, `sale_filter_less_than_10k`, `year`, `row_id`. Official `sale_filter_deed_type` is the non-sale cut. Usable volume 2000–2025.
+
+## 15. Miami-Dade PaGis property folios
+
+Retrieval date: **2026-09-18**.
+
+| | |
+|---|---|
+| Layer | `MD_LandInformation/MapServer/24` (Property @ PaGis folio **points**) |
+| Query | https://gisweb.miamidade.gov/arcgis/rest/services/MD_LandInformation/MapServer/24/query |
+| Rows (live) | 943,689 points |
+| Ingest | `oh ingest --metro dade` (laptop-only) |
+
+Verified fields: `FOLIO`, `TRUE_OWNER1`, `DOR_CODE_CUR`, `DOR_DESC`, `UNIT_COUNT`, `CONDO_FLAG`, `PARENT_FOLIO`, `TRUE_SITE_CITY`, `TRUE_SITE_ZIP_CODE`, `TRUE_MAILING_ADDR1`, `ASSESSMENT_YEAR_CUR`, `CANCEL_FLAG`. No municipality-polygon or `NBRHD_CD` field on this layer. Use points, not polygons (condos stack).
+
+## 16. Florida DOR Sale Data File (SDF)
+
+| | |
+|---|---|
+| Portal | https://floridarevenue.com/property/Pages/DataPortal_RequestAssessmentRollGISData.aspx |
+| County | Miami-Dade `CO_NO=23` |
+| Ingest | local copy to `data/raw/dade/sdf/<date>/florida_sdf.csv` (`oh ingest --metro dade --dataset sdf` exits: no public URL) |
+
+Production files have **no header**. Field order is the 2024/2025 DOR user’s guide Section 2. There is **no grantee / buyer name**. Qualified sales are `QUAL_CD` in `{01, 1}`. County PA BBS sales files ($50) are out of scope.

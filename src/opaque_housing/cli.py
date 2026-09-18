@@ -3,16 +3,30 @@
 from __future__ import annotations
 
 import json
+from dataclasses import dataclass
 from datetime import UTC, date, datetime
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any, NoReturn
 
 import polars as pl
 import typer
 from dotenv import load_dotenv
 
 from opaque_housing import __version__
+from opaque_housing.adapters.arcgis import write_arcgis_parquet
 from opaque_housing.adapters.carto import write_carto_csv
+from opaque_housing.adapters.cook.parcels import CookParcelAdapter
+from opaque_housing.adapters.cook.sales import CookSalesAdapter
+from opaque_housing.adapters.cook.sources import COOK_SOURCES, resolve_cook_specs
+from opaque_housing.adapters.dade.parcels import DadeParcelAdapter
+from opaque_housing.adapters.dade.sdf import DadeSdfAdapter
+from opaque_housing.adapters.dade.sources import (
+    GIS,
+    GIS_OUT_FIELDS,
+    GIS_QUERY,
+    SDF,
+    resolve_dade_specs,
+)
 from opaque_housing.adapters.http import stream_to_path
 from opaque_housing.adapters.nyc.acris import NycAcrisAdapter
 from opaque_housing.adapters.nyc.hpd import NycHpdAdapter
@@ -24,12 +38,11 @@ from opaque_housing.adapters.nyc.sources import (
     HPD_SOURCES,
     NYC_SOURCES,
     NYS_DOS,
-    PLUTO_SNAPSHOT_DATE,
     resolve_ingest_specs,
 )
 from opaque_housing.adapters.phl.opa import PhlOpaAdapter
 from opaque_housing.adapters.phl.rtt import PhlRttAdapter
-from opaque_housing.adapters.phl.sources import OPA_SNAPSHOT_DATE, resolve_phl_specs
+from opaque_housing.adapters.phl.sources import resolve_phl_specs
 from opaque_housing.adapters.soda import write_soda_parquet
 from opaque_housing.classify.apply import classify_parcel_frame
 from opaque_housing.classify.llm import apply_llm_label, needs_llm
@@ -45,7 +58,8 @@ from opaque_housing.metrics.concentration import neighborhood_concentration
 from opaque_housing.metrics.correction import bootstrap_corrected_prevalence
 from opaque_housing.metrics.evaluation import evaluation_report
 from opaque_housing.metrics.flow import (
-    COVERAGE_WINDOWS,
+    COOK_SENSITIVITY_CONFIGS,
+    DADE_SENSITIVITY_CONFIGS,
     PHL_SENSITIVITY_CONFIGS,
     attach_residential,
     classify_buyers,
@@ -86,6 +100,7 @@ from opaque_housing.metrics.sale_filter import (
     attach_primary_parties,
 )
 from opaque_housing.metrics.stock import headline_shares, private_residential, stock_breakdowns
+from opaque_housing.metros import known_metro, metro_spec
 from opaque_housing.opacity.build import attach_parcel_owners, run_opacity
 from opaque_housing.opacity.tiers import OPACITY_VERSION
 from opaque_housing.paths import derived_dir, latest_raw_file, published_dir, raw_dir
@@ -101,6 +116,455 @@ load_dotenv()
 app = typer.Typer(no_args_is_help=True, help="Opaque housing investigation pipeline.")
 
 _ENTITY_VALUES = {item.value for item in ENTITY_OWNED_CLASSES}
+
+
+def _echo_unknown_dataset(dataset: str) -> None:
+    typer.echo(f"unknown dataset {dataset}", err=True)
+
+
+def _ingest_soda_specs(metro: str, specs: list[Any], *, day: date, force: bool) -> None:
+    for spec in specs:
+        dest = raw_dir(metro, spec.name, day) / spec.filename
+        if dest.exists() and not force:
+            typer.echo(f"skip existing {dest}")
+            continue
+        typer.echo(f"downloading {spec.dataset_id} -> {dest}")
+        if getattr(spec, "paged", False):
+            stats = write_soda_parquet(
+                dest,
+                spec.dataset_id,
+                select=spec.select,
+                where=spec.where,
+                key=spec.key,
+                page_size=spec.limit,
+                host=spec.host,
+            )
+            typer.echo(
+                f"wrote {dest} pages={stats['pages']} rows={stats['rows']} "
+                f"({dest.stat().st_size} bytes)"
+            )
+        else:
+            stream_to_path(spec.csv_url, dest)
+            typer.echo(f"wrote {dest} ({dest.stat().st_size} bytes)")
+
+
+def _ingest_nyc(dataset: str, day: date, force: bool) -> None:
+    try:
+        specs = resolve_ingest_specs(dataset)
+    except KeyError:
+        _echo_unknown_dataset(dataset)
+        raise typer.Exit(code=1) from None
+    _ingest_soda_specs("nyc", specs, day=day, force=force)
+
+
+def _ingest_phl(dataset: str, day: date, force: bool) -> None:
+    try:
+        carto_specs = resolve_phl_specs(dataset)
+    except KeyError:
+        _echo_unknown_dataset(dataset)
+        raise typer.Exit(code=1) from None
+    for spec in carto_specs:
+        dest = raw_dir("phl", spec.name, day) / spec.filename
+        if dest.exists() and not force:
+            typer.echo(f"skip existing {dest}")
+            continue
+        typer.echo(f"downloading {spec.table} -> {dest}")
+        write_carto_csv(dest, spec)
+        typer.echo(f"wrote {dest} ({dest.stat().st_size} bytes)")
+
+
+def _ingest_cook(dataset: str, day: date, force: bool) -> None:
+    try:
+        specs = resolve_cook_specs(dataset)
+    except KeyError:
+        _echo_unknown_dataset(dataset)
+        raise typer.Exit(code=1) from None
+    _ingest_soda_specs("cook", specs, day=day, force=force)
+
+
+def _ingest_dade(dataset: str, day: date, force: bool) -> None:
+    try:
+        specs = resolve_dade_specs(dataset)
+    except KeyError:
+        _echo_unknown_dataset(dataset)
+        raise typer.Exit(code=1) from None
+    for spec in specs:
+        dest = raw_dir("dade", spec.name, day) / spec.filename
+        if spec.kind == "local":
+            typer.echo(
+                f"{spec.name} is a local DOR file; copy it to {dest} (no stable public URL)",
+                err=True,
+            )
+            raise typer.Exit(code=1)
+        if dest.exists() and not force:
+            typer.echo(f"skip existing {dest}")
+            continue
+        typer.echo(f"downloading PaGis folios -> {dest}")
+        stats = write_arcgis_parquet(dest, GIS_QUERY, out_fields=GIS_OUT_FIELDS)
+        typer.echo(
+            f"wrote {dest} pages={stats['pages']} rows={stats['rows']} "
+            f"({dest.stat().st_size} bytes)"
+        )
+
+
+_INGEST = {
+    "nyc": _ingest_nyc,
+    "phl": _ingest_phl,
+    "cook": _ingest_cook,
+    "dade": _ingest_dade,
+}
+
+
+def _missing_source(message: str) -> NoReturn:
+    typer.echo(message, err=True)
+    raise typer.Exit(code=1)
+
+
+@dataclass
+class _StockRun:
+    parcels: pl.DataFrame
+    adapter: Any
+    source_path: Path
+    source_label: str
+    extra_paths: dict[str, str]
+
+
+def _stock_nyc(
+    *,
+    source: Path | None,
+    equiv: Path | None,
+    snapshot_date: str | None,
+    addresses: Path | None,
+    characteristics: Path | None,
+    condo: Path | None,
+) -> _StockRun:
+    del addresses, characteristics, condo
+    source_path = source or latest_raw_file("nyc", "pluto", NYC_SOURCES["pluto"].filename)
+    if source_path is None or not source_path.exists():
+        _missing_source("no PLUTO extract; pass --source or run oh ingest")
+    equiv_path = equiv or latest_raw_file("nyc", "tract_nta", NYC_SOURCES["tract_nta"].filename)
+    snap = date.fromisoformat(snapshot_date or metro_spec("nyc").snapshot_date)
+    adapter = NycPlutoAdapter(snapshot_date=snap, tract_equiv_path=equiv_path)
+    return _StockRun(
+        parcels=adapter.load_parcels_snapshot(source_path),
+        adapter=adapter,
+        source_path=source_path,
+        source_label="pluto",
+        extra_paths={"tract_nta": str(equiv_path) if equiv_path else ""},
+    )
+
+
+def _stock_phl(
+    *,
+    source: Path | None,
+    equiv: Path | None,
+    snapshot_date: str | None,
+    addresses: Path | None,
+    characteristics: Path | None,
+    condo: Path | None,
+) -> _StockRun:
+    del equiv, addresses, characteristics, condo
+    source_path = source or latest_raw_file("phl", "opa", "opa_properties_public.csv")
+    if source_path is None or not source_path.exists():
+        _missing_source("no OPA extract; pass --source or run oh ingest --metro phl")
+    snap = date.fromisoformat(snapshot_date or metro_spec("phl").snapshot_date)
+    adapter = PhlOpaAdapter(snapshot_date=snap)
+    return _StockRun(
+        parcels=adapter.load_parcels_snapshot(source_path),
+        adapter=adapter,
+        source_path=source_path,
+        source_label="opa",
+        extra_paths={},
+    )
+
+
+def _stock_cook(
+    *,
+    source: Path | None,
+    equiv: Path | None,
+    snapshot_date: str | None,
+    addresses: Path | None,
+    characteristics: Path | None,
+    condo: Path | None,
+) -> _StockRun:
+    del equiv
+    source_path = source or latest_raw_file("cook", "universe", COOK_SOURCES["universe"].filename)
+    if source_path is None or not source_path.exists():
+        _missing_source("no Cook universe extract; pass --source or run oh ingest --metro cook")
+    addr_path = addresses or latest_raw_file(
+        "cook", "addresses", COOK_SOURCES["addresses"].filename
+    )
+    char_path = characteristics or latest_raw_file(
+        "cook", "characteristics", COOK_SOURCES["characteristics"].filename
+    )
+    condo_path = condo or latest_raw_file("cook", "condo", COOK_SOURCES["condo"].filename)
+    snap = date.fromisoformat(snapshot_date or metro_spec("cook").snapshot_date)
+    adapter = CookParcelAdapter(snapshot_date=snap)
+    return _StockRun(
+        parcels=adapter.load_parcels_snapshot(
+            source_path,
+            addresses_path=addr_path,
+            characteristics_path=char_path,
+            condo_path=condo_path,
+        ),
+        adapter=adapter,
+        source_path=source_path,
+        source_label="universe",
+        extra_paths={
+            "addresses": str(addr_path) if addr_path else "",
+            "characteristics": str(char_path) if char_path else "",
+            "condo": str(condo_path) if condo_path else "",
+        },
+    )
+
+
+def _stock_dade(
+    *,
+    source: Path | None,
+    equiv: Path | None,
+    snapshot_date: str | None,
+    addresses: Path | None,
+    characteristics: Path | None,
+    condo: Path | None,
+) -> _StockRun:
+    del equiv, addresses, characteristics, condo
+    source_path = source or latest_raw_file("dade", GIS.name, GIS.filename)
+    if source_path is None or not source_path.exists():
+        _missing_source("no Dade GIS extract; pass --source or run oh ingest --metro dade")
+    snap = date.fromisoformat(snapshot_date or metro_spec("dade").snapshot_date)
+    adapter = DadeParcelAdapter(snapshot_date=snap)
+    return _StockRun(
+        parcels=adapter.load_parcels_snapshot(source_path),
+        adapter=adapter,
+        source_path=source_path,
+        source_label="gis",
+        extra_paths={},
+    )
+
+
+_STOCK = {
+    "nyc": _stock_nyc,
+    "phl": _stock_phl,
+    "cook": _stock_cook,
+    "dade": _stock_dade,
+}
+
+
+@dataclass
+class _FlowRun:
+    transfers: pl.DataFrame
+    adapter: Any
+    source_paths: dict[str, str]
+    source_versions: dict[str, str]
+    window: tuple[int, int]
+    snap: date
+    sensitivity_configs: list[tuple[str, SaleFilterConfig]] | None
+    window_note: str
+    history_config: SaleFilterConfig | None
+    flow_config: SaleFilterConfig
+    notes: list[str]
+
+
+def _flow_nyc(
+    *,
+    parcel_path: Path,
+    master: Path | None,
+    legals: Path | None,
+    parties: Path | None,
+    rtt: Path | None,
+    sales: Path | None,
+    sdf: Path | None,
+    pad: Path | None,
+    snapshot_date: str | None,
+    min_consideration: float,
+) -> _FlowRun:
+    del rtt, sales, sdf
+    spec = metro_spec("nyc")
+    master_path = master or latest_raw_file(
+        "nyc", "acris_master", ACRIS_SOURCES["acris_master"].filename
+    )
+    legals_path = legals or latest_raw_file(
+        "nyc", "acris_legals", ACRIS_SOURCES["acris_legals"].filename
+    )
+    parties_path = parties or latest_raw_file(
+        "nyc", "acris_parties", ACRIS_SOURCES["acris_parties"].filename
+    )
+    missing = [
+        label
+        for label, path in (
+            ("master", master_path),
+            ("legals", legals_path),
+            ("parties", parties_path),
+            ("parcels", parcel_path),
+        )
+        if path is None or not path.exists()
+    ]
+    if missing:
+        _missing_source(f"missing inputs: {', '.join(missing)}")
+    assert master_path is not None and legals_path is not None and parties_path is not None
+    adapter = NycAcrisAdapter()
+    typer.echo("loading ACRIS master/legals/parties")
+    transfers = adapter.load_transfers(master_path, legals_path)
+    party_rows = adapter.load_transfer_parties(parties_path)
+    transfers = attach_primary_parties(transfers, party_rows)
+    typer.echo(f"transfers={transfers.height} parties={party_rows.height}")
+    return _FlowRun(
+        transfers=transfers,
+        adapter=adapter,
+        source_paths={
+            "acris_master": str(master_path),
+            "acris_legals": str(legals_path),
+            "acris_parties": str(parties_path),
+            "parcels": str(parcel_path),
+            "pad": str(pad) if pad else "",
+        },
+        source_versions={"acris": adapter.source_version, "rules": RULES_VERSION},
+        window=spec.coverage_window,
+        snap=date.fromisoformat(snapshot_date or spec.snapshot_date),
+        sensitivity_configs=None,
+        window_note="coverage window recorded years 2003-2025 (ADR 0006)",
+        history_config=None,
+        flow_config=SaleFilterConfig(min_consideration=min_consideration),
+        notes=[
+            "flow uses sale_deed + named grantee + consideration cut (ADR 0005)",
+            "history uses every sale_deed with a named grantee",
+        ],
+    )
+
+
+def _flow_phl(
+    *,
+    parcel_path: Path,
+    master: Path | None,
+    legals: Path | None,
+    parties: Path | None,
+    rtt: Path | None,
+    sales: Path | None,
+    sdf: Path | None,
+    pad: Path | None,
+    snapshot_date: str | None,
+    min_consideration: float,
+) -> _FlowRun:
+    del master, legals, parties, sales, sdf, pad
+    spec = metro_spec("phl")
+    rtt_path = rtt or latest_raw_file("phl", "rtt", "rtt_summary.csv")
+    if rtt_path is None or not rtt_path.exists() or not parcel_path.exists():
+        _missing_source("missing PHL inputs; pass --rtt and run oh build --metro phl")
+    adapter = PhlRttAdapter()
+    typer.echo("loading RTT_SUMMARY")
+    transfers = adapter.load_transfers(rtt_path)
+    typer.echo(f"transfers={transfers.height}")
+    return _FlowRun(
+        transfers=transfers,
+        adapter=adapter,
+        source_paths={"rtt": str(rtt_path), "parcels": str(parcel_path)},
+        source_versions={"rtt": adapter.source_version, "rules": RULES_VERSION},
+        window=spec.coverage_window,
+        snap=date.fromisoformat(snapshot_date or spec.snapshot_date),
+        sensitivity_configs=PHL_SENSITIVITY_CONFIGS,
+        window_note="coverage window recorded years 2000-2025 (ADR 0010)",
+        history_config=None,
+        flow_config=SaleFilterConfig(min_consideration=min_consideration),
+        notes=[
+            "flow uses sale_deed + named grantee + consideration cut (ADR 0005)",
+            "history uses every sale_deed with a named grantee",
+        ],
+    )
+
+
+def _flow_cook(
+    *,
+    parcel_path: Path,
+    master: Path | None,
+    legals: Path | None,
+    parties: Path | None,
+    rtt: Path | None,
+    sales: Path | None,
+    sdf: Path | None,
+    pad: Path | None,
+    snapshot_date: str | None,
+    min_consideration: float,
+) -> _FlowRun:
+    del master, legals, parties, rtt, sdf, pad
+    spec = metro_spec("cook")
+    sales_path = sales or latest_raw_file("cook", "sales", COOK_SOURCES["sales"].filename)
+    if sales_path is None or not sales_path.exists() or not parcel_path.exists():
+        _missing_source("missing Cook inputs; pass --sales and run oh build --metro cook")
+    adapter = CookSalesAdapter()
+    typer.echo("loading Cook Parcel Sales")
+    transfers = adapter.load_transfers(sales_path)
+    typer.echo(f"transfers={transfers.height}")
+    return _FlowRun(
+        transfers=transfers,
+        adapter=adapter,
+        source_paths={"sales": str(sales_path), "parcels": str(parcel_path)},
+        source_versions={"sales": adapter.source_version, "rules": RULES_VERSION},
+        window=spec.coverage_window,
+        snap=date.fromisoformat(snapshot_date or spec.snapshot_date),
+        sensitivity_configs=COOK_SENSITIVITY_CONFIGS,
+        window_note="coverage window recorded years 2000-2025 (ADR 0013)",
+        history_config=None,
+        flow_config=SaleFilterConfig(min_consideration=min_consideration),
+        notes=[
+            "flow uses sale_deed + named grantee + consideration cut (ADR 0005)",
+            "history uses every sale_deed with a named grantee",
+        ],
+    )
+
+
+def _flow_dade(
+    *,
+    parcel_path: Path,
+    master: Path | None,
+    legals: Path | None,
+    parties: Path | None,
+    rtt: Path | None,
+    sales: Path | None,
+    sdf: Path | None,
+    pad: Path | None,
+    snapshot_date: str | None,
+    min_consideration: float,
+) -> _FlowRun:
+    del master, legals, parties, rtt, sales, pad
+    spec = metro_spec("dade")
+    sdf_path = sdf or latest_raw_file("dade", SDF.name, SDF.filename)
+    if sdf_path is None or not sdf_path.exists() or not parcel_path.exists():
+        _missing_source("missing Dade inputs; pass --sdf and run oh build --metro dade")
+    adapter = DadeSdfAdapter()
+    typer.echo("loading Florida DOR SDF")
+    transfers = adapter.load_transfers(sdf_path)
+    typer.echo(f"transfers={transfers.height}")
+    return _FlowRun(
+        transfers=transfers,
+        adapter=adapter,
+        source_paths={"sdf": str(sdf_path), "parcels": str(parcel_path)},
+        source_versions={"sdf": adapter.source_version, "rules": RULES_VERSION},
+        window=spec.coverage_window,
+        snap=date.fromisoformat(snapshot_date or spec.snapshot_date),
+        sensitivity_configs=DADE_SENSITIVITY_CONFIGS,
+        window_note="coverage window recorded years 2000-2025; SDF has no grantee (ADR 0014)",
+        history_config=SaleFilterConfig(
+            min_consideration=0.0,
+            treat_zero_amount_as_missing=True,
+            require_named_grantee=False,
+        ),
+        flow_config=SaleFilterConfig(
+            min_consideration=min_consideration,
+            require_named_grantee=False,
+        ),
+        notes=[
+            "flow uses sale_deed + consideration cut; SDF has no grantee (ADR 0014)",
+            "history uses every sale_deed; entity-buyer shares are not identified",
+        ],
+    )
+
+
+_FLOW = {
+    "nyc": _flow_nyc,
+    "phl": _flow_phl,
+    "cook": _flow_cook,
+    "dade": _flow_dade,
+}
 
 
 @app.command()
@@ -120,52 +584,11 @@ def ingest(
 ) -> None:
     """Download raw source extracts into data/raw/<metro>/<dataset>/<date>/."""
     day = date.fromisoformat(retrieval_date) if retrieval_date else date.today()
-    if metro == "phl":
-        try:
-            carto_specs = resolve_phl_specs(dataset)
-        except KeyError:
-            typer.echo(f"unknown dataset {dataset}", err=True)
-            raise typer.Exit(code=1) from None
-        for spec in carto_specs:
-            dest = raw_dir(metro, spec.name, day) / spec.filename
-            if dest.exists() and not force:
-                typer.echo(f"skip existing {dest}")
-                continue
-            typer.echo(f"downloading {spec.table} -> {dest}")
-            write_carto_csv(dest, spec)
-            typer.echo(f"wrote {dest} ({dest.stat().st_size} bytes)")
-        return
-    if metro != "nyc":
-        typer.echo(f"ingest is only wired for nyc and phl (got {metro})", err=True)
+    handler = _INGEST.get(metro)
+    if handler is None:
+        typer.echo(f"ingest is not wired for {metro}", err=True)
         raise typer.Exit(code=1)
-    try:
-        specs = resolve_ingest_specs(dataset)
-    except KeyError:
-        typer.echo(f"unknown dataset {dataset}", err=True)
-        raise typer.Exit(code=1) from None
-    for spec in specs:
-        dest = raw_dir(metro, spec.name, day) / spec.filename
-        if dest.exists() and not force:
-            typer.echo(f"skip existing {dest}")
-            continue
-        typer.echo(f"downloading {spec.dataset_id} -> {dest}")
-        if spec.paged:
-            stats = write_soda_parquet(
-                dest,
-                spec.dataset_id,
-                select=spec.select,
-                where=spec.where,
-                key=spec.key,
-                page_size=spec.limit,
-                host=spec.host,
-            )
-            typer.echo(
-                f"wrote {dest} pages={stats['pages']} rows={stats['rows']} "
-                f"({dest.stat().st_size} bytes)"
-            )
-        else:
-            stream_to_path(spec.csv_url, dest)
-            typer.echo(f"wrote {dest} ({dest.stat().st_size} bytes)")
+    handler(dataset=dataset, day=day, force=force)
 
 
 @app.command()
@@ -183,36 +606,33 @@ def build(
         Path | None,
         typer.Option(help="Optional labeled gold CSV for Rogan–Gladen correction."),
     ] = None,
+    addresses: Annotated[Path | None, typer.Option(help="Cook addresses extract.")] = None,
+    characteristics: Annotated[
+        Path | None, typer.Option(help="Cook improvement-characteristics extract.")
+    ] = None,
+    condo: Annotated[Path | None, typer.Option(help="Cook condo-characteristics extract.")] = None,
 ) -> None:
     """Classify residential parcels and write stock shares."""
     dest = out_dir or derived_dir(metro)
     dest.mkdir(parents=True, exist_ok=True)
     started = datetime.now(tz=UTC)
-    if metro == "phl":
-        source_path = source or latest_raw_file(metro, "opa", "opa_properties_public.csv")
-        if source_path is None or not source_path.exists():
-            typer.echo("no OPA extract; pass --source or run oh ingest --metro phl", err=True)
-            raise typer.Exit(code=1)
-        snap = date.fromisoformat(snapshot_date or OPA_SNAPSHOT_DATE)
-        adapter = PhlOpaAdapter(snapshot_date=snap)
-        parcels = adapter.load_parcels_snapshot(source_path)
-        source_label = "opa"
-        extra_paths = {}
-        equiv_path = None
-    elif metro == "nyc":
-        source_path = source or latest_raw_file(metro, "pluto", NYC_SOURCES["pluto"].filename)
-        if source_path is None or not source_path.exists():
-            typer.echo("no PLUTO extract; pass --source or run oh ingest", err=True)
-            raise typer.Exit(code=1)
-        equiv_path = equiv or latest_raw_file(metro, "tract_nta", NYC_SOURCES["tract_nta"].filename)
-        snap = date.fromisoformat(snapshot_date or PLUTO_SNAPSHOT_DATE)
-        adapter = NycPlutoAdapter(snapshot_date=snap, tract_equiv_path=equiv_path)
-        parcels = adapter.load_parcels_snapshot(source_path)
-        source_label = "pluto"
-        extra_paths = {"tract_nta": str(equiv_path) if equiv_path else ""}
-    else:
-        typer.echo(f"build is only wired for nyc and phl (got {metro})", err=True)
+    loader = _STOCK.get(metro)
+    if loader is None:
+        typer.echo(f"build is not wired for {metro}", err=True)
         raise typer.Exit(code=1)
+    stock = loader(
+        source=source,
+        equiv=equiv,
+        snapshot_date=snapshot_date,
+        addresses=addresses,
+        characteristics=characteristics,
+        condo=condo,
+    )
+    parcels = stock.parcels
+    adapter = stock.adapter
+    source_path = stock.source_path
+    source_label = stock.source_label
+    extra_paths = stock.extra_paths
     classified = classify_parcel_frame(parcels)
     private, private_count = private_residential(classified)
     headlines = headline_shares(private)
@@ -260,6 +680,8 @@ def flow(
         Path | None, typer.Option(help="Classified parcels parquet from oh build.")
     ] = None,
     rtt: Annotated[Path | None, typer.Option(help="Philadelphia RTT extract.")] = None,
+    sales: Annotated[Path | None, typer.Option(help="Cook Parcel Sales extract.")] = None,
+    sdf: Annotated[Path | None, typer.Option(help="Florida DOR SDF extract.")] = None,
     pad: Annotated[Path | None, typer.Option(help="Optional PAD BBL crosswalk.")] = None,
     out_dir: Annotated[Path | None, typer.Option(help="Derived output directory.")] = None,
     min_consideration: Annotated[float, typer.Option(help="Arm's-length amount cut.")] = 10_000.0,
@@ -273,74 +695,42 @@ def flow(
     started = datetime.now(tz=UTC)
     parcel_path = parcels or (derived_dir(metro) / "parcels_classified.parquet")
     pad_frame = load_pad_crosswalk(pad) if pad is not None else None
-    if metro == "phl":
-        rtt_path = rtt or latest_raw_file(metro, "rtt", "rtt_summary.csv")
-        if rtt_path is None or not rtt_path.exists() or not parcel_path.exists():
-            typer.echo("missing PHL inputs; pass --rtt and run oh build --metro phl", err=True)
-            raise typer.Exit(code=1)
-        adapter = PhlRttAdapter()
-        typer.echo("loading RTT_SUMMARY")
-        transfers = adapter.load_transfers(rtt_path)
-        typer.echo(f"transfers={transfers.height}")
-        source_paths = {"rtt": str(rtt_path), "parcels": str(parcel_path)}
-        source_versions = {"rtt": adapter.source_version, "rules": RULES_VERSION}
-        window = COVERAGE_WINDOWS["phl"]
-        snap = date.fromisoformat(snapshot_date or OPA_SNAPSHOT_DATE)
-        sensitivity_configs = PHL_SENSITIVITY_CONFIGS
-        window_note = "coverage window recorded years 2000-2025 (ADR 0010)"
-    elif metro == "nyc":
-        master_path = master or latest_raw_file(
-            metro, "acris_master", ACRIS_SOURCES["acris_master"].filename
-        )
-        legals_path = legals or latest_raw_file(
-            metro, "acris_legals", ACRIS_SOURCES["acris_legals"].filename
-        )
-        parties_path = parties or latest_raw_file(
-            metro, "acris_parties", ACRIS_SOURCES["acris_parties"].filename
-        )
-        missing = [
-            label
-            for label, path in (
-                ("master", master_path),
-                ("legals", legals_path),
-                ("parties", parties_path),
-                ("parcels", parcel_path),
-            )
-            if path is None or not path.exists()
-        ]
-        if missing:
-            typer.echo(f"missing inputs: {', '.join(missing)}", err=True)
-            raise typer.Exit(code=1)
-        assert master_path is not None and legals_path is not None and parties_path is not None
-        adapter = NycAcrisAdapter()
-        typer.echo("loading ACRIS master/legals/parties")
-        transfers = adapter.load_transfers(master_path, legals_path)
-        party_rows = adapter.load_transfer_parties(parties_path)
-        transfers = attach_primary_parties(transfers, party_rows)
-        typer.echo(f"transfers={transfers.height} parties={party_rows.height}")
-        source_paths = {
-            "acris_master": str(master_path),
-            "acris_legals": str(legals_path),
-            "acris_parties": str(parties_path),
-            "parcels": str(parcel_path),
-            "pad": str(pad) if pad else "",
-        }
-        source_versions = {"acris": adapter.source_version, "rules": RULES_VERSION}
-        window = COVERAGE_WINDOWS["nyc"]
-        snap = date.fromisoformat(snapshot_date or PLUTO_SNAPSHOT_DATE)
-        sensitivity_configs = None
-        window_note = "coverage window recorded years 2003-2025 (ADR 0006)"
-    else:
-        typer.echo(f"flow is only wired for nyc and phl (got {metro})", err=True)
+    loader = _FLOW.get(metro)
+    if loader is None:
+        typer.echo(f"flow is not wired for {metro}", err=True)
         raise typer.Exit(code=1)
+    loaded = loader(
+        parcel_path=parcel_path,
+        master=master,
+        legals=legals,
+        parties=parties,
+        rtt=rtt,
+        sales=sales,
+        sdf=sdf,
+        pad=pad,
+        snapshot_date=snapshot_date,
+        min_consideration=min_consideration,
+    )
+    transfers = loaded.transfers
+    adapter = loaded.adapter
+    source_paths = loaded.source_paths
+    source_versions = loaded.source_versions
+    window = loaded.window
+    snap = loaded.snap
+    sensitivity_configs = loaded.sensitivity_configs
+    window_note = loaded.window_note
+    history_config = loaded.history_config
+    flow_config = loaded.flow_config
     parcel_frame = pl.read_parquet(parcel_path)
 
-    hist_sales, hist_counts = history_only_sales(transfers)
+    hist_sales, hist_counts = (
+        apply_sale_filter(transfers, history_config)
+        if history_config is not None
+        else history_only_sales(transfers)
+    )
     typer.echo(f"classifying {hist_sales.height} named sale-deed buyers")
     hist_buyers = classify_buyers(hist_sales)
-    flow_sales, flow_counts = apply_sale_filter(
-        hist_buyers, SaleFilterConfig(min_consideration=min_consideration)
-    )
+    flow_sales, flow_counts = apply_sale_filter(hist_buyers, flow_config)
     flow_matched, join_counts = attach_residential(flow_sales, parcel_frame, pad_frame)
     flow_matched = with_year_and_borough(flow_matched)
     flow_matched, window_count = in_coverage_window(flow_matched, window[0], window[1])
@@ -386,8 +776,7 @@ def flow(
             *hist_join,
         ],
         notes=[
-            "flow uses sale_deed + named grantee + consideration cut (ADR 0005)",
-            "history uses every sale_deed with a named grantee",
+            *loaded.notes,
             window_note,
             "trusts are not in the entity headline",
         ],
@@ -630,8 +1019,8 @@ def publish(
     ] = 0.20,
 ) -> None:
     """Copy allowlisted aggregates. Never writes names, addresses, or owner keys."""
-    if metro not in {"nyc", "phl"}:
-        typer.echo(f"publish is only wired for nyc and phl (got {metro})", err=True)
+    if not known_metro(metro):
+        typer.echo(f"publish is not wired for {metro}", err=True)
         raise typer.Exit(code=1)
     src = derived or derived_dir(metro)
     dest = out_dir or published_dir(metro)
@@ -1012,6 +1401,8 @@ def _publish_aggregates(
             pl.lit("Philadelphia").alias("borough"),
             pl.col("nta").alias("nta_name"),
         )
+    elif metro in {"cook", "dade"}:
+        neighborhoods = neighborhoods.with_columns(pl.col("nta").alias("nta_name"))
     boroughs = None
     borough_path = resolved.get("stock_by_borough_type.csv")
     if borough_path is not None:
@@ -1060,9 +1451,9 @@ def _publish_aggregates(
         "flow_present": "flow_headlines.json" in resolved,
         "opacity_present": "opacity_headlines.json" in resolved,
         "notes": [
-            "GitHub-hosted refresh updates NYC PLUTO stock and PHL OPA stock (ADR 0011).",
-            "ACRIS, NY DOS, and PHL RTT stay laptop-only; "
-            "flow and opacity are reused when missing.",
+            "GitHub-hosted refresh updates NYC PLUTO stock, PHL OPA stock, and Cook County stock+sales.",
+            "ACRIS, NY DOS, PHL RTT, and Miami-Dade stay laptop-only; "
+            "NYC/PHL flow and opacity are reused when missing.",
         ],
     }
     _write_json(dest / "freshness.json", freshness)

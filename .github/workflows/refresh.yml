@@ -37,15 +37,26 @@ jobs:
         run: uv run oh build --metro phl
       - name: Publish Philadelphia aggregates
         run: uv run oh publish --metro phl
+      # Cook stock+sales+build+flow was ~14 min on a laptop (2026-09-18).
+      - name: Ingest Cook County stock
+        run: uv run oh ingest --metro cook
+      - name: Rebuild Cook County stock
+        run: uv run oh build --metro cook
+      - name: Ingest Cook County sales
+        run: uv run oh ingest --metro cook --dataset sales
+      - name: Rebuild Cook County flow
+        run: uv run oh flow --metro cook
+      - name: Publish Cook County aggregates
+        run: uv run oh publish --metro cook
       - name: Commit published files
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/published/nyc data/published/phl site/data
+          git add data/published/nyc data/published/phl data/published/cook site/data
           if git diff --cached --quiet; then
             echo "no published-file changes"
           else
-            git commit -m "refresh published NYC and PHL stock aggregates"
+            git commit -m "refresh published NYC, PHL, and Cook aggregates"
             git push
           fi
       - name: Reload the insight app

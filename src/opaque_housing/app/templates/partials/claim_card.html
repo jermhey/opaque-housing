@@ -15,9 +15,11 @@
     <dt>Filters</dt>
     <dd>
       {% if card.filters %}
-        {% for item in card.filters %}
-          {{ item.rule_id }}: {{ item.rows_in|intcomma }} → {{ item.rows_out|intcomma }}{% if not loop.last %}; {% endif %}
-        {% endfor %}
+        <ul class="filters">
+          {% for item in card.filters %}
+          <li><code>{{ item.rule_id }}</code> {{ item.rows_in|intcomma }} → {{ item.rows_out|intcomma }}</li>
+          {% endfor %}
+        </ul>
       {% else %}
         —
       {% endif %}

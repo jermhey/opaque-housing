@@ -29,10 +29,14 @@ def metros(store: Annotated[AggregateStore, Depends(get_store)]) -> dict[str, ob
 def compare_mix(
     store: Annotated[AggregateStore, Depends(get_store)],
     weight: Annotated[str, Query(pattern="^(parcel|unit)$")] = "parcel",
+    other: Annotated[str, Query(pattern="^(phl|cook|dade)$")] = "phl",
 ) -> dict[str, object]:
-    if "nyc" not in store.metros or "phl" not in store.metros:
-        raise HTTPException(status_code=404, detail="both nyc and phl aggregates are required")
-    return mix_payload(store, weight=weight)
+    if "nyc" not in store.metros or other not in store.metros:
+        raise HTTPException(
+            status_code=404,
+            detail=f"both nyc and {other} aggregates are required",
+        )
+    return mix_payload(store, weight=weight, other=other)
 
 
 @router.get("/freshness")

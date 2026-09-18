@@ -10,6 +10,8 @@ from pydantic import BaseModel, Field
 class MetroId(StrEnum):
     NYC = "nyc"
     PHL = "phl"
+    COOK = "cook"
+    DADE = "dade"
 
 
 class BuildingType(StrEnum):

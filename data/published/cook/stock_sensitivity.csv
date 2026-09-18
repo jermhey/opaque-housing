@@ -1,0 +1,9 @@
+series,include_trust,weight,headline_key,parcels,units,entity_parcels,entity_units,raw,corrected,corrected_lo,corrected_hi,n_labeled
+private_all,false,parcel,private_all_entity_only,1482172,1863727,51024,117287,0.03442515443551761,,,,
+private_all,false,unit,private_all_entity_only,1482172,1863727,51024,117287,0.06293142718863869,,,,
+private_all,true,parcel,private_all_entity_plus_trust,1482172,1863727,66952,136665,0.045171545542622586,,,,
+private_all,true,unit,private_all_entity_plus_trust,1482172,1863727,66952,136665,0.07332887273726249,,,,
+sfr_condo,false,parcel,sfr_condo_entity_only,1439281,1628397,40049,51339,0.02782569908169426,,,,
+sfr_condo,false,unit,sfr_condo_entity_only,1439281,1628397,40049,51339,0.0315273241107666,,,,
+sfr_condo,true,parcel,sfr_condo_entity_plus_trust,1439281,1628397,55539,68393,0.03858801721137151,,,,
+sfr_condo,true,unit,sfr_condo_entity_plus_trust,1439281,1628397,55539,68393,0.042000200196880735,,,,

@@ -1,0 +1,7 @@
+config,min_consideration,treat_zero_amount_as_missing,require_named_grantee,require_full_interest,exclude_same_surname,drop_sale_codes,sales,entity_sales,sale_share,units,entity_units,unit_share
+default_10k,10000.0,false,true,false,false,"",1799813,128781,0.0715524335028139,2276120,267126,0.11736024462682108
+threshold_0,0.0,false,true,false,false,"",1902612,141076,0.07414859151524325,2427299,294416,0.1212936683943758
+threshold_1,1.0,false,true,false,false,"",1895137,139529,0.07362475641602692,2414573,290387,0.12026432830980882
+threshold_100k,100000.0,false,true,false,false,"",1542339,79957,0.051841391548809956,1961058,203172,0.10360325905710081
+zero_as_missing_10k,10000.0,true,true,false,false,"",1807288,130328,0.07211246906967789,2288846,271155,0.11846799653624578
+exclude_quit_claim,10000.0,false,true,false,false,"Quit Claim Deed,Quit claim",1799813,128781,0.0715524335028139,2276120,267126,0.11736024462682108

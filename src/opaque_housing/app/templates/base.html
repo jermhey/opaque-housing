@@ -13,7 +13,7 @@
       <p class="kicker">Investigation · aggregates only</p>
       <h1><a href="/">Opaque residential ownership</a></h1>
       <nav>
-        <a href="/" {% if page == "home" %}aria-current="page"{% endif %}>Compare</a>
+        <a href="/" {% if page == "home" %}aria-current="page"{% endif %}>Findings</a>
         <a href="/neighborhoods" {% if page == "neighborhoods" %}aria-current="page"{% endif %}>Neighborhoods</a>
         <a href="/definitions" {% if page == "definitions" %}aria-current="page"{% endif %}>Definitions</a>
         <a href="/trends" {% if page == "trends" %}aria-current="page"{% endif %}>Trends</a>
@@ -32,7 +32,7 @@
     {% block main %}{% endblock %}
   </main>
   <footer class="site">
-    <div class="wrap">Aggregates only. No name or address search. <a href="https://github.com/jermhey/opaque-housing">Source</a>.</div>
+    <div class="wrap">Live investigation on Fly. <a href="{{ pages_url }}">Static snapshot</a> on GitHub Pages. Aggregates only. No name or address search. <a href="https://github.com/jermhey/opaque-housing">Source</a>.</div>
   </footer>
 </body>
 </html>

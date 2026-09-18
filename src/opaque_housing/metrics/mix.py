@@ -1,4 +1,4 @@
-"""Mix-adjusted NYC vs PHL entity shares. Pure functions on published type tables."""
+"""Mix-adjusted pairwise entity shares. Pure functions on published type tables."""
 
 from __future__ import annotations
 
@@ -116,72 +116,108 @@ def _observed(rates: dict[str, float], weights: dict[str, float]) -> float:
 
 
 def mix_adjust(
-    nyc: pl.DataFrame,
-    phl: pl.DataFrame,
+    reference: pl.DataFrame,
+    other: pl.DataFrame,
     *,
     weight: str = "parcel",
+    reference_id: str = "nyc",
+    other_id: str = "phl",
 ) -> dict[str, Any]:
     """Standardize each metro onto the other's building-type mix.
 
     ``weight`` is ``parcel`` (the comparable headline) or ``unit``.
-    Common-type rows renormalize mix weights to 1. Kitagawa uses Philadelphia
-    as the reference mix: NYC − PHL = rate effect + mix effect.
+    Common-type rows renormalize mix weights to 1. Kitagawa uses ``other`` as
+    the reference mix: reference − other = rate effect + mix effect.
     """
     if weight not in {"parcel", "unit"}:
         raise ValueError("weight must be parcel or unit")
-    nyc_rates = building_type_entity_rates(nyc)
-    phl_rates = building_type_entity_rates(phl)
-    nyc_r, nyc_w = _rate_weight_maps(nyc_rates, weight)
-    phl_r, phl_w = _rate_weight_maps(phl_rates, weight)
-    nyc_types = list(nyc_r)
-    phl_types = list(phl_r)
-    common = sorted(set(nyc_types) & set(phl_types))
-    nyc_only = sorted(set(nyc_types) - set(phl_types))
-    phl_only = sorted(set(phl_types) - set(nyc_types))
-    nyc_w_c = _renorm(nyc_w, common)
-    phl_w_c = _renorm(phl_w, common)
-    nyc_obs = _observed(nyc_r, nyc_w)
-    phl_obs = _observed(phl_r, phl_w)
-    nyc_obs_common = _dot(nyc_r, nyc_w_c, common)
-    phl_obs_common = _dot(phl_r, phl_w_c, common)
-    phl_on_nyc = _dot(phl_r, nyc_w_c, common)
-    nyc_on_phl = _dot(nyc_r, phl_w_c, common)
-    # Rates at NYC mix + composition at PHL rates: identity holds on common types.
-    rate_effect = nyc_obs_common - phl_on_nyc
-    mix_effect = phl_on_nyc - phl_obs_common
+    ref_rates = building_type_entity_rates(reference)
+    oth_rates = building_type_entity_rates(other)
+    ref_r, ref_w = _rate_weight_maps(ref_rates, weight)
+    oth_r, oth_w = _rate_weight_maps(oth_rates, weight)
+    ref_types = list(ref_r)
+    oth_types = list(oth_r)
+    common = sorted(set(ref_types) & set(oth_types))
+    ref_only = sorted(set(ref_types) - set(oth_types))
+    oth_only = sorted(set(oth_types) - set(ref_types))
+    ref_w_c = _renorm(ref_w, common)
+    oth_w_c = _renorm(oth_w, common)
+    ref_obs = _observed(ref_r, ref_w)
+    oth_obs = _observed(oth_r, oth_w)
+    ref_obs_common = _dot(ref_r, ref_w_c, common)
+    oth_obs_common = _dot(oth_r, oth_w_c, common)
+    oth_on_ref = _dot(oth_r, ref_w_c, common)
+    ref_on_oth = _dot(ref_r, oth_w_c, common)
+    rate_effect = ref_obs_common - oth_on_ref
+    mix_effect = oth_on_ref - oth_obs_common
     rows = []
-    for btype in sorted(set(nyc_types) | set(phl_types)):
+    for btype in sorted(set(ref_types) | set(oth_types)):
         rows.append(
             {
                 "building_type": btype,
-                "in_nyc": btype in nyc_r,
-                "in_phl": btype in phl_r,
-                "nyc_rate": nyc_r.get(btype),
-                "phl_rate": phl_r.get(btype),
-                "nyc_weight": nyc_w.get(btype),
-                "phl_weight": phl_w.get(btype),
+                "in_reference": btype in ref_r,
+                "in_other": btype in oth_r,
+                "reference_rate": ref_r.get(btype),
+                "other_rate": oth_r.get(btype),
+                "reference_weight": ref_w.get(btype),
+                "other_weight": oth_w.get(btype),
+                f"in_{reference_id}": btype in ref_r,
+                f"in_{other_id}": btype in oth_r,
+                f"{reference_id}_rate": ref_r.get(btype),
+                f"{other_id}_rate": oth_r.get(btype),
+                f"{reference_id}_weight": ref_w.get(btype),
+                f"{other_id}_weight": oth_w.get(btype),
             }
         )
     return {
         "weight": weight,
+        "reference_id": reference_id,
+        "other_id": other_id,
         "entity_classes": list(_ENTITY),
         "common_types": common,
-        "nyc_only_types": nyc_only,
-        "phl_only_types": phl_only,
-        "nyc_observed": nyc_obs,
-        "phl_observed": phl_obs,
-        "nyc_observed_common": nyc_obs_common,
-        "phl_observed_common": phl_obs_common,
-        "phl_on_nyc_mix": phl_on_nyc,
-        "nyc_on_phl_mix": nyc_on_phl,
-        "gap": nyc_obs - phl_obs,
-        "gap_common": nyc_obs_common - phl_obs_common,
+        "reference_only_types": ref_only,
+        "other_only_types": oth_only,
+        "reference_observed": ref_obs,
+        "other_observed": oth_obs,
+        "reference_observed_common": ref_obs_common,
+        "other_observed_common": oth_obs_common,
+        "other_on_reference_mix": oth_on_ref,
+        "reference_on_other_mix": ref_on_oth,
+        f"{reference_id}_only_types": ref_only,
+        f"{other_id}_only_types": oth_only,
+        f"{reference_id}_observed": ref_obs,
+        f"{other_id}_observed": oth_obs,
+        f"{reference_id}_observed_common": ref_obs_common,
+        f"{other_id}_observed_common": oth_obs_common,
+        f"{other_id}_on_{reference_id}_mix": oth_on_ref,
+        f"{reference_id}_on_{other_id}_mix": ref_on_oth,
+        "gap": ref_obs - oth_obs,
+        "gap_common": ref_obs_common - oth_obs_common,
         "rate_effect": rate_effect,
         "mix_effect": mix_effect,
         "types": rows,
         "caveat": (
             "Common building types only; mix weights renormalized to 1. "
-            "NYC co-op buildings have no Philadelphia analogue and are excluded "
-            "from the standardized rates. Entity = llc + corp + partnership."
+            "Types that exist in only one metro are excluded from the "
+            "standardized rates. Entity = llc + corp + partnership. "
+            f"{reference_id} is the mix reference."
         ),
+    }
+
+
+def kitagawa_story(mix: dict[str, Any]) -> dict[str, Any]:
+    """Which side of the common-type gap is larger: rate or mix."""
+    rate = float(mix["rate_effect"])
+    mix_effect = float(mix["mix_effect"])
+    gap = float(mix["gap_common"])
+    magnitude = abs(rate) + abs(mix_effect)
+    dominant = "mix" if abs(mix_effect) >= abs(rate) else "rate"
+    return {
+        "dominant": dominant,
+        "rate_effect": rate,
+        "mix_effect": mix_effect,
+        "gap_common": gap,
+        "rate_share": abs(rate) / magnitude if magnitude else 0.0,
+        "mix_share": abs(mix_effect) / magnitude if magnitude else 0.0,
+        "reference_higher": float(mix["reference_observed"]) > float(mix["other_observed"]),
     }

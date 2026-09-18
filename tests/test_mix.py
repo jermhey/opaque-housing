@@ -62,3 +62,18 @@ def test_mix_adjust_kitagawa_adds_up() -> None:
 def test_mix_adjust_rejects_bad_weight() -> None:
     with pytest.raises(ValueError, match="weight"):
         mix_adjust(_type_table(), _phl_table(), weight="lots")
+
+
+def test_mix_adjust_generic_ids() -> None:
+    result = mix_adjust(
+        _type_table(),
+        _phl_table(),
+        weight="parcel",
+        reference_id="nyc",
+        other_id="cook",
+    )
+    assert result["reference_id"] == "nyc"
+    assert result["other_id"] == "cook"
+    assert result["nyc_observed"] == pytest.approx(result["reference_observed"])
+    assert result["cook_observed"] == pytest.approx(result["other_observed"])
+    assert result["gap_common"] == pytest.approx(result["rate_effect"] + result["mix_effect"])

@@ -11,6 +11,7 @@ from fastapi.templating import Jinja2Templates
 
 from opaque_housing.app.formatters import intcomma, pct
 from opaque_housing.app.security import is_admin
+from opaque_housing.app.urls import app_public_url, pages_url
 
 TEMPLATE_DIR = Path(__file__).parent / "templates"
 
@@ -30,6 +31,8 @@ def render(
         "request": request,
         "admin": is_admin(request),
         "partial": partial,
+        "app_url": app_public_url(),
+        "pages_url": pages_url(),
         **(context or {}),
     }
     return templates.TemplateResponse(request, name, payload)

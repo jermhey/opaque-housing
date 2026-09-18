@@ -8,7 +8,7 @@ from dataclasses import dataclass
 
 from opaque_housing.schema import BuildingType, OwnerClass
 
-RULES_VERSION = "2026-09-17.3"
+RULES_VERSION = "2026-09-18.1"
 
 _TokenPred = Callable[[str], bool]
 
@@ -46,6 +46,8 @@ _NOT_PERSON = re.compile(
 _PUBLIC = re.compile(
     r"\bCITY OF NEW YORK\b|\bNEW YORK CITY\b|\bNYCHA\b|\bHOUSING AUTH"
     r"|\bCITY OF PHILADELPHIA\b"
+    r"|\bCITY OF CHICAGO\b|\bCOOK COUNTY\b|\bCHICAGO HOUSING AUTH"
+    r"|\bMIAMI-DADE COUNTY\b|\bMIAMI DADE COUNTY\b|\bCITY OF MIAMI\b"
     r"|\bUNITED STATES\b|\bUS GOVERNMENT\b"
     r"|\bSTATE OF NEW YORK\b|\bNEW YORK STATE\b"
     r"|\bPORT AUTHORITY\b|\bMTA\b|\bMETROPOLITAN TRANSPORTATION\b"
@@ -54,6 +56,7 @@ _PUBLIC = re.compile(
     r"|\bHUD\b|\bNYS OFFICE\b|\bNYS DEPARTMENT\b"
     r"|\bCITY COLLEGE\b|\bGRAND-?DUCHY\b"
 )
+_PLACEHOLDER_OWNER = re.compile(r"^TAXPAYER OF\b|^CURRENT OWNER\b|^OWNER OF RECORD\b")
 _LENDER = re.compile(
     r"\bFANNIE MAE\b|\bFREDDIE MAC\b|\bFNMA\b|\bFHLMC\b|\bGINNIE MAE\b|\bGNMA\b"
     r"|\bFEDERAL NATIONAL MORTGAGE\b"
@@ -116,6 +119,12 @@ def _is_estate(name: str) -> bool:
     return _ESTATE.search(name) is not None
 
 
+def _is_placeholder_owner(name: str) -> bool:
+    if _has_legal_form(name):
+        return False
+    return _PLACEHOLDER_OWNER.search(name) is not None
+
+
 def _is_coop_building(_name: str, building_type: BuildingType | None) -> bool:
     return building_type is BuildingType.COOP_BUILDING
 
@@ -155,6 +164,7 @@ RULES: tuple[Rule, ...] = (
     Rule("R001_blank", OwnerClass.UNKNOWN, _eq("")),
     Rule("R010_hdfc", OwnerClass.HDFC, _has(_HDFC)),
     Rule("R020_public", OwnerClass.PUBLIC, _is_public),
+    Rule("R021_placeholder_owner", OwnerClass.UNKNOWN, _is_placeholder_owner),
     Rule("R030_lender", OwnerClass.LENDER_REO, _is_lender),
     Rule("R040_nonprofit", OwnerClass.NONPROFIT_RELIGIOUS, _is_nonprofit),
     Rule("R050_estate", OwnerClass.ESTATE, _is_estate),

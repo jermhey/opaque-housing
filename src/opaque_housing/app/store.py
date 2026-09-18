@@ -17,8 +17,9 @@ from opaque_housing.metrics.publish import (
     assert_allowed_filename,
     assert_safe_columns,
 )
+from opaque_housing.metros import METRO_IDS
 
-KNOWN_METROS = ("nyc", "phl")
+KNOWN_METROS = METRO_IDS
 LOADABLE = ALLOWED_FILES | GENERATED_FILES
 
 

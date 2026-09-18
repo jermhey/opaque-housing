@@ -1,3 +1,4 @@
+{% if data.lede %}<p class="finding-lead">{{ data.lede }}</p>{% endif %}
 <div class="card-grid">
   {% if data.stock %}
     {% with card=data.stock %}{% include "partials/claim_card.html" %}{% endwith %}

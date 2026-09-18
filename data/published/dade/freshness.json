@@ -1,0 +1,38 @@
+{
+  "metro": "dade",
+  "generated_at": "2026-09-18T15:50:00.633965+00:00",
+  "stock": {
+    "metro_id": "dade",
+    "started_at": "2026-09-18T15:45:15.322828+00:00",
+    "finished_at": "2026-09-18T15:45:31.788252+00:00",
+    "source_versions": {
+      "gis": "2026"
+    },
+    "rules_version": "2026-09-18.1",
+    "filter_counts": [
+      {
+        "stage": "dade_to_parcels",
+        "rule_id": "dade_residential_only",
+        "rows_in": 943689,
+        "rows_out": 814861
+      },
+      {
+        "stage": "stock_private_denominator",
+        "rule_id": "exclude_public_nonprofit",
+        "rows_in": 814861,
+        "rows_out": 814410
+      }
+    ],
+    "notes": [
+      "raw shares only",
+      "trusts are not in the entity headline"
+    ]
+  },
+  "reused": {},
+  "flow_present": false,
+  "opacity_present": false,
+  "notes": [
+    "GitHub-hosted refresh updates NYC PLUTO stock, PHL OPA stock, and Cook County stock+sales.",
+    "ACRIS, NY DOS, PHL RTT, and Miami-Dade stay laptop-only; NYC/PHL flow and opacity are reused when missing."
+  ]
+}

@@ -41,11 +41,11 @@ Citywide “top portfolio” lists are **not** published. Cluster 1 on the opaci
 
 ### Refresh (amends ADR 0009)
 
-`refresh.yml` may rebuild **NYC PLUTO stock and PHL OPA stock** on the monthly (or dispatched) job. Both fit a runner. PHL RTT (~206 MB), ACRIS, HPD, and NY DOS stay laptop-only. Freshness UI must say which series are stale.
+`refresh.yml` may rebuild **NYC PLUTO stock, PHL OPA stock, and Cook County stock+sales** on the monthly (or dispatched) job. Laptop timing 2026-09-18: Cook stock+sales+build+flow ~14 minutes. PHL RTT (~206 MB), ACRIS, HPD, NY DOS, and Miami-Dade stay laptop-only. Freshness UI must say which series are stale.
 
 ### Host
 
-A small VM (Fly.io / Render) can serve the app. GitHub Actions still builds aggregates. No warehouse. DuckDB in the app process holds only published tables (memory or `data/app.duckdb` with the same allowlist).
+Fly.io is the canonical public host (`opaque-housing-insight`, `min_machines_running = 1`). GitHub Pages is a static snapshot with a pointer to Fly, not a second site to maintain. GitHub Actions still builds aggregates. No warehouse. DuckDB in the app process holds only published tables (memory or `data/app.duckdb` with the same allowlist).
 
 The image may ship a fallback copy of `data/published`. The live host **syncs allowlisted files from GitHub** on boot and after `refresh.yml` pushes (`POST /internal/reload` with `OH_SYNC_TOKEN`). It never fetches parcel files.
 

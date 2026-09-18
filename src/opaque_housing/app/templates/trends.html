@@ -2,12 +2,12 @@
 {% block title %}Trends — Opaque residential ownership{% endblock %}
 {% block main %}
 <h2>Sale-flow trends</h2>
-<p class="lede">Entity buyers of arm’s-length sales. Coverage window {{ data.window.start }}–{{ data.window.end }}.</p>
+<p class="lede">Entity buyers of arm’s-length sales. Coverage window {{ data.window.start }}–{{ data.window.end }}. Cook County and Miami-Dade County are county files, not Chicago or Miami.</p>
 <form class="toolbar" method="get">
   <label>Metro
     <select name="metro" onchange="this.form.submit()">
       {% for item in metros %}
-      <option value="{{ item }}" {% if item == metro %}selected{% endif %}>{{ item|upper }}</option>
+      <option value="{{ item }}" {% if item == metro %}selected{% endif %}>{{ metro_label(item) }}</option>
       {% endfor %}
     </select>
   </label>
@@ -25,6 +25,18 @@
     <p class="sub">the comparable cross-metro series</p>
   </article>
 </div>
+{% if data.sparkline %}
+<figure class="sparkline">
+  <svg viewBox="0 0 {{ data.sparkline.width }} {{ data.sparkline.height }}" role="img" aria-label="Entity sale share {{ data.sparkline.first_year }} to {{ data.sparkline.last_year }}">
+    <path d="{{ data.sparkline.path }}" fill="none" stroke="currentColor" stroke-width="2"/>
+  </svg>
+  <figcaption>{{ data.sparkline.first_year }} {{ data.sparkline.start|pct }} → {{ data.sparkline.last_year }} {{ data.sparkline.end|pct }}</figcaption>
+</figure>
+{% endif %}
+{% elif metro == "dade" %}
+<p class="note">No published Miami-Dade flow. The free Florida SDF has no buyer name, so entity-buyer shares are not identified.</p>
+{% else %}
+<p class="note">No published flow series for {{ metro_label(metro) }}.</p>
 {% endif %}
 <div class="table-wrap">
   <table>

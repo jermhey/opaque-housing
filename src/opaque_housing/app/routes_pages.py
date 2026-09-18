@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import HTMLResponse
@@ -17,12 +17,40 @@ from opaque_housing.app.payloads import (
 )
 from opaque_housing.app.store import AggregateStore
 from opaque_housing.app.templating import render
+from opaque_housing.metros import COMPARE_OTHERS, display_name
 
 router = APIRouter()
 
 
 def _ctx(**extra: object) -> dict[str, object]:
-    return {"pct": pct, "intcomma": intcomma, **extra}
+    return {"pct": pct, "intcomma": intcomma, "metro_label": display_name, **extra}
+
+
+def _compare_set(
+    store: AggregateStore, *, weight: str
+) -> tuple[list[dict[str, Any]], dict[str, Any] | None]:
+    compares: list[dict[str, Any]] = []
+    if "nyc" in store.metros:
+        for other in COMPARE_OTHERS:
+            if other not in store.metros:
+                continue
+            compares.append(_display_mix(mix_payload(store, weight=weight, other=other)))
+    headline = next((item for item in compares if item.get("other") == "phl"), None)
+    if headline is None and compares:
+        headline = compares[0]
+    return compares, headline
+
+
+def _display_mix(payload: dict[str, Any]) -> dict[str, Any]:
+    nyc_claim = payload.get("nyc_claim")
+    if isinstance(nyc_claim, dict):
+        payload["nyc_claim"] = claim_display(nyc_claim)
+    other_claim = payload.get("other_claim")
+    if isinstance(other_claim, dict):
+        payload["other_claim"] = claim_display(other_claim)
+    if payload.get("phl_claim"):
+        payload["phl_claim"] = payload.get("other_claim")
+    return payload
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -31,17 +59,18 @@ def home(
     store: Annotated[AggregateStore, Depends(get_store)],
     weight: Annotated[str, Query(pattern="^(parcel|unit)$")] = "parcel",
 ) -> HTMLResponse:
-    mixed = None
-    if "nyc" in store.metros and "phl" in store.metros:
-        mixed = mix_payload(store, weight=weight)
-        if mixed.get("nyc_claim"):
-            mixed["nyc_claim"] = claim_display(mixed["nyc_claim"])
-        if mixed.get("phl_claim"):
-            mixed["phl_claim"] = claim_display(mixed["phl_claim"])
+    compares, headline = _compare_set(store, weight=weight)
     return render(
         request,
         "home.html",
-        _ctx(page="home", weight=weight, mixed=mixed, metros=store.metros),
+        _ctx(
+            page="home",
+            weight=weight,
+            mixed=headline,
+            headline=headline,
+            compares=compares,
+            metros=store.metros,
+        ),
     )
 
 
@@ -50,13 +79,25 @@ def mix_partial(
     request: Request,
     store: Annotated[AggregateStore, Depends(get_store)],
     weight: Annotated[str, Query(pattern="^(parcel|unit)$")] = "parcel",
+    other: Annotated[str, Query(pattern="^(phl|cook|dade)$")] = "phl",
 ) -> HTMLResponse:
-    mixed = mix_payload(store, weight=weight)
-    if mixed.get("nyc_claim"):
-        mixed["nyc_claim"] = claim_display(mixed["nyc_claim"])
-    if mixed.get("phl_claim"):
-        mixed["phl_claim"] = claim_display(mixed["phl_claim"])
+    mixed = _display_mix(mix_payload(store, weight=weight, other=other))
     return render(request, "partials/mix.html", _ctx(weight=weight, mixed=mixed), partial=True)
+
+
+@router.get("/partials/compares", response_class=HTMLResponse)
+def compares_partial(
+    request: Request,
+    store: Annotated[AggregateStore, Depends(get_store)],
+    weight: Annotated[str, Query(pattern="^(parcel|unit)$")] = "parcel",
+) -> HTMLResponse:
+    compares, headline = _compare_set(store, weight=weight)
+    return render(
+        request,
+        "partials/compares.html",
+        _ctx(weight=weight, compares=compares, headline=headline),
+        partial=True,
+    )
 
 
 @router.get("/neighborhoods", response_class=HTMLResponse)

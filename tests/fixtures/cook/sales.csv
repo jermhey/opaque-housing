@@ -1,0 +1,4 @@
+pin,doc_no,sale_date,sale_price,deed_type,mydec_deed_type,buyer_name,seller_name,is_multisale,sale_filter_deed_type,sale_filter_less_than_10k,year,row_id
+14021250150000,D1,2022-06-01,250000,Warranty,Warranty Deed,BUYER LLC,SELLER,false,false,false,2022,s1
+14021250150001,D2,2022-07-01,5000,Warranty,Warranty Deed,SMALL BUYER,SELLER,false,false,true,2022,s2
+14021250150002,D3,2022-08-01,200000,Quit claim,Quit Claim Deed,QC LLC,SELLER,false,true,false,2022,s3

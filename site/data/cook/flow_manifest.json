@@ -1,0 +1,78 @@
+{
+  "metro_id": "cook",
+  "started_at": "2026-09-18T15:32:14.863852+00:00",
+  "finished_at": "2026-09-18T15:33:37.261685+00:00",
+  "source_versions": {
+    "sales": "wvhk-k5uv-2026-09-18",
+    "rules": "2026-09-18.1"
+  },
+  "rules_version": "2026-09-18.1",
+  "filter_counts": [
+    {
+      "stage": "cook_sales_to_transfers",
+      "rule_id": "group_document_parcels",
+      "rows_in": 2686086,
+      "rows_out": 2345388
+    },
+    {
+      "stage": "sale_filter",
+      "rule_id": "sale_deed_type",
+      "rows_in": 2134422,
+      "rows_out": 2134422
+    },
+    {
+      "stage": "sale_filter",
+      "rule_id": "named_grantee",
+      "rows_in": 2134422,
+      "rows_out": 2134422
+    },
+    {
+      "stage": "sale_filter",
+      "rule_id": "min_consideration",
+      "rows_in": 2134422,
+      "rows_out": 2016061
+    },
+    {
+      "stage": "flow_residential_join",
+      "rule_id": "pluto_or_pad_residential",
+      "rows_in": 2016061,
+      "rows_out": 1822550
+    },
+    {
+      "stage": "coverage_window",
+      "rule_id": "recorded_year_2000_2025",
+      "rows_in": 1865316,
+      "rows_out": 1842207
+    },
+    {
+      "stage": "sale_filter",
+      "rule_id": "sale_deed_type",
+      "rows_in": 2345388,
+      "rows_out": 2243677
+    },
+    {
+      "stage": "sale_filter",
+      "rule_id": "named_grantee",
+      "rows_in": 2243677,
+      "rows_out": 2134422
+    },
+    {
+      "stage": "sale_filter",
+      "rule_id": "min_consideration",
+      "rows_in": 2134422,
+      "rows_out": 2134422
+    },
+    {
+      "stage": "flow_residential_join",
+      "rule_id": "pluto_or_pad_residential",
+      "rows_in": 2134422,
+      "rows_out": 1925414
+    }
+  ],
+  "notes": [
+    "flow uses sale_deed + named grantee + consideration cut (ADR 0005)",
+    "history uses every sale_deed with a named grantee",
+    "coverage window recorded years 2000-2025 (ADR 0013)",
+    "trusts are not in the entity headline"
+  ]
+}

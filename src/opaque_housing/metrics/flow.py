@@ -17,11 +17,6 @@ from opaque_housing.schema import ENTITY_OWNED_CLASSES
 _ENTITY = [item.value for item in ENTITY_OWNED_CLASSES]
 WINDOW_START = 2003
 WINDOW_END = 2025
-# NYC: ADR 0006. PHL: ADR 0010 (usable consideration from recording year 2000).
-COVERAGE_WINDOWS: dict[str, tuple[int, int]] = {
-    "nyc": (2003, 2025),
-    "phl": (2000, 2025),
-}
 
 
 def classify_buyers(sales: pl.DataFrame) -> pl.DataFrame:
@@ -289,6 +284,25 @@ PHL_SENSITIVITY_CONFIGS: list[tuple[str, SaleFilterConfig]] = [
         "exclude_sheriff",
         SaleFilterConfig(drop_sale_codes=frozenset({"DEED SHERIFF", "SHERIFF'S DEED"})),
     ),
+]
+
+COOK_SENSITIVITY_CONFIGS: list[tuple[str, SaleFilterConfig]] = [
+    ("default_10k", SaleFilterConfig()),
+    ("threshold_0", SaleFilterConfig(min_consideration=0.0)),
+    ("threshold_1", SaleFilterConfig(min_consideration=1.0)),
+    ("threshold_100k", SaleFilterConfig(min_consideration=100_000.0)),
+    ("zero_as_missing_10k", SaleFilterConfig(treat_zero_amount_as_missing=True)),
+    (
+        "exclude_quit_claim",
+        SaleFilterConfig(drop_sale_codes=frozenset({"Quit claim", "Quit Claim Deed"})),
+    ),
+]
+
+DADE_SENSITIVITY_CONFIGS: list[tuple[str, SaleFilterConfig]] = [
+    ("default_10k", SaleFilterConfig(require_named_grantee=False)),
+    ("threshold_0", SaleFilterConfig(min_consideration=0.0, require_named_grantee=False)),
+    ("threshold_1", SaleFilterConfig(min_consideration=1.0, require_named_grantee=False)),
+    ("threshold_100k", SaleFilterConfig(min_consideration=100_000.0, require_named_grantee=False)),
 ]
 
 

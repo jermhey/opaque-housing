@@ -1,0 +1,67 @@
+{% if compares and headline %}
+  {% set mix = headline.mix %}
+  {% set story = headline.story %}
+  <section class="finding">
+    <p class="kicker">{{ headline.reference_label }} vs {{ headline.other_label }} · {{ weight }}-weighted</p>
+    {% if story.dominant == "mix" %}
+    <p class="finding-lead">Mostly mix. {{ headline.reference_label }}’s {{ mix.nyc_observed|pct }} entity share versus {{ headline.other_label }}’s {{ mix.other_observed|pct }} is mainly composition, not a higher rate inside the same building types.</p>
+    {% else %}
+    <p class="finding-lead">Mostly rate. {{ headline.reference_label }}’s {{ mix.nyc_observed|pct }} versus {{ headline.other_label }}’s {{ mix.other_observed|pct }} stays after you give {{ headline.other_label }} New York’s building-type mix.</p>
+    {% endif %}
+    <div class="stat-grid">
+      <article class="stat">
+        <div class="label">NYC observed</div>
+        <p class="value">{{ mix.nyc_observed|pct }}</p>
+        <p class="sub">{{ headline.reference_label }}</p>
+      </article>
+      <article class="stat">
+        <div class="label">{{ headline.other_label }} observed</div>
+        <p class="value">{{ mix.other_observed|pct }}</p>
+        <p class="sub">{{ weight }}-weighted entity share</p>
+      </article>
+      <article class="stat">
+        <div class="label">{% if headline.other == "phl" %}PHL on NYC mix{% else %}{{ headline.other_label }} on NYC mix{% endif %}</div>
+        <p class="value">{{ mix.other_on_reference_mix|pct }}</p>
+        <p class="sub">{{ headline.other_label }} rates × New York mix</p>
+      </article>
+      <article class="stat">
+        <div class="label">Of the common-type gap</div>
+        <p class="value">{{ story.mix_share|pct }} mix</p>
+        <p class="sub">rate {{ mix.rate_effect|pct }} · mix {{ mix.mix_effect|pct }}</p>
+      </article>
+    </div>
+    {% if headline.weight_bars %}
+    <h3>Building-type mix</h3>
+    <p class="note">Share of private residential {{ weight }}s in each official type. Harmonized <code>sfr_1_4</code> is not NYC 1–4 family.</p>
+    {% with bars=headline.weight_bars, left_label="NYC", right_label=headline.other_label %}
+      {% include "partials/weight_bars.html" %}
+    {% endwith %}
+    {% endif %}
+    <p class="caveat">{{ mix.caveat }}</p>
+  </section>
+
+  <h3>Two county files</h3>
+  <p class="note">Cook County and Miami-Dade County are county extracts, not Chicago or the City of Miami.</p>
+  <div class="card-grid">
+    {% for mixed in compares %}
+      {% if mixed.other != "phl" %}
+      <article class="card county-card">
+        <div class="label">{{ mixed.other_label }}</div>
+        <p class="value">{{ mixed.mix.other_observed|pct }}</p>
+        <p class="sub">{{ weight }}-weighted entity share · NYC is {{ mixed.mix.nyc_observed|pct }}</p>
+        <p class="caveat">{{ mixed.metro_note }}</p>
+        <p class="note">{{ mixed.other_label }} on NYC mix: {{ mixed.mix.other_on_reference_mix|pct }}. Gap is {{ mixed.story.dominant }}-led (rate {{ mixed.mix.rate_effect|pct }}, mix {{ mixed.mix.mix_effect|pct }}).</p>
+      </article>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  {% for mixed in compares %}
+    <details class="compare-block" {% if mixed.other == headline.other %}open{% endif %}>
+      <summary>{{ mixed.reference_label }} vs {{ mixed.other_label }}</summary>
+      {% include "partials/mix.html" %}
+    </details>
+  {% endfor %}
+{% else %}
+  <p class="note">Published aggregates for New York City and at least one other metro are required for mix-adjust.</p>
+{% endif %}

@@ -1,22 +1,18 @@
 {% extends "base.html" %}
-{% block title %}NYC vs Philadelphia — Opaque residential ownership{% endblock %}
+{% block title %}Findings — Opaque residential ownership{% endblock %}
 {% block main %}
-<h2>New York City vs Philadelphia</h2>
-<p class="lede">Is New York’s higher entity lot share mostly large multifamily, or a higher entity rate inside the same building types? Mix-adjust uses only the published type tables.</p>
-<p class="caveat">Entity-owned is LLC + corporation + partnership. Trusts stay a sensitivity series. Parcel weight is the comparable headline — Philadelphia has no dwelling-unit census (ADR 0010). No name or address search.</p>
-<form class="toolbar" hx-get="/partials/mix" hx-target="#mix-panel" hx-swap="innerHTML">
+<h2>What the lots show</h2>
+<p class="lede">Is New York’s higher entity lot share mostly more large buildings, or a higher entity rate inside the same types? The answer is in the published type tables — not a live reclassify, and not a name search.</p>
+<form class="toolbar" hx-get="/partials/compares" hx-target="#mix-panel" hx-swap="innerHTML">
   <label>Weight
-    <select name="weight" hx-get="/partials/mix" hx-target="#mix-panel" hx-include="closest form">
+    <select name="weight" hx-get="/partials/compares" hx-target="#mix-panel" hx-include="closest form">
       <option value="parcel" {% if weight == "parcel" %}selected{% endif %}>Lots (comparable)</option>
       <option value="unit" {% if weight == "unit" %}selected{% endif %}>Units (PHL is a lower bound)</option>
     </select>
   </label>
 </form>
 <div id="mix-panel">
-  {% if mixed %}
-    {% include "partials/mix.html" %}
-  {% else %}
-    <p class="note">Published aggregates for both metros are required for mix-adjust.</p>
-  {% endif %}
+  {% include "partials/compares.html" %}
 </div>
+<p class="note">Entity-owned is LLC + corporation + partnership. Trusts stay a sensitivity series. <a href="/definitions">Change the definition</a> without leaving the cubes.</p>
 {% endblock %}

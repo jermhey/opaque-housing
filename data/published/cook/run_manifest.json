@@ -1,0 +1,27 @@
+{
+  "metro_id": "cook",
+  "started_at": "2026-09-18T15:29:18.281017+00:00",
+  "finished_at": "2026-09-18T15:29:52.313394+00:00",
+  "source_versions": {
+    "universe": "2026"
+  },
+  "rules_version": "2026-09-18.1",
+  "filter_counts": [
+    {
+      "stage": "cook_to_parcels",
+      "rule_id": "cook_residential_only",
+      "rows_in": 1863562,
+      "rows_out": 1482835
+    },
+    {
+      "stage": "stock_private_denominator",
+      "rule_id": "exclude_public_nonprofit",
+      "rows_in": 1482835,
+      "rows_out": 1482172
+    }
+  ],
+  "notes": [
+    "raw shares only",
+    "trusts are not in the entity headline"
+  ]
+}

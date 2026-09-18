@@ -28,7 +28,7 @@ PLUTO condo rows are billing-lot / complex grain, not unit owners (ADR 0002). Ow
 - wrapped `TR UST` is canonicalized to `TRUST`
 - `owner_key` is `sha256(name_normalized)[:16]` of the first party
 
-## Owner-class rules (`RULES_VERSION = 2026-09-17.3`)
+## Owner-class rules (`RULES_VERSION = 2026-09-18.1`)
 
 First match wins. Each rule has a positive and a negative unit test.
 
@@ -36,7 +36,8 @@ First match wins. Each rule has a positive and a negative unit test.
 |---|---|---|
 | `R001_blank` | `unknown` | empty after normalize |
 | `R010_hdfc` | `hdfc` | `HDFC` or `HOUSING DEVELOPMENT FUND` |
-| `R020_public` | `public` | Agency phrases (`CITY OF NEW YORK`, `NYCHA`, `CITY OF PHILADELPHIA`, `HOUSING AUTH` / `HOUSING AUTHORITY`, `NYS OFFICE`, …). Not bare `USA`/`NYS`/`FEDERAL`. Not an LLC. `CITY COLLEGE` is public (CUNY). |
+| `R020_public` | `public` | Agency phrases (`CITY OF NEW YORK`, `NYCHA`, `CITY OF PHILADELPHIA`, `CITY OF CHICAGO`, `COOK COUNTY`, `MIAMI-DADE COUNTY`, `CITY OF MIAMI`, `HOUSING AUTH` / `HOUSING AUTHORITY`, `NYS OFFICE`, …). Not bare `USA`/`NYS`/`FEDERAL`. Not an LLC. `CITY COLLEGE` is public (CUNY). |
+| `R021_placeholder_owner` | `unknown` | `TAXPAYER OF` / `CURRENT OWNER` / `OWNER OF RECORD` — not an LLC, not a land-trust name |
 | `R030_lender` | `lender_reo` | GSEs, `BANK`, `MORTGAGE`, `REO`, `J P MORGAN CHASE`. Not standalone `NA` or `CHASE`. Not an LLC. |
 | `R040_nonprofit` | `nonprofit_religious` | church/university/hospital/ministry tokens — not `COLLEGE AVE` / `COLLEGE POINT`, not an LLC, not `CHURCH`+`REALTY` |
 | `R050_estate` | `estate` | starts with `ESTATE`, or `ESTATE OF` / `EST OF` — not `REAL ESTATE`, not if INC/LLC/CORP |
@@ -120,10 +121,18 @@ OPA `opa_properties_public` via Carto. Residential filter and unit lower bounds 
 
 PHL flow uses `rtt_summary` sale types `DEED` / `DEED SHERIFF` / `SHERIFF'S DEED`, the same $10,000 named-grantee cut as NYC, and recorded years **2000–2025**.
 
+## Cook County stock and flow (ADR 0013)
+
+Geography is the **county**, not the City of Chicago. `geo_borough` is township; `geo_neighborhood` is township + assessor `nbhd_code`. Class 211 is official 2–6 units and is split with `char_apts` into `sfr_1_4` (2–4) vs `small_mf` (5–6). Condo parking/common-area PINs are dropped. Owner is year-matched `owner_address_name`. `TAXPAYER OF` is `unknown` (`R021`), not an LLC. Coverage window **2000–2025**. Timed 2026-09-18 (~14 min stock+sales+build+flow); now on the monthly runner.
+
+## Miami-Dade County stock and flow (ADR 0014)
+
+Geography is the **county**, not the City of Miami. Stock source of truth is PaGis folio **points** (`TRUE_OWNER1`, `DOR_DESC`, `UNIT_COUNT`). `geo_borough` is situs city; `geo_neighborhood` is ZIP. Blank 119.071 owners stay as `unknown`. Flow is Florida DOR SDF, county `CO_NO=23`, `QUAL_CD` 01. **SDF has no buyer name**; headline flow uses `require_named_grantee=False` and does not identify entity-buyer shares. Coverage window **2000–2025**. GIS timed 2026-09-18 (~15 min, 944 pages); stays laptop-only (no local SDF; ArcGIS page cap is flaky).
+
 ## Public aggregates (M4) and insight app (ADR 0011)
 
 `oh publish` copies an allowlist of citywide and NTA-or-coarser files. Parcel extracts, `owner_key`, HPD person names, addresses, and cluster member lists are refused. NTA cells with fewer than 10 units keep `suppressed=true`. The static site reads `site/data/site.json`.
 
-The insight app (`oh serve`) is a second public surface: FastAPI + DuckDB over the same allowlist. Mix-adjust uses `stock_by_building_type.csv` from both metros (common types, Kitagawa with Philadelphia as the reference mix). The definition playground reads `headlines.json` and `flow_sensitivity.csv`. Neighborhood HHI / top-N shares come from `concentration_by_neighborhood.csv` written by `oh build` (name-keys only; no names). Citywide ranked portfolios are not published — opacity cluster 1 is a known likely false merge.
+The insight app (`oh serve`) is a second public surface: FastAPI + DuckDB over the same allowlist. Mix-adjust uses `stock_by_building_type.csv` pairwise (NYC vs PHL / Cook / Dade; common types; Kitagawa with the other metro as the reference mix). The definition playground reads `headlines.json` and `flow_sensitivity.csv`. Neighborhood HHI / top-N shares come from `concentration_by_neighborhood.csv` written by `oh build` (name-keys only; no names). Citywide ranked portfolios are not published — opacity cluster 1 is a known likely false merge.
 
-GitHub-hosted refresh updates NYC PLUTO stock **and** PHL OPA stock (ADR 0011). ACRIS, NY DOS, and PHL RTT are not cold-pulled. After the job commits `data/published`, it calls the insight app `POST /internal/reload` so Fly DuckDB picks up the new files without rebuilding the image. The app also syncs allowlisted GitHub files on boot (`OH_SYNC_ON_BOOT`).
+GitHub-hosted refresh updates NYC PLUTO stock, PHL OPA stock, and Cook County stock+sales (ADR 0011). ACRIS, NY DOS, PHL RTT, and Miami-Dade are not cold-pulled (ADR 0012). After the job commits `data/published`, it calls the insight app `POST /internal/reload` so Fly DuckDB picks up the new files without rebuilding the image. The app also syncs allowlisted GitHub files on boot (`OH_SYNC_ON_BOOT`).

@@ -1,0 +1,62 @@
+{
+  "as_of": "2026-01-01",
+  "n_pluto": 1482835,
+  "n_reconstructed": 1001897,
+  "n_compared": 1001897,
+  "n_pluto_without_deed": 480938,
+  "n_deed_without_pluto": 0,
+  "class_agree": 859656,
+  "entity_agree": 946340,
+  "class_agree_rate": 0.8580283202764356,
+  "entity_agree_rate": 0.9445481920796249,
+  "by_building_type": [
+    {
+      "building_type": "small_mf",
+      "n": 18512,
+      "class_agree": 9018,
+      "entity_agree": 11488,
+      "class_agree_rate": 0.4871434745030251,
+      "entity_agree_rate": 0.6205704407951599
+    },
+    {
+      "building_type": "other_res",
+      "n": 28,
+      "class_agree": 19,
+      "entity_agree": 20,
+      "class_agree_rate": 0.6785714285714286,
+      "entity_agree_rate": 0.7142857142857143
+    },
+    {
+      "building_type": "mixed_use_res",
+      "n": 8681,
+      "class_agree": 5489,
+      "entity_agree": 6492,
+      "class_agree_rate": 0.6323004262181776,
+      "entity_agree_rate": 0.7478401105863379
+    },
+    {
+      "building_type": "condo_unit",
+      "n": 288229,
+      "class_agree": 247126,
+      "entity_agree": 273836,
+      "class_agree_rate": 0.8573946410666519,
+      "entity_agree_rate": 0.950064011601886
+    },
+    {
+      "building_type": "sfr_1_4",
+      "n": 686269,
+      "class_agree": 597999,
+      "entity_agree": 654344,
+      "class_agree_rate": 0.871376967340795,
+      "entity_agree_rate": 0.9534803407993075
+    },
+    {
+      "building_type": "coop_building",
+      "n": 178,
+      "class_agree": 5,
+      "entity_agree": 160,
+      "class_agree_rate": 0.028089887640449437,
+      "entity_agree_rate": 0.898876404494382
+    }
+  ]
+}

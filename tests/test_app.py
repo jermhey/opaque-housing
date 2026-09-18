@@ -64,6 +64,8 @@ def _write_published(root: Path) -> None:
     for metro, share, types in (
         ("nyc", 0.18, (8, 10, 80, 20)),
         ("phl", 0.10, (7, 3, 90, 10)),
+        ("cook", 0.12, (9, 4, 85, 15)),
+        ("dade", 0.08, (5, 2, 95, 5)),
     ):
         folder = root / metro
         folder.mkdir(parents=True)
@@ -226,7 +228,7 @@ def test_v1_stock_flow_mix_and_definition(tmp_path: Path, monkeypatch: pytest.Mo
     client = _client(tmp_path, monkeypatch)
     metros = client.get("/v1/metros")
     assert metros.status_code == 200
-    assert set(metros.json()["metros"]) == {"nyc", "phl"}
+    assert set(metros.json()["metros"]) == {"nyc", "phl", "cook", "dade"}
     stock = client.get("/v1/nyc/stock")
     assert stock.status_code == 200
     _assert_safe(stock.json())
@@ -234,9 +236,17 @@ def test_v1_stock_flow_mix_and_definition(tmp_path: Path, monkeypatch: pytest.Mo
     assert mix.status_code == 200
     body = mix.json()
     _assert_safe(body)
+    assert body["other"] == "phl"
     assert body["mix"]["gap_common"] == pytest.approx(
         body["mix"]["rate_effect"] + body["mix"]["mix_effect"]
     )
+    cook = client.get("/v1/compare/mix", params={"other": "cook"})
+    assert cook.status_code == 200
+    assert cook.json()["other"] == "cook"
+    assert cook.json()["other_label"] == "Cook County"
+    dade = client.get("/v1/compare/mix", params={"other": "dade"})
+    assert dade.status_code == 200
+    assert dade.json()["other_label"] == "Miami-Dade County"
     definition = client.get(
         "/v1/phl/definition",
         params={
@@ -268,10 +278,18 @@ def test_htmx_home_and_definitions(tmp_path: Path, monkeypatch: pytest.MonkeyPat
     home = client.get("/")
     assert home.status_code == 200
     assert "PHL on NYC mix" in home.text
+    assert "Cook County" in home.text
+    assert "Miami-Dade County" in home.text
+    assert "not the City of Chicago" in home.text
+    assert "not the City of Miami" in home.text
+    assert "Mostly rate" in home.text
+    assert "bar-track" in home.text
     assert "No name or address search" in home.text
     defs = client.get("/definitions", params={"metro": "phl", "flow_config": "exclude_sheriff"})
     assert defs.status_code == 200
     assert "Definition playground" in defs.text
+    assert "Precomputed cube" in defs.text
+    assert "exclude_public_nonprofit" in defs.text
     hoods = client.get("/neighborhoods", params={"metro": "nyc"})
     assert hoods.status_code == 200
     assert "Anonymous concentration" in hoods.text
@@ -325,6 +343,8 @@ def test_published_tree_api_has_no_forbidden_keys() -> None:
     home = client.get("/")
     assert home.status_code == 200
     assert "PHL on NYC mix" in home.text
+    assert "Mostly mix" in home.text
+    assert "bar-track" in home.text
     trends = client.get("/trends", params={"metro": "phl"})
     assert trends.status_code == 200
     assert "Sale-flow trends" in trends.text

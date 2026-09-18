@@ -2,19 +2,19 @@
 {% block title %}Definition playground — Opaque residential ownership{% endblock %}
 {% block main %}
 <h2>Definition playground</h2>
-<p class="lede">These are the toggles the static pages imply but cannot apply live. Every number is a precomputed cube — the server does not reclassify parcels.</p>
+<p class="lede">One claim card, four toggles. Every number is a precomputed cube — the server does not reclassify parcels.</p>
 <form class="toolbar"
       method="get"
       action="/definitions"
       hx-get="/definitions"
-      hx-select="main"
-      hx-target="main"
+      hx-select="#claim-panel"
+      hx-target="#claim-panel"
       hx-push-url="true"
       hx-trigger="change">
   <label>Metro
     <select name="metro">
       {% for item in metros %}
-      <option value="{{ item }}" {% if item == metro %}selected{% endif %}>{{ item|upper }}</option>
+      <option value="{{ item }}" {% if item == metro %}selected{% endif %}>{{ metro_label(item) }}</option>
       {% endfor %}
     </select>
   </label>
