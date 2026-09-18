@@ -5,8 +5,8 @@
 <p class="lede">Trigger the monthly stock job and append a gold label if this process can write a local queue. Gold individual names are not listed here.</p>
 <p><a href="/admin/logout">Sign out</a></p>
 
-<h3>Refresh</h3>
-<p class="caveat">The runner updates NYC PLUTO stock and PHL OPA stock. ACRIS, NY DOS, and PHL RTT stay on the laptop.</p>
+<h3>Rebuild aggregates</h3>
+<p class="caveat">GitHub Actions pulls NYC PLUTO and PHL OPA, runs <code>oh build</code> / <code>oh publish</code>, and commits <code>data/published</code>. ACRIS, NY DOS, and PHL RTT stay on the laptop. After the job pushes, Actions calls this app to reload.</p>
 {% if refresh_result %}
 <p class="flash">
   {% if refresh_result.ok %}Dispatched <code>{{ refresh_result.workflow }}</code> on {{ refresh_result.repo }}.
@@ -16,6 +16,19 @@
 {% endif %}
 <form method="post" action="/admin/refresh">
   <button type="submit">Dispatch refresh.yml</button>
+</form>
+
+<h3>Reload this host</h3>
+<p class="caveat">Download allowlisted files from <code>{{ sync_repo }}@{{ sync_ref }}</code> into DuckDB. No parcel files.</p>
+{% if sync_result %}
+<p class="flash">
+  {% if sync_result.ok %}Loaded {{ sync_result.count }} files from GitHub.
+  {% else %}{{ sync_result.detail or sync_result.error }}
+  {% endif %}
+</p>
+{% endif %}
+<form method="post" action="/admin/sync">
+  <button type="submit" class="secondary">Sync published files now</button>
 </form>
 
 <h3>Label a name</h3>

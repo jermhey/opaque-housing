@@ -14,6 +14,7 @@ from opaque_housing.app.admin_actions import (
     queue_writable,
     trigger_refresh,
 )
+from opaque_housing.app.deps import get_store
 from opaque_housing.app.security import (
     admin_configured,
     exchange_github_code,
@@ -25,9 +26,26 @@ from opaque_housing.app.security import (
     logout_session,
     password_ok,
 )
+from opaque_housing.app.store import AggregateStore
+from opaque_housing.app.sync import reload_store, sync_remote
 from opaque_housing.app.templating import render
 
 router = APIRouter()
+
+
+def _admin_context(**extra: object) -> dict[str, object]:
+    repo, ref = sync_remote()
+    return {
+        "page": "admin",
+        "queue_writable": queue_writable(),
+        "queue_path": str(gold_queue_path()),
+        "refresh_result": None,
+        "sync_result": None,
+        "label_result": None,
+        "sync_repo": repo,
+        "sync_ref": ref,
+        **extra,
+    }
 
 
 def require_admin(request: Request) -> None:
@@ -97,17 +115,7 @@ def admin_home(
     request: Request,
     _: Annotated[None, Depends(require_admin)],
 ) -> HTMLResponse:
-    return render(
-        request,
-        "admin/index.html",
-        {
-            "page": "admin",
-            "queue_writable": queue_writable(),
-            "queue_path": str(gold_queue_path()),
-            "refresh_result": None,
-            "label_result": None,
-        },
-    )
+    return render(request, "admin/index.html", _admin_context())
 
 
 @router.post("/refresh", response_class=HTMLResponse)
@@ -116,17 +124,20 @@ def refresh(
     _: Annotated[None, Depends(require_admin)],
 ) -> HTMLResponse:
     result = trigger_refresh()
-    return render(
-        request,
-        "admin/index.html",
-        {
-            "page": "admin",
-            "queue_writable": queue_writable(),
-            "queue_path": str(gold_queue_path()),
-            "refresh_result": result,
-            "label_result": None,
-        },
-    )
+    return render(request, "admin/index.html", _admin_context(refresh_result=result))
+
+
+@router.post("/sync", response_class=HTMLResponse)
+def sync_now(
+    request: Request,
+    _: Annotated[None, Depends(require_admin)],
+    store: Annotated[AggregateStore, Depends(get_store)],
+) -> HTMLResponse:
+    try:
+        result: dict[str, object] = reload_store(store)
+    except Exception as exc:  # noqa: BLE001 — stay on the admin page
+        result = {"ok": False, "detail": str(exc)}
+    return render(request, "admin/index.html", _admin_context(sync_result=result))
 
 
 @router.post("/label", response_class=HTMLResponse)
@@ -157,11 +168,5 @@ def label(
     return render(
         request,
         "admin/index.html",
-        {
-            "page": "admin",
-            "queue_writable": queue_writable(),
-            "queue_path": "local gold queue",
-            "refresh_result": None,
-            "label_result": label_result,
-        },
+        _admin_context(queue_path="local gold queue", label_result=label_result),
     )

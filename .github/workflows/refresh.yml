@@ -48,3 +48,14 @@ jobs:
             git commit -m "refresh published NYC and PHL stock aggregates"
             git push
           fi
+      - name: Reload the insight app
+        env:
+          OH_APP_URL: ${{ secrets.OH_APP_URL }}
+          OH_SYNC_TOKEN: ${{ secrets.OH_SYNC_TOKEN }}
+        run: |
+          if [ -z "$OH_APP_URL" ] || [ -z "$OH_SYNC_TOKEN" ]; then
+            echo "skip reload; set repository secrets OH_APP_URL and OH_SYNC_TOKEN"
+            exit 0
+          fi
+          curl -fsS -X POST "${OH_APP_URL%/}/internal/reload" \
+            -H "Authorization: Bearer ${OH_SYNC_TOKEN}"

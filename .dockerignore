@@ -1,0 +1,10 @@
+.git
+.venv
+.cursor
+data/raw
+data/derived
+eval/gold
+**/__pycache__
+**/*.pyc
+.DS_Store
+.env

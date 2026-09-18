@@ -47,6 +47,8 @@ Citywide “top portfolio” lists are **not** published. Cluster 1 on the opaci
 
 A small VM (Fly.io / Render) can serve the app. GitHub Actions still builds aggregates. No warehouse. DuckDB in the app process holds only published tables (memory or `data/app.duckdb` with the same allowlist).
 
+The image may ship a fallback copy of `data/published`. The live host **syncs allowlisted files from GitHub** on boot and after `refresh.yml` pushes (`POST /internal/reload` with `OH_SYNC_TOKEN`). It never fetches parcel files.
+
 ## Consequences
 
 Static Pages is no longer the only public surface. Leak tests apply to the API the same way they apply to `oh publish`. Mix-adjust and anonymous HHI are in-scope; public lookup is not.

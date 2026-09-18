@@ -664,11 +664,14 @@ def serve(
     ] = None,
 ) -> None:
     """Serve the insight app over published aggregates only."""
+    import os
+
     import uvicorn
 
     from opaque_housing.app.main import create_app
 
-    uvicorn.run(create_app(published_root=published), host=host, port=port)
+    bind_port = port if port != 8000 else int(os.environ.get("PORT", "8000"))
+    uvicorn.run(create_app(published_root=published), host=host, port=bind_port)
 
 
 @app.command()

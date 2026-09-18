@@ -1,0 +1,26 @@
+name: deploy-app
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/opaque_housing/app/**"
+      - "src/opaque_housing/metrics/**"
+      - "src/opaque_housing/cli.py"
+      - "Dockerfile"
+      - "fly.toml"
+      - "pyproject.toml"
+      - "uv.lock"
+      - ".github/workflows/deploy-app.yml"
+  workflow_dispatch:
+
+jobs:
+  fly:
+    runs-on: ubuntu-latest
+    if: ${{ secrets.FLY_API_TOKEN != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: flyctl deploy --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

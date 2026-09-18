@@ -126,4 +126,4 @@ PHL flow uses `rtt_summary` sale types `DEED` / `DEED SHERIFF` / `SHERIFF'S DEED
 
 The insight app (`oh serve`) is a second public surface: FastAPI + DuckDB over the same allowlist. Mix-adjust uses `stock_by_building_type.csv` from both metros (common types, Kitagawa with Philadelphia as the reference mix). The definition playground reads `headlines.json` and `flow_sensitivity.csv`. Neighborhood HHI / top-N shares come from `concentration_by_neighborhood.csv` written by `oh build` (name-keys only; no names). Citywide ranked portfolios are not published — opacity cluster 1 is a known likely false merge.
 
-GitHub-hosted refresh updates NYC PLUTO stock **and** PHL OPA stock (ADR 0011). ACRIS, NY DOS, and PHL RTT are not cold-pulled.
+GitHub-hosted refresh updates NYC PLUTO stock **and** PHL OPA stock (ADR 0011). ACRIS, NY DOS, and PHL RTT are not cold-pulled. After the job commits `data/published`, it calls the insight app `POST /internal/reload` so Fly DuckDB picks up the new files without rebuilding the image. The app also syncs allowlisted GitHub files on boot (`OH_SYNC_ON_BOOT`).

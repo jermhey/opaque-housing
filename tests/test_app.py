@@ -291,6 +291,17 @@ def test_admin_requires_secret(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
     refresh = client.post("/admin/refresh")
     assert refresh.status_code == 200
     assert "gh workflow run refresh.yml" in refresh.text
+    assert "Sync published files now" in page.text
+    assert client.post("/internal/reload").status_code == 503
+    monkeypatch.setenv("OH_SYNC_TOKEN", "sync-token")
+    assert client.post("/internal/reload").status_code == 401
+    monkeypatch.setattr(
+        "opaque_housing.app.main.reload_store",
+        lambda _store: {"ok": True, "count": 1, "files": []},
+    )
+    reloaded = client.post("/internal/reload", headers={"Authorization": "Bearer sync-token"})
+    assert reloaded.status_code == 200
+    assert reloaded.json()["ok"] is True
 
 
 def test_published_tree_api_has_no_forbidden_keys() -> None:

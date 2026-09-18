@@ -1,0 +1,26 @@
+# Fly.io hosts the insight app (ADR 0011). GitHub Pages still serves the static snapshot.
+
+app = "opaque-housing-insight"
+primary_region = "sjc"
+
+[build]
+
+[env]
+  OH_DATA_DIR = "/app/data"
+  OH_PUBLISHED_DIR = "/app/data/published"
+  OH_SYNC_ON_BOOT = "1"
+  OH_GITHUB_REPO = "jermhey/opaque-housing"
+  OH_GITHUB_REF = "main"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+[[vm]]
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1
