@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Definition playground — Opaque residential ownership{% endblock %}
+{% block main %}
+<h2>Definition playground</h2>
+<p class="lede">These are the toggles the static pages imply but cannot apply live. Every number is a precomputed cube — the server does not reclassify parcels.</p>
+<form class="toolbar"
+      method="get"
+      action="/definitions"
+      hx-get="/definitions"
+      hx-select="main"
+      hx-target="main"
+      hx-push-url="true"
+      hx-trigger="change">
+  <label>Metro
+    <select name="metro">
+      {% for item in metros %}
+      <option value="{{ item }}" {% if item == metro %}selected{% endif %}>{{ item|upper }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Stock series
+    <select name="series">
+      <option value="private_all" {% if series == "private_all" %}selected{% endif %}>All private residential</option>
+      <option value="sfr_condo" {% if series == "sfr_condo" %}selected{% endif %}>1–4 family + condo</option>
+    </select>
+  </label>
+  <label>Stock weight
+    <select name="weight">
+      <option value="parcel" {% if weight == "parcel" %}selected{% endif %}>Lots</option>
+      <option value="unit" {% if weight == "unit" %}selected{% endif %}>Units</option>
+    </select>
+  </label>
+  <label>Trusts
+    <select name="include_trust">
+      <option value="false" {% if not include_trust %}selected{% endif %}>Entity only</option>
+      <option value="true" {% if include_trust %}selected{% endif %}>Entity + trust</option>
+    </select>
+  </label>
+  <label>Flow cut
+    <select name="flow_config">
+      {% for item in flow_configs %}
+      <option value="{{ item }}" {% if item == flow_config %}selected{% endif %}>{{ item }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Flow weight
+    <select name="flow_weight">
+      <option value="sale" {% if flow_weight == "sale" %}selected{% endif %}>Sales</option>
+      <option value="unit" {% if flow_weight == "unit" %}selected{% endif %}>Sale units</option>
+    </select>
+  </label>
+</form>
+<div id="claim-panel">
+  {% include "partials/claims.html" %}
+</div>
+{% endblock %}

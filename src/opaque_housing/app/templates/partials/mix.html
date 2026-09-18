@@ -1,0 +1,64 @@
+{% set mix = mixed.mix %}
+<div class="stat-grid">
+  <article class="stat">
+    <div class="label">NYC observed</div>
+    <p class="value">{{ mix.nyc_observed|pct }}</p>
+    <p class="sub">{{ weight }}-weighted entity share</p>
+  </article>
+  <article class="stat">
+    <div class="label">Philadelphia observed</div>
+    <p class="value">{{ mix.phl_observed|pct }}</p>
+    <p class="sub">{{ weight }}-weighted entity share</p>
+  </article>
+  <article class="stat">
+    <div class="label">PHL on NYC mix</div>
+    <p class="value">{{ mix.phl_on_nyc_mix|pct }}</p>
+    <p class="sub">Philadelphia rates × New York mix</p>
+  </article>
+  <article class="stat">
+    <div class="label">NYC on PHL mix</div>
+    <p class="value">{{ mix.nyc_on_phl_mix|pct }}</p>
+    <p class="sub">New York rates × Philadelphia mix</p>
+  </article>
+  <article class="stat">
+    <div class="label">Rate effect</div>
+    <p class="value">{{ mix.rate_effect|pct }}</p>
+    <p class="sub">of the {{ mix.gap_common|pct }} common-type gap</p>
+  </article>
+  <article class="stat">
+    <div class="label">Mix effect</div>
+    <p class="value">{{ mix.mix_effect|pct }}</p>
+    <p class="sub">composition, common types only</p>
+  </article>
+</div>
+<p class="caveat">{{ mix.caveat }}{% if mix.nyc_only_types %} NYC-only types excluded from the standardized rates: {{ mix.nyc_only_types|join(", ") }}.{% endif %}</p>
+{% if mixed.nyc_claim and mixed.phl_claim %}
+<div class="card-grid">
+  {% with card=mixed.nyc_claim %}{% include "partials/claim_card.html" %}{% endwith %}
+  {% with card=mixed.phl_claim %}{% include "partials/claim_card.html" %}{% endwith %}
+</div>
+{% endif %}
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Building type</th>
+        <th class="num">NYC rate</th>
+        <th class="num">PHL rate</th>
+        <th class="num">NYC mix</th>
+        <th class="num">PHL mix</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in mix.types %}
+      <tr>
+        <td>{{ row.building_type }}</td>
+        <td class="num">{{ row.nyc_rate|pct }}</td>
+        <td class="num">{{ row.phl_rate|pct }}</td>
+        <td class="num">{{ row.nyc_weight|pct }}</td>
+        <td class="num">{{ row.phl_weight|pct }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

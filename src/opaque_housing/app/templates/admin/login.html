@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Admin — Opaque residential ownership{% endblock %}
+{% block main %}
+<h2>Admin</h2>
+<p class="lede">One operator. Refresh and labeling only. Still no public parcel file.</p>
+{% if error %}
+<p class="flash">Sign-in failed.</p>
+{% endif %}
+{% if not configured %}
+<p class="note">Set <code>ADMIN_SECRET</code> or GitHub OAuth env vars. The app will not accept a default password.</p>
+{% else %}
+<form class="toolbar" method="post" action="/admin/login">
+  <label>Shared secret
+    <input type="password" name="password" autocomplete="current-password">
+  </label>
+  <button type="submit">Sign in</button>
+</form>
+{% if github %}
+<p><a class="button" href="/admin/github">Sign in with GitHub</a></p>
+{% endif %}
+{% endif %}
+{% endblock %}

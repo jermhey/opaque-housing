@@ -1,0 +1,11 @@
+<div class="card-grid">
+  {% if data.stock %}
+    {% with card=data.stock %}{% include "partials/claim_card.html" %}{% endwith %}
+  {% endif %}
+  {% if data.flow %}
+    {% with card=data.flow %}{% include "partials/claim_card.html" %}{% endwith %}
+  {% endif %}
+</div>
+{% if not data.stock and not data.flow %}
+<p class="note">No published slice for this definition.</p>
+{% endif %}

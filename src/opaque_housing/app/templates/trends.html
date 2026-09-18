@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Trends — Opaque residential ownership{% endblock %}
+{% block main %}
+<h2>Sale-flow trends</h2>
+<p class="lede">Entity buyers of arm’s-length sales. Coverage window {{ data.window.start }}–{{ data.window.end }}.</p>
+<form class="toolbar" method="get">
+  <label>Metro
+    <select name="metro" onchange="this.form.submit()">
+      {% for item in metros %}
+      <option value="{{ item }}" {% if item == metro %}selected{% endif %}>{{ item|upper }}</option>
+      {% endfor %}
+    </select>
+  </label>
+</form>
+{% if data.headlines.private_residential %}
+<div class="stat-grid">
+  <article class="stat">
+    <div class="label">Entity sale share</div>
+    <p class="value">{{ data.headlines.private_residential.sale_share|pct }}</p>
+    <p class="sub">{{ data.headlines.private_residential.entity_sales|intcomma }} of {{ data.headlines.private_residential.sales|intcomma }} sales</p>
+  </article>
+  <article class="stat">
+    <div class="label">1–4 + condo sale share</div>
+    <p class="value">{% if data.headlines.sfr_condo %}{{ data.headlines.sfr_condo.sale_share|pct }}{% else %}—{% endif %}</p>
+    <p class="sub">the comparable cross-metro series</p>
+  </article>
+</div>
+{% endif %}
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Year</th>
+        <th class="num">Sales</th>
+        <th class="num">Entity sales</th>
+        <th class="num">Sale share</th>
+        <th class="num">Unit share</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in data.by_year %}
+      <tr>
+        <td>{{ row.year }}</td>
+        <td class="num">{{ row.sales|intcomma }}</td>
+        <td class="num">{{ row.entity_sales|intcomma }}</td>
+        <td class="num">{{ row.sale_share|pct }}</td>
+        <td class="num">{{ row.unit_share|pct }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

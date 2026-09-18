@@ -26,6 +26,7 @@ def test_help() -> None:
     assert "flow" in result.stdout
     assert "opacity" in result.stdout
     assert "publish" in result.stdout
+    assert "serve" in result.stdout
 
 
 def test_version() -> None:
@@ -223,6 +224,7 @@ def test_phl_build_and_publish(tmp_path: Path) -> None:
     )
     assert built.exit_code == 0, built.stdout + built.stderr
     assert (derived / "headlines.json").exists()
+    assert (derived / "concentration_by_neighborhood.csv").exists()
     dest = tmp_path / "published"
     published = runner.invoke(
         app,

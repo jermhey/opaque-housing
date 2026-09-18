@@ -120,6 +120,10 @@ OPA `opa_properties_public` via Carto. Residential filter and unit lower bounds 
 
 PHL flow uses `rtt_summary` sale types `DEED` / `DEED SHERIFF` / `SHERIFF'S DEED`, the same $10,000 named-grantee cut as NYC, and recorded years **2000–2025**.
 
-## Public aggregates (M4)
+## Public aggregates (M4) and insight app (ADR 0011)
 
-`oh publish` copies an allowlist of citywide and NTA-or-coarser files. Parcel extracts, `owner_key`, HPD person names, addresses, and cluster member lists are refused. NTA cells with fewer than 10 units keep `suppressed=true`. The static site reads `site/data/site.json`. GitHub-hosted refresh updates PLUTO stock only; ACRIS and NY DOS are not cold-pulled (ADR 0009).
+`oh publish` copies an allowlist of citywide and NTA-or-coarser files. Parcel extracts, `owner_key`, HPD person names, addresses, and cluster member lists are refused. NTA cells with fewer than 10 units keep `suppressed=true`. The static site reads `site/data/site.json`.
+
+The insight app (`oh serve`) is a second public surface: FastAPI + DuckDB over the same allowlist. Mix-adjust uses `stock_by_building_type.csv` from both metros (common types, Kitagawa with Philadelphia as the reference mix). The definition playground reads `headlines.json` and `flow_sensitivity.csv`. Neighborhood HHI / top-N shares come from `concentration_by_neighborhood.csv` written by `oh build` (name-keys only; no names). Citywide ranked portfolios are not published — opacity cluster 1 is a known likely false merge.
+
+GitHub-hosted refresh updates NYC PLUTO stock **and** PHL OPA stock (ADR 0011). ACRIS, NY DOS, and PHL RTT are not cold-pulled.

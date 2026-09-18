@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Freshness — Opaque residential ownership{% endblock %}
+{% block main %}
+<h2>Freshness</h2>
+<p class="lede">Source catalog time versus last publish. Monthly Actions can refresh NYC PLUTO and PHL OPA stock. Flow and opacity stay laptop-only.</p>
+<p><a href="/freshness?live=true">Check live Socrata timestamps</a>{% if live %} · showing live catalog{% endif %}</p>
+{% for metro, block in data.published.items() %}
+<h3>{{ metro|upper }} last publish</h3>
+{% if block %}
+<dl class="claim">
+  <div class="label">{{ metro }}</div>
+  <p class="sub">generated {{ block.generated_at or "—" }}</p>
+  <p class="caveat">flow present: {{ block.flow_present }} · opacity present: {{ block.opacity_present }}</p>
+  {% if block.reused %}
+  <p class="note">Reused from the last full run: {{ block.reused.keys()|list|join(", ") }}</p>
+  {% endif %}
+</dl>
+{% else %}
+<p class="note">No freshness document for {{ metro }}.</p>
+{% endif %}
+{% endfor %}
+<h3>Live Socrata (NYC)</h3>
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Dataset</th>
+        <th>ID</th>
+        <th>rowsUpdatedAt</th>
+        <th>On the runner?</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in data.live %}
+      <tr>
+        <td>{{ row.dataset }}</td>
+        <td><code>{{ row.dataset_id }}</code></td>
+        <td>{{ row.rows_updated_at or row.error or (live and "—") or "not fetched" }}</td>
+        <td>{{ row.runner }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<h3>Laptop-only series</h3>
+<ul class="plain">
+  {% for item in data.laptop_only %}
+  <li>{{ item }}</li>
+  {% endfor %}
+</ul>
+{% for note in data.notes %}
+<p class="caveat">{{ note }}</p>
+{% endfor %}
+{% endblock %}

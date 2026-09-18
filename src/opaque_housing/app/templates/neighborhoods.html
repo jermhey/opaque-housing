@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Neighborhoods — Opaque residential ownership{% endblock %}
+{% block main %}
+<h2>Neighborhoods</h2>
+<p class="lede">Entity share and anonymous concentration. New York rows are 2020 NTAs; Philadelphia rows are ZIP codes. Cells under 10 units are suppressed.</p>
+<form class="toolbar" hx-get="/partials/neighborhoods" hx-target="#hood-panel" hx-swap="innerHTML">
+  <label>Metro
+    <select name="metro" hx-get="/partials/neighborhoods" hx-target="#hood-panel">
+      {% for item in metros %}
+      <option value="{{ item }}" {% if item == metro %}selected{% endif %}>{{ item|upper }}</option>
+      {% endfor %}
+    </select>
+  </label>
+</form>
+<div id="hood-panel">
+  {% include "partials/neighborhoods.html" %}
+</div>
+{% endblock %}

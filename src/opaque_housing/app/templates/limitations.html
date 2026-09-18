@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Limitations — Opaque residential ownership{% endblock %}
+{% block main %}
+<h2>Limitations</h2>
+<ul class="plain">
+  <li>LLC membership-interest sales generate no deed. Flow undercounts entity turnover.</li>
+  <li>Co-op buildings are corporate-owned by design and are never counted as opaque.</li>
+  <li>Trusts are not entities. Most are probate-avoidance vehicles.</li>
+  <li>Philadelphia unit weights are official building-code lower bounds, not a dwelling census.</li>
+  <li>Name-key HHI is not a portfolio map. Shared officers can falsely merge clusters; citywide top portfolios stay unpublished.</li>
+  <li>This app does not search addresses, BBLs, OPA accounts, or owner names.</li>
+  <li>GitHub-hosted refresh cannot cold-pull ACRIS, NY DOS, or PHL RTT.</li>
+  <li>Gold labels for individuals stay out of the public repo and off the public VM.</li>
+</ul>
+{% endblock %}

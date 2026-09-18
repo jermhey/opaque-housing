@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Opaque residential ownership{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="https://unpkg.com/htmx.org@2.0.7" defer></script>
+</head>
+<body>
+  <header class="site">
+    <div class="wrap">
+      <p class="kicker">Investigation · aggregates only</p>
+      <h1><a href="/">Opaque residential ownership</a></h1>
+      <nav>
+        <a href="/" {% if page == "home" %}aria-current="page"{% endif %}>Compare</a>
+        <a href="/neighborhoods" {% if page == "neighborhoods" %}aria-current="page"{% endif %}>Neighborhoods</a>
+        <a href="/definitions" {% if page == "definitions" %}aria-current="page"{% endif %}>Definitions</a>
+        <a href="/trends" {% if page == "trends" %}aria-current="page"{% endif %}>Trends</a>
+        <a href="/methodology" {% if page == "methodology" %}aria-current="page"{% endif %}>Methodology</a>
+        <a href="/limitations" {% if page == "limitations" %}aria-current="page"{% endif %}>Limitations</a>
+        <a href="/freshness" {% if page == "freshness" %}aria-current="page"{% endif %}>Freshness</a>
+        <a href="/data" {% if page == "data" %}aria-current="page"{% endif %}>Downloads</a>
+        <a href="/docs">API</a>
+        {% if admin %}
+        <a href="/admin" {% if page == "admin" %}aria-current="page"{% endif %}>Admin</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+  <main class="wrap">
+    {% block main %}{% endblock %}
+  </main>
+  <footer class="site">
+    <div class="wrap">Aggregates only. No name or address search. <a href="https://github.com/jermhey/opaque-housing">Source</a>.</div>
+  </footer>
+</body>
+</html>

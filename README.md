@@ -4,7 +4,7 @@ A public, reproducible investigation of how much residential housing is held beh
 
 This is an investigation, not a product. **Milestones 1–5** are in the repo: NYC stock/flow/opacity, a static site, and a Philadelphia adapter with a NYC vs PHL compare page. Corrected stock shares use the held-out NYC test split only.
 
-Public site (after GitHub Pages is enabled): [https://jermhey.github.io/opaque-housing/](https://jermhey.github.io/opaque-housing/). The site is static HTML reading committed aggregates under `site/data/` (ADR 0009). It is not Evidence.dev.
+Public site (after GitHub Pages is enabled): [https://jermhey.github.io/opaque-housing/](https://jermhey.github.io/opaque-housing/). The `site/` tree is a static snapshot of committed aggregates (ADR 0009). The insight app (`uv run oh serve`) is FastAPI + DuckDB over the same allowlist: mix-adjusted NYC vs PHL, definition toggles, anonymous neighborhood HHI, and `/v1` OpenAPI (ADR 0011). It is not Evidence.dev and it is not a name or address search.
 
 ## Setup
 
@@ -32,13 +32,14 @@ uv run oh ingest --metro phl --dataset rtt
 uv run oh build --metro phl
 uv run oh flow --metro phl
 uv run oh publish --metro phl
+uv run oh serve
 uv run oh label --sample-from data/derived/nyc/parcels_classified.parquet
 uv run oh label
 uv run oh eval --gold eval/gold/ci_dev.csv --split test
 uv run oh eval --gold eval/gold/queue.csv --split test --with-llm
 ```
 
-`oh ingest` writes immutable extracts under `data/raw/nyc/<dataset>/<date>/`. Default `all` is PLUTO + tract–NTA (`64uk-42ks`, `hm78-6dwm`). `--dataset acris` pages Master / Legals / Parties (`bnx9-e6tj`, `8h5j-fqxa`, `636b-3b5g`) for recorded years 2003–2026. `--dataset opacity` pulls HPD registrations + contacts (`tesw-yqqr`, `feu5-w2e2`) and NY DOS active corporations (`n9v6-gdp6` on data.ny.gov). `oh build` classifies residential lots. `oh flow` writes entity-buyer series. `oh opacity` writes O-tier shares, cluster links, and the top-20 entity-name review. `oh publish` copies allowlisted citywide and NTA-or-coarser aggregates into `data/published/<metro>/` and `site/data/` (Philadelphia under `site/data/phl/`). It refuses parcel files, owner keys, person names, and addresses. `oh ingest --metro phl` pulls OPA `opa_properties_public` from Carto.
+`oh ingest` writes immutable extracts under `data/raw/nyc/<dataset>/<date>/`. Default `all` is PLUTO + tract–NTA (`64uk-42ks`, `hm78-6dwm`). `--dataset acris` pages Master / Legals / Parties (`bnx9-e6tj`, `8h5j-fqxa`, `636b-3b5g`) for recorded years 2003–2026. `--dataset opacity` pulls HPD registrations + contacts (`tesw-yqqr`, `feu5-w2e2`) and NY DOS active corporations (`n9v6-gdp6` on data.ny.gov). `oh build` classifies residential lots and writes anonymous neighborhood concentration. `oh flow` writes entity-buyer series. `oh opacity` writes O-tier shares, cluster links, and the top-20 entity-name review. `oh publish` copies allowlisted citywide and NTA-or-coarser aggregates into `data/published/<metro>/` and `site/data/` (Philadelphia under `site/data/phl/`). It refuses parcel files, owner keys, person names, and addresses. `oh serve` loads those published files into in-memory DuckDB and serves `/v1` plus HTMX pages. `oh ingest --metro phl` pulls OPA `opa_properties_public` from Carto. FastAPI is the API/UI layer specified in ADR 0011.
 
 Reproduce stock from a raw-data volume:
 
@@ -61,7 +62,8 @@ Raw and gold-corrected NYC stock shares are in [`docs/milestones/m1-current-stoc
 - **Cluster review never lists HPD person names.** Seed registered-agent names are denied. Address sharing is evidence, not a cluster edge (ADR 0008).
 - **Most entity *units* have a named HPD officer** (large multifamily). Most 1–4 family *entity parcels* do not. Do not quote the citywide O1 unit share as “opaque housing is rare.”
 - **No entity-level or portfolio-level public pages** until an explicit review and sign-off.
-- **GitHub-hosted refresh cannot cold-pull ACRIS or NY DOS** (ADR 0009). `refresh.yml` may update PLUTO stock monthly and reuse the last published flow and opacity series. A full local run is required to refresh those series.
+- **GitHub-hosted refresh cannot cold-pull ACRIS, NY DOS, or PHL RTT** (ADR 0009, ADR 0011). `refresh.yml` may update NYC PLUTO stock and PHL OPA stock monthly and reuse the last published flow and opacity series. A full local run is required to refresh those series.
+- **The insight app never loads parcel files or owner names.** Mix-adjust, definition toggles, and neighborhood HHI are computed from published aggregates (or from laptop-side concentration files that contain no keys).
 - The public URL needs GitHub Pages on this repo plus a working `gh` login to push and enable it. Until that deploy succeeds, serve `site/` locally after `oh publish`.
 - **Flow undercounts LLC membership-interest sales** (no deed) and drops $0-amount deeds from the headline series. Historical stock keeps those $0 sale deeds. See ADR 0005.
 - Docker Desktop is not required for local `make test`. The image entrypoint is `oh`; mount `data/` (and `site/` for publish) as shown above.

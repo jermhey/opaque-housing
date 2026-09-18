@@ -33,6 +33,18 @@ ALLOWED_FILES: frozenset[str] = frozenset(
         "opacity_headlines.json",
         "opacity_by_type.csv",
         "opacity_manifest.json",
+        "concentration_by_neighborhood.csv",
+    }
+)
+
+GENERATED_FILES: frozenset[str] = frozenset(
+    {
+        "neighborhoods.csv",
+        "nta_names.csv",
+        "freshness.json",
+        "site.json",
+        "publish_manifest.json",
+        "stock_sensitivity.csv",
     }
 )
 
@@ -75,6 +87,9 @@ FORBIDDEN_COLUMNS: frozenset[str] = frozenset(
         "owner_key",
         "evidence_ref",
         "bbl",
+        "parcel_id",
+        "cluster_id",
+        "person_key",
         "document_id",
         "chairman_name",
         "dos_process_name",
@@ -121,13 +136,7 @@ def assert_safe_columns(names: list[str], *, origin: str) -> None:
 def assert_allowed_filename(name: str) -> None:
     if name in FORBIDDEN_FILENAMES:
         raise PublishError(f"{name} is not a public aggregate")
-    if name not in ALLOWED_FILES and name not in {
-        "neighborhoods.csv",
-        "nta_names.csv",
-        "freshness.json",
-        "site.json",
-        "publish_manifest.json",
-    }:
+    if name not in ALLOWED_FILES and name not in GENERATED_FILES:
         raise PublishError(f"{name} is not on the publish allowlist")
 
 
@@ -377,6 +386,8 @@ def assemble_site_payload(
     opacity_by_type: pl.DataFrame | None = None,
     freshness: dict[str, Any] | None = None,
     reused: dict[str, str] | None = None,
+    concentration: pl.DataFrame | None = None,
+    stock_sensitivity: pl.DataFrame | None = None,
 ) -> dict[str, Any]:
     return {
         "metro": metro,
@@ -396,4 +407,8 @@ def assemble_site_payload(
         "opacity": opacity_headlines or {},
         "opacity_by_type": frame_records(opacity_by_type) if opacity_by_type is not None else [],
         "freshness": freshness or {},
+        "concentration": frame_records(concentration) if concentration is not None else [],
+        "stock_sensitivity": (
+            frame_records(stock_sensitivity) if stock_sensitivity is not None else []
+        ),
     }

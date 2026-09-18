@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Downloads — Opaque residential ownership{% endblock %}
+{% block main %}
+<h2>Allowlisted files</h2>
+<p class="lede">The same aggregates <code>oh publish</code> writes. Use <code>GET /v1/{metro}/stock</code> and neighbors, or download from the static snapshot when Pages is up.</p>
+{% for metro in metros %}
+<h3>{{ metro|upper }}</h3>
+<ul class="plain download">
+  {% for name in files[metro] %}
+  <li><code>{{ name }}.csv</code></li>
+  {% endfor %}
+</ul>
+{% endfor %}
+<p class="caveat">Parcel files, owner keys, person names, and addresses are not published.</p>
+<p><a href="/docs">OpenAPI</a></p>
+{% endblock %}

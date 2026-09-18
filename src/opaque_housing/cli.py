@@ -40,6 +40,8 @@ from opaque_housing.labeling.sample import (
     assign_splits,
     stratified_owner_sample,
 )
+from opaque_housing.metrics.claims import stock_sensitivity_table
+from opaque_housing.metrics.concentration import neighborhood_concentration
 from opaque_housing.metrics.correction import bootstrap_corrected_prevalence
 from opaque_housing.metrics.evaluation import evaluation_report
 from opaque_housing.metrics.flow import (
@@ -227,6 +229,7 @@ def build(
     classified.write_parquet(dest / "parcels_classified.parquet")
     for name, table in breakdowns.items():
         table.write_csv(dest / f"stock_{name}.csv")
+    neighborhood_concentration(private).write_csv(dest / "concentration_by_neighborhood.csv")
     (dest / "headlines.json").write_text(json.dumps(headlines, indent=2) + "\n")
 
     versions = sorted(classified["source_version"].drop_nulls().unique().to_list())
@@ -653,6 +656,22 @@ def publish(
 
 
 @app.command()
+def serve(
+    host: Annotated[str, typer.Option(help="Bind address.")] = "127.0.0.1",
+    port: Annotated[int, typer.Option(help="Bind port.")] = 8000,
+    published: Annotated[
+        Path | None, typer.Option(help="Allowlisted published-aggregate root.")
+    ] = None,
+) -> None:
+    """Serve the insight app over published aggregates only."""
+    import uvicorn
+
+    from opaque_housing.app.main import create_app
+
+    uvicorn.run(create_app(published_root=published), host=host, port=port)
+
+
+@app.command()
 def label(
     queue: Annotated[Path, typer.Option(help="Labeling queue CSV.")] = Path("eval/gold/queue.csv"),
     sample_from: Annotated[
@@ -1038,11 +1057,16 @@ def _publish_aggregates(
         "flow_present": "flow_headlines.json" in resolved,
         "opacity_present": "opacity_headlines.json" in resolved,
         "notes": [
-            "GitHub-hosted refresh updates PLUTO + tract–NTA stock only (ADR 0009).",
-            "Flow and opacity are reused from the last full local run when missing.",
+            "GitHub-hosted refresh updates NYC PLUTO stock and PHL OPA stock (ADR 0011).",
+            "ACRIS, NY DOS, and PHL RTT stay laptop-only; "
+            "flow and opacity are reused when missing.",
         ],
     }
     _write_json(dest / "freshness.json", freshness)
+    sensitivity = stock_sensitivity_table(headlines)
+    assert_safe_columns(sensitivity.columns, origin="stock_sensitivity.csv")
+    sensitivity.write_csv(dest / "stock_sensitivity.csv")
+    concentration = _optional_csv(resolved.get("concentration_by_neighborhood.csv"))
     payload = assemble_site_payload(
         metro=metro,
         generated_at=str(freshness["generated_at"]),
@@ -1061,6 +1085,8 @@ def _publish_aggregates(
         opacity_by_type=_optional_csv(resolved.get("opacity_by_type.csv")),
         freshness=freshness,
         reused={name: origin for name, origin in origins.items() if origin == "reused"},
+        concentration=concentration,
+        stock_sensitivity=sensitivity,
     )
     _write_json(dest / "site.json", payload)
     _write_json(

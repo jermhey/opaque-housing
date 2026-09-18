@@ -31,14 +31,20 @@ jobs:
         run: uv run oh build --metro nyc
       - name: Publish allowlisted aggregates
         run: uv run oh publish --metro nyc
+      - name: Ingest Philadelphia OPA
+        run: uv run oh ingest --metro phl
+      - name: Rebuild Philadelphia stock
+        run: uv run oh build --metro phl
+      - name: Publish Philadelphia aggregates
+        run: uv run oh publish --metro phl
       - name: Commit published files
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/published/nyc site/data
+          git add data/published/nyc data/published/phl site/data
           if git diff --cached --quiet; then
             echo "no published-file changes"
           else
-            git commit -m "refresh published NYC stock aggregates"
+            git commit -m "refresh published NYC and PHL stock aggregates"
             git push
           fi

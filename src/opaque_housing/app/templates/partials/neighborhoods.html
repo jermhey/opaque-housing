@@ -1,0 +1,62 @@
+<p class="caveat">{{ data.caveat }}</p>
+{% if data.has_concentration %}
+<h3>Anonymous concentration</h3>
+<p class="note">HHI is 0–1 on recorded name-keys. Top-N is the share of units (or lots) held by the largest 5 / 10 / 20 keys. No names.</p>
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Neighborhood</th>
+        <th class="num">Units</th>
+        <th class="num">Keys</th>
+        <th class="num">HHI units</th>
+        <th class="num">Top 5 units</th>
+        <th class="num">Top 10 units</th>
+        <th class="num">Top 20 units</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in data.concentration %}
+      <tr>
+        <td>{{ row.geo_neighborhood }}</td>
+        <td class="num">{{ row.units|intcomma }}</td>
+        <td class="num">{{ row.n_name_keys|intcomma }}</td>
+        <td class="num">{% if row.suppressed is true %}—{% else %}{{ row.hhi_units|pct }}{% endif %}</td>
+        <td class="num">{% if row.suppressed is true %}—{% else %}{{ row.top5_unit_share|pct }}{% endif %}</td>
+        <td class="num">{% if row.suppressed is true %}—{% else %}{{ row.top10_unit_share|pct }}{% endif %}</td>
+        <td class="num">{% if row.suppressed is true %}—{% else %}{{ row.top20_unit_share|pct }}{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="note">Concentration is written by <code>oh build</code> and copied by <code>oh publish</code>. It is not in this snapshot yet.</p>
+{% endif %}
+<h3>Entity share</h3>
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Neighborhood</th>
+        <th>Borough</th>
+        <th class="num">Lots</th>
+        <th class="num">Units</th>
+        <th class="num">Entity lot share</th>
+        <th class="num">Entity unit share</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in data.neighborhoods %}
+      <tr>
+        <td>{{ row.nta_name or row.nta }}</td>
+        <td>{{ row.borough }}</td>
+        <td class="num">{{ row.parcels|intcomma }}</td>
+        <td class="num">{{ row.units|intcomma }}</td>
+        <td class="num">{% if row.suppressed is true %}—{% else %}{{ row.entity_parcel_share|pct }}{% endif %}</td>
+        <td class="num">{% if row.suppressed is true %}—{% else %}{{ row.entity_unit_share|pct }}{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

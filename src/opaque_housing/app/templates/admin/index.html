@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Admin — Opaque residential ownership{% endblock %}
+{% block main %}
+<h2>Admin</h2>
+<p class="lede">Trigger the monthly stock job and append a gold label if this process can write a local queue. Gold individual names are not listed here.</p>
+<p><a href="/admin/logout">Sign out</a></p>
+
+<h3>Refresh</h3>
+<p class="caveat">The runner updates NYC PLUTO stock and PHL OPA stock. ACRIS, NY DOS, and PHL RTT stay on the laptop.</p>
+{% if refresh_result %}
+<p class="flash">
+  {% if refresh_result.ok %}Dispatched <code>{{ refresh_result.workflow }}</code> on {{ refresh_result.repo }}.
+  {% else %}{{ refresh_result.detail }}{% if refresh_result.command %} Run <code>{{ refresh_result.command }}</code> locally.{% endif %}
+  {% endif %}
+</p>
+{% endif %}
+<form method="post" action="/admin/refresh">
+  <button type="submit">Dispatch refresh.yml</button>
+</form>
+
+<h3>Label a name</h3>
+{% if not queue_writable %}
+<p class="note">This host cannot write a gold queue. Run <code>oh label</code> on the laptop. Do not copy individual gold names onto the public VM.</p>
+{% else %}
+{% if label_result %}
+<p class="flash">
+  {% if label_result.ok %}Saved. Predicted {{ label_result.predicted }}; labeled {{ label_result.label }}.
+  {% else %}{{ label_result.detail }}
+  {% endif %}
+</p>
+{% endif %}
+<form method="post" action="/admin/label" class="toolbar">
+  <label>Recorded name
+    <input type="text" name="name_raw" required autocomplete="off">
+  </label>
+  <label>Building type
+    <input type="text" name="building_type" placeholder="sfr_1_4">
+  </label>
+  <label>Metro
+    <select name="metro">
+      <option value="nyc">NYC</option>
+      <option value="phl">PHL</option>
+    </select>
+  </label>
+  <label>Gold class
+    <select name="label">
+      <option value="individual">individual</option>
+      <option value="trust">trust</option>
+      <option value="llc">llc</option>
+      <option value="corp">corp</option>
+      <option value="partnership">partnership</option>
+      <option value="estate">estate</option>
+      <option value="public">public</option>
+      <option value="nonprofit_religious">nonprofit_religious</option>
+      <option value="lender_reo">lender_reo</option>
+      <option value="unknown">unknown</option>
+    </select>
+  </label>
+  <button type="submit">Append to local queue</button>
+</form>
+{% endif %}
+{% endblock %}
