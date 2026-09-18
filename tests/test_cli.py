@@ -27,6 +27,8 @@ def test_help() -> None:
     assert "opacity" in result.stdout
     assert "publish" in result.stdout
     assert "serve" in result.stdout
+    assert "worker" in result.stdout
+    assert "raw" in result.stdout
 
 
 def test_version() -> None:
@@ -369,3 +371,16 @@ def test_dade_build_flow_and_publish(tmp_path: Path) -> None:
     )
     assert flowed.exit_code == 0, flowed.stdout + flowed.stderr
     assert (derived / "flow_headlines.json").exists()
+
+
+def test_unknown_metro_asks_for_specs_row() -> None:
+    result = runner.invoke(app, ["ingest", "--metro", "lax"])
+    assert result.exit_code == 1
+    assert "SPECS row" in result.stderr + result.stdout
+
+
+def test_raw_requires_uri(monkeypatch) -> None:
+    monkeypatch.delenv("OH_RAW_URI", raising=False)
+    result = runner.invoke(app, ["raw", "push"])
+    assert result.exit_code == 1
+    assert "OH_RAW_URI" in result.stderr + result.stdout

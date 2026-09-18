@@ -8,6 +8,7 @@ from opaque_housing.adapters.cook.sources import SALES as COOK_SALES
 from opaque_housing.adapters.cook.sources import UNIVERSE as COOK_UNIVERSE
 from opaque_housing.adapters.nyc.sources import PLUTO, TRACT_NTA
 from opaque_housing.adapters.soda import fetch_view_meta
+from opaque_housing.metros import display_name, laptop_jobs
 
 LIVE_SOURCES: tuple[dict[str, str], ...] = (
     {
@@ -66,16 +67,13 @@ def freshness_payload(
         "published": published,
         "live": live or [],
         "laptop_only": [
-            "NYC ACRIS Master / Legals / Parties",
-            "NY DOS active corporations",
-            "HPD registrations and contacts",
-            "Philadelphia RTT (~206 MB) — optional, not on the monthly job",
-            "Miami-Dade PaGis folios and Florida DOR SDF",
+            *(f"{display_name(metro)} {dataset}" for metro, dataset in laptop_jobs()),
+            "Florida DOR SDF (local file; no public URL)",
         ],
         "notes": [
-            "GitHub-hosted refresh updates NYC PLUTO stock, PHL OPA stock, and Cook County stock+sales.",
-            "ACRIS, NY DOS, PHL RTT, and Miami-Dade stay laptop-only; NYC/PHL flow and opacity are reused when missing.",
-            "NYC/PHL flow, history, and opacity stay stale until a laptop run republishes them. Cook flow is rebuilt on the monthly job.",
+            "GitHub-hosted refresh updates NYC PLUTO, PHL OPA, and Cook stock+sales.",
+            "ACRIS, NY DOS, PHL RTT, and Miami-Dade stay laptop-only.",
+            "NYC/PHL flow and opacity reuse the last laptop publish. Cook flow is monthly.",
             "Philadelphia Carto has no Socrata rowsUpdatedAt; PHL freshness is last publish.",
             "Florida SDF has no buyer name; Dade entity-buyer shares are unidentified (ADR 0014).",
         ],

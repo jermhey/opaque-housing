@@ -6,6 +6,8 @@ on:
     paths:
       - "src/opaque_housing/app/**"
       - "src/opaque_housing/metrics/**"
+      - "src/opaque_housing/metros.py"
+      - "src/opaque_housing/adapters/**"
       - "src/opaque_housing/cli.py"
       - "Dockerfile"
       - "fly.toml"
@@ -17,7 +19,6 @@ on:
 jobs:
   fly:
     runs-on: ubuntu-latest
-    if: ${{ secrets.FLY_API_TOKEN != '' }}
     steps:
       - uses: actions/checkout@v4
       - uses: superfly/flyctl-actions/setup-flyctl@master

@@ -1,4 +1,4 @@
-.PHONY: test lint typecheck fmt ci publish serve
+.PHONY: test lint typecheck fmt ci publish serve worker
 
 test:
 	uv run pytest
@@ -17,8 +17,13 @@ fmt:
 publish:
 	uv run oh publish --metro nyc
 	uv run oh publish --metro phl
+	uv run oh publish --metro cook
+	uv run oh publish --metro dade
 
 serve:
 	uv run oh serve
+
+worker:
+	uv run oh worker
 
 ci: lint typecheck test

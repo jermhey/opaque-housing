@@ -41,6 +41,8 @@ uv run oh ingest --metro dade
 uv run oh build --metro dade
 uv run oh flow --metro dade --sdf path/to/florida_sdf.csv
 uv run oh publish --metro dade
+uv run oh worker
+uv run oh raw push
 uv run oh serve
 uv run oh label --sample-from data/derived/nyc/parcels_classified.parquet
 uv run oh label
@@ -48,7 +50,20 @@ uv run oh eval --gold eval/gold/ci_dev.csv --split test
 uv run oh eval --gold eval/gold/queue.csv --split test --with-llm
 ```
 
-`oh ingest` writes immutable extracts under `data/raw/<metro>/<dataset>/<date>/`. Default NYC `all` is PLUTO + tract–NTA (`64uk-42ks`, `hm78-6dwm`). `--dataset acris` pages Master / Legals / Parties (`bnx9-e6tj`, `8h5j-fqxa`, `636b-3b5g`) for recorded years 2003–2026. `--dataset opacity` pulls HPD registrations + contacts (`tesw-yqqr`, `feu5-w2e2`) and NY DOS active corporations (`n9v6-gdp6` on data.ny.gov). Cook `all` is current-year universe / addresses / characteristics / condo (`pabr-t5kh`, `3723-97qp`, `x54s-btds`, `3r7i-mrz4`); `--dataset sales` is `wvhk-k5uv`. Dade `all` is PaGis folio points; SDF is a local DOR file. `oh build` classifies residential lots and writes anonymous neighborhood concentration. `oh flow` writes entity-buyer series (Dade SDF has no grantee). `oh opacity` is NYC-only. `oh publish` copies allowlisted citywide and NTA-or-coarser aggregates into `data/published/<metro>/` and `site/data/` (other metros under `site/data/<metro>/`). It refuses parcel files, owner keys, person names, and addresses. `oh serve` loads those published files into in-memory DuckDB and serves `/v1` plus HTMX pages. On Fly, the app also pulls the latest allowlisted files from GitHub on boot and after `refresh.yml` (`POST /internal/reload`). `oh ingest --metro phl` pulls OPA `opa_properties_public` from Carto. FastAPI is the API/UI layer specified in ADR 0011.
+`oh ingest` writes immutable extracts under `data/raw/<metro>/<dataset>/<date>/`. Default NYC `all` is PLUTO + tract–NTA (`64uk-42ks`, `hm78-6dwm`). `--dataset acris` pages Master / Legals / Parties (`bnx9-e6tj`, `8h5j-fqxa`, `636b-3b5g`) for recorded years 2003–2026. `--dataset opacity` pulls HPD registrations + contacts (`tesw-yqqr`, `feu5-w2e2`) and NY DOS active corporations (`n9v6-gdp6` on data.ny.gov). Cook `all` is current-year universe / addresses / characteristics / condo (`pabr-t5kh`, `3723-97qp`, `x54s-btds`, `3r7i-mrz4`); `--dataset sales` is `wvhk-k5uv`. Dade `all` is PaGis folio points; SDF is a local DOR file. `oh worker` runs the laptop-only ingest jobs listed on `MetroSpec` (ACRIS, opacity, PHL RTT, Dade GIS). `oh raw push|pull` syncs `data/raw` to `OH_RAW_URI` via the aws CLI — git never gets paid or multi-million-row extracts. `oh build` classifies residential lots and writes anonymous neighborhood concentration. `oh flow` writes entity-buyer series (Dade SDF has no grantee). `oh opacity` is NYC-only. `oh publish` copies allowlisted citywide and NTA-or-coarser aggregates into `data/published/<metro>/` and `site/data/` (other metros under `site/data/<metro>/`). It refuses parcel files, owner keys, person names, and addresses. `oh serve` loads those published files into in-memory DuckDB and serves `/v1` plus HTMX pages. On Fly, the app also pulls the latest allowlisted files from GitHub on boot and after `refresh.yml` (`POST /internal/reload`). `oh ingest --metro phl` pulls OPA `opa_properties_public` from Carto. FastAPI is the API/UI layer specified in ADR 0011.
+
+## Add a metro
+
+A fifth city is a new adapter plus one registry row. No new app routes.
+
+1. Inspect live columns and dataset IDs. Never invent field names.
+2. Record the geography and source caveats as an ADR in `docs/decisions/`.
+3. Add `src/opaque_housing/adapters/<id>/` that emits `ParcelSnapshot` / `Transfer`.
+4. Add one `SPECS` row in `src/opaque_housing/metros.py` (display name, files, coverage window, sensitivity profile, refresh vs laptop jobs). Add the id to `schema.MetroId`.
+5. Write adapter tests (and a rule test if you add a name phrase). `make test`.
+6. Timed ingest, then `oh build` / `oh flow` / `oh publish`. Do not add the metro to `refresh.yml` until wall time fits the 90-minute runner.
+
+Do not title charts by a city name when the file is a county. Do not add O-tiers without officer names. Do not put parcels on Fly.
 
 Reproduce stock from a raw-data volume:
 

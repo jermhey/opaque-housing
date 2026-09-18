@@ -11,6 +11,7 @@ from opaque_housing.adapters.nyc.pad import map_to_billing
 from opaque_housing.classify.apply import classify_name_frame
 from opaque_housing.metrics.sale_filter import SaleFilterConfig, apply_sale_filter
 from opaque_housing.metrics.stock import INFORMATIVE_TYPES, nyc_borough
+from opaque_housing.metros import metro_spec
 from opaque_housing.quality.filters import FilterCount
 from opaque_housing.schema import ENTITY_OWNED_CLASSES
 
@@ -304,6 +305,21 @@ DADE_SENSITIVITY_CONFIGS: list[tuple[str, SaleFilterConfig]] = [
     ("threshold_1", SaleFilterConfig(min_consideration=1.0, require_named_grantee=False)),
     ("threshold_100k", SaleFilterConfig(min_consideration=100_000.0, require_named_grantee=False)),
 ]
+
+_SENSITIVITY_PROFILES: dict[str, list[tuple[str, SaleFilterConfig]] | None] = {
+    "nyc": None,
+    "phl": PHL_SENSITIVITY_CONFIGS,
+    "cook": COOK_SENSITIVITY_CONFIGS,
+    "dade": DADE_SENSITIVITY_CONFIGS,
+}
+
+
+def sensitivity_configs_for(metro: str) -> list[tuple[str, SaleFilterConfig]] | None:
+    """Select a precomputed sensitivity table from MetroSpec.sensitivity_profile."""
+    profile = metro_spec(metro).sensitivity_profile
+    if profile not in _SENSITIVITY_PROFILES:
+        raise KeyError(profile)
+    return _SENSITIVITY_PROFILES[profile]
 
 
 def sensitivity_table(

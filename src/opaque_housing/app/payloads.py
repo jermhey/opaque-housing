@@ -9,7 +9,7 @@ from opaque_housing.app.store import AggregateStore
 from opaque_housing.metrics.claims import flow_claim, stock_claim, stock_sensitivity_table
 from opaque_housing.metrics.mix import kitagawa_story, mix_adjust
 from opaque_housing.metrics.publish import FORBIDDEN_COLUMNS, PublishError, assert_safe_columns
-from opaque_housing.metros import COMPARE_NOTES, COMPARE_OTHERS, COVERAGE_WINDOWS, display_name
+from opaque_housing.metros import COMPARE_OTHERS, COVERAGE_WINDOWS, display_name, metro_spec
 
 
 def assert_payload_safe(payload: object, *, origin: str) -> None:
@@ -150,7 +150,7 @@ def mix_payload(
         "other": other,
         "reference_label": display_name("nyc"),
         "other_label": display_name(other),
-        "metro_note": COMPARE_NOTES.get(other, ""),
+        "metro_note": metro_spec(other).compare_note,
         "mix": mixed,
         "story": kitagawa_story(mixed),
         "weight_bars": mix_weight_bars(mixed["types"]),

@@ -34,3 +34,5 @@ Gold correction, O-tiers, ACRIS/HPD/DOS, and PAD condo mapping.
 ## Consequences
 
 A new metro is still a new adapter emitting `ParcelSnapshot` / `Transfer`. Compare copy must name the county. Cook stock+sales were timed 2026-09-18 (~14 min) and are on `refresh.yml`. Miami-Dade GIS was timed (~15 min) but stays laptop-only: no local SDF, and the MapServer silently caps pages.
+
+`MetroSpec` is the add-a-metro surface: default files, coverage window, sensitivity profile, refresh flags, and laptop jobs. CLI loaders resolve raw paths from that row. `oh worker` runs `laptop_datasets`; `oh raw` syncs `data/raw` to `OH_RAW_URI`. No new insight-app routes.
