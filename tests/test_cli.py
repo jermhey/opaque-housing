@@ -241,3 +241,21 @@ def test_phl_build_and_publish(tmp_path: Path) -> None:
     assert published.exit_code == 0, published.stdout + published.stderr
     assert (dest / "site.json").exists()
     assert (dest / "neighborhoods.csv").exists()
+
+    flowed = runner.invoke(
+        app,
+        [
+            "flow",
+            "--metro",
+            "phl",
+            "--rtt",
+            "tests/fixtures/phl/rtt_sample.csv",
+            "--parcels",
+            str(derived / "parcels_classified.parquet"),
+            "--out-dir",
+            str(derived),
+        ],
+    )
+    assert flowed.exit_code == 0, flowed.stdout + flowed.stderr
+    assert (derived / "flow_headlines.json").exists()
+    assert (derived / "flow_by_year.csv").exists()

@@ -29,6 +29,7 @@ class CartoSpec:
     filename: str
     where: str | None = None
     host: str = CARTO_PHL
+    timeout: float = 300.0
 
     @property
     def query(self) -> str:
@@ -50,7 +51,8 @@ RTT = CartoSpec(
     name="rtt",
     select=RTT_COLUMNS,
     filename="rtt_summary.csv",
-    where="document_type='DEED'",
+    where="document_type in ('DEED','DEED SHERIFF','SHERIFF''S DEED')",
+    timeout=600.0,
 )
 
 PHL_SOURCES: dict[str, CartoSpec] = {OPA.name: OPA, RTT.name: RTT}

@@ -383,6 +383,33 @@ async function renderCompare(nyc) {
     "unit-compare",
     `NYC entity unit share ${pct(nycAll.unit_share)} (corrected ${pct((correction(nyc.stock, "private_all_entity_only", "unit") || {}).corrected)}). Philadelphia lower-bound unit share ${pct(phlAll.unit_share)} — not a dwelling census.`,
   );
+  const nycFlow = (nyc.flow && nyc.flow.private_residential) || {};
+  const phlFlow = (phl.flow && phl.flow.private_residential) || {};
+  const nycFlowSfr = (nyc.flow && nyc.flow.sfr_condo) || {};
+  const phlFlowSfr = (phl.flow && phl.flow.sfr_condo) || {};
+  const nycWin = (nyc.flow && nyc.flow.window) || { start: 2003, end: 2025 };
+  const phlWin = (phl.flow && phl.flow.window) || { start: 2000, end: 2025 };
+  setText("nyc-flow", pct(nycFlow.sale_share));
+  setText(
+    "nyc-flow-sub",
+    `${num(nycFlow.entity_sales)} of ${num(nycFlow.sales)} sales, ${nycWin.start}–${nycWin.end}. Unit-weighted ${pct(nycFlow.unit_share)}.`,
+  );
+  setText("phl-flow", pct(phlFlow.sale_share));
+  setText(
+    "phl-flow-sub",
+    phlFlow.sales
+      ? `${num(phlFlow.entity_sales)} of ${num(phlFlow.sales)} sales, ${phlWin.start}–${phlWin.end}. Includes sheriff deeds.`
+      : "PHL flow not published yet.",
+  );
+  setText("nyc-flow-sfr", pct(nycFlowSfr.sale_share));
+  setText("nyc-flow-sfr-sub", `${num(nycFlowSfr.entity_sales)} of ${num(nycFlowSfr.sales)} 1–4 + condo sales.`);
+  setText("phl-flow-sfr", pct(phlFlowSfr.sale_share));
+  setText(
+    "phl-flow-sfr-sub",
+    phlFlowSfr.sales
+      ? `${num(phlFlowSfr.entity_sales)} of ${num(phlFlowSfr.sales)} 1–4 + condo sales.`
+      : "",
+  );
 }
 
 function renderFreshness(data) {

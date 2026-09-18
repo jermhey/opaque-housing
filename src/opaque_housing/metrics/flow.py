@@ -17,6 +17,11 @@ from opaque_housing.schema import ENTITY_OWNED_CLASSES
 _ENTITY = [item.value for item in ENTITY_OWNED_CLASSES]
 WINDOW_START = 2003
 WINDOW_END = 2025
+# NYC: ADR 0006. PHL: ADR 0010 (usable consideration from recording year 2000).
+COVERAGE_WINDOWS: dict[str, tuple[int, int]] = {
+    "nyc": (2003, 2025),
+    "phl": (2000, 2025),
+}
 
 
 def classify_buyers(sales: pl.DataFrame) -> pl.DataFrame:
@@ -56,6 +61,7 @@ def attach_residential(
             pl.lit(None).cast(pl.Int64).alias("res_units"),
             pl.lit(None).cast(pl.Utf8).alias("geo_tract"),
             pl.lit(None).cast(pl.Utf8).alias("geo_neighborhood"),
+            pl.lit(None).cast(pl.Utf8).alias("geo_borough"),
         )
         count = FilterCount(
             stage="flow_residential_join",
@@ -65,13 +71,10 @@ def attach_residential(
         )
         return empty, [count]
 
-    parcel_attrs = parcels.select(
-        "parcel_id",
-        "building_type",
-        "res_units",
-        "geo_tract",
-        "geo_neighborhood",
-    )
+    parcel_cols = ["parcel_id", "building_type", "res_units", "geo_tract", "geo_neighborhood"]
+    if "geo_borough" in parcels.columns:
+        parcel_cols.append("geo_borough")
+    parcel_attrs = parcels.select(parcel_cols)
     if pad is not None and pad.height:
         mapped = map_to_billing(long["parcel_id"], pad)
         long = long.join(mapped, left_on="parcel_id", right_on="unit_parcel_id", how="left")
@@ -90,7 +93,13 @@ def attach_residential(
     need = direct.filter(pl.col("building_type").is_null()).drop(
         [
             col
-            for col in ("building_type", "res_units", "geo_tract", "geo_neighborhood")
+            for col in (
+                "building_type",
+                "res_units",
+                "geo_tract",
+                "geo_neighborhood",
+                "geo_borough",
+            )
             if col in direct.columns
         ]
     )
@@ -127,7 +136,10 @@ def attach_residential(
 
 
 def with_year_and_borough(matched: pl.DataFrame) -> pl.DataFrame:
+    """Prefer adapter-supplied ``geo_borough`` (ADR 0010). NYC BBL is the fallback."""
     years = matched.with_columns(pl.col("recorded_date").dt.year().alias("year"))
+    if "geo_borough" in years.columns and years["geo_borough"].null_count() < years.height:
+        return years
     boroughs = [nyc_borough(pid or "") for pid in years["parcel_id"].to_list()]
     return years.with_columns(pl.Series("geo_borough", boroughs, dtype=pl.Utf8))
 
@@ -141,7 +153,7 @@ def in_coverage_window(
     kept = frame.filter(pl.col("year").is_between(start, end, closed="both"))
     return kept, FilterCount(
         stage="coverage_window",
-        rule_id="recorded_year_2003_2025",
+        rule_id=f"recorded_year_{start}_{end}",
         rows_in=rows_in,
         rows_out=kept.height,
     )
@@ -222,7 +234,11 @@ def flow_breakdowns(matched: pl.DataFrame) -> dict[str, pl.DataFrame]:
     }
 
 
-def flow_headlines(matched: pl.DataFrame) -> dict[str, Any]:
+def flow_headlines(
+    matched: pl.DataFrame,
+    start: int = WINDOW_START,
+    end: int = WINDOW_END,
+) -> dict[str, Any]:
     city = flow_share_table(matched, [])
     informative = flow_share_table(
         matched.filter(pl.col("building_type").is_in(list(INFORMATIVE_TYPES))),
@@ -243,7 +259,7 @@ def flow_headlines(matched: pl.DataFrame) -> dict[str, Any]:
         return {k: row[k] for k in row if k not in {"year", "building_type", "geo_borough"}}
 
     return {
-        "window": {"start": WINDOW_START, "end": WINDOW_END},
+        "window": {"start": start, "end": end},
         "private_residential": _row(city),
         "sfr_condo": _row(informative),
     }
@@ -261,12 +277,28 @@ SENSITIVITY_CONFIGS: list[tuple[str, SaleFilterConfig]] = [
     ("exclude_deedo", SaleFilterConfig(drop_sale_codes=frozenset({"DEEDO"}))),
 ]
 
+PHL_SENSITIVITY_CONFIGS: list[tuple[str, SaleFilterConfig]] = [
+    ("default_10k", SaleFilterConfig()),
+    ("threshold_0", SaleFilterConfig(min_consideration=0.0)),
+    ("threshold_1", SaleFilterConfig(min_consideration=1.0)),
+    ("threshold_100k", SaleFilterConfig(min_consideration=100_000.0)),
+    ("zero_as_missing_10k", SaleFilterConfig(treat_zero_amount_as_missing=True)),
+    ("exclude_same_surname", SaleFilterConfig(exclude_same_surname=True)),
+    ("require_full_interest", SaleFilterConfig(require_full_interest=True)),
+    (
+        "exclude_sheriff",
+        SaleFilterConfig(drop_sale_codes=frozenset({"DEED SHERIFF", "SHERIFF'S DEED"})),
+    ),
+]
+
 
 def sensitivity_table(
     transfers: pl.DataFrame,
     parcels: pl.DataFrame,
     pad: pl.DataFrame | None = None,
     configs: list[tuple[str, SaleFilterConfig]] | None = None,
+    start: int = WINDOW_START,
+    end: int = WINDOW_END,
 ) -> pl.DataFrame:
     # Classify the widest named-grantee sale set once; each config is a row filter.
     if "buyer_class" in transfers.columns:
@@ -279,8 +311,8 @@ def sensitivity_table(
         filtered, _ = apply_sale_filter(classified, config)
         matched, _ = attach_residential(filtered, parcels, pad)
         matched = with_year_and_borough(matched)
-        matched, _ = in_coverage_window(matched)
-        headlines = flow_headlines(matched)
+        matched, _ = in_coverage_window(matched, start, end)
+        headlines = flow_headlines(matched, start, end)
         payload = headlines["private_residential"]
         rows.append(
             {

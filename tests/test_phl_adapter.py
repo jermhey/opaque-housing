@@ -58,10 +58,18 @@ def test_opa_fixture_maps_to_canonical_parcels() -> None:
 def test_rtt_fixture_marks_deeds() -> None:
     adapter = PhlRttAdapter()
     frame = adapter.load_transfers(RTT)
-    assert frame.height == 3
+    assert frame.height == 6
     deeds = frame.filter(pl_doc_is_sale(frame))
-    assert deeds.height == 2
-    assert SALE_TYPES == frozenset({"DEED"})
+    assert deeds.height == 4
+    by_id = {row["doc_id"]: row for row in frame.iter_rows(named=True)}
+    assert by_id["99"]["doc_type_canonical"] == DocTypeCanonical.SALE_DEED.value
+    assert by_id["101"]["doc_type_canonical"] == DocTypeCanonical.SALE_DEED.value
+    assert by_id["102"]["doc_type_canonical"] == DocTypeCanonical.SALE_DEED.value
+    assert by_id["18"]["doc_type_canonical"] == DocTypeCanonical.OTHER.value
+    assert by_id["103"]["doc_type_canonical"] == DocTypeCanonical.OTHER.value
+    assert by_id["99"]["consideration"] == 250000
+    assert "222222222" in by_id["99"]["parcel_ids"]
+    assert SALE_TYPES == frozenset({"DEED", "DEED SHERIFF", "SHERIFF'S DEED"})
 
 
 def pl_doc_is_sale(frame):

@@ -28,6 +28,7 @@ from opaque_housing.adapters.nyc.sources import (
     resolve_ingest_specs,
 )
 from opaque_housing.adapters.phl.opa import PhlOpaAdapter
+from opaque_housing.adapters.phl.rtt import PhlRttAdapter
 from opaque_housing.adapters.phl.sources import OPA_SNAPSHOT_DATE, resolve_phl_specs
 from opaque_housing.adapters.soda import write_soda_parquet
 from opaque_housing.classify.apply import classify_parcel_frame
@@ -42,6 +43,8 @@ from opaque_housing.labeling.sample import (
 from opaque_housing.metrics.correction import bootstrap_corrected_prevalence
 from opaque_housing.metrics.evaluation import evaluation_report
 from opaque_housing.metrics.flow import (
+    COVERAGE_WINDOWS,
+    PHL_SENSITIVITY_CONFIGS,
     attach_residential,
     classify_buyers,
     flow_breakdowns,
@@ -253,53 +256,81 @@ def flow(
     parcels: Annotated[
         Path | None, typer.Option(help="Classified parcels parquet from oh build.")
     ] = None,
+    rtt: Annotated[Path | None, typer.Option(help="Philadelphia RTT extract.")] = None,
     pad: Annotated[Path | None, typer.Option(help="Optional PAD BBL crosswalk.")] = None,
     out_dir: Annotated[Path | None, typer.Option(help="Derived output directory.")] = None,
     min_consideration: Annotated[float, typer.Option(help="Arm's-length amount cut.")] = 10_000.0,
     snapshot_date: Annotated[
-        str, typer.Option(help="As-of date for the PLUTO consistency check.")
-    ] = PLUTO_SNAPSHOT_DATE,
+        str | None, typer.Option(help="As-of date for the current-stock consistency check.")
+    ] = None,
 ) -> None:
-    """Entity-buyer flow, reconstructed history, and PLUTO consistency."""
-    if metro != "nyc":
-        typer.echo(f"flow is only wired for nyc (got {metro})", err=True)
-        raise typer.Exit(code=1)
-    master_path = master or latest_raw_file(
-        metro, "acris_master", ACRIS_SOURCES["acris_master"].filename
-    )
-    legals_path = legals or latest_raw_file(
-        metro, "acris_legals", ACRIS_SOURCES["acris_legals"].filename
-    )
-    parties_path = parties or latest_raw_file(
-        metro, "acris_parties", ACRIS_SOURCES["acris_parties"].filename
-    )
-    parcel_path = parcels or (derived_dir(metro) / "parcels_classified.parquet")
-    missing = [
-        label
-        for label, path in (
-            ("master", master_path),
-            ("legals", legals_path),
-            ("parties", parties_path),
-            ("parcels", parcel_path),
-        )
-        if path is None or not path.exists()
-    ]
-    if missing:
-        typer.echo(f"missing inputs: {', '.join(missing)}", err=True)
-        raise typer.Exit(code=1)
-    assert master_path is not None and legals_path is not None and parties_path is not None
+    """Entity-buyer flow, reconstructed history, and current-stock consistency."""
     dest = out_dir or derived_dir(metro)
     dest.mkdir(parents=True, exist_ok=True)
     started = datetime.now(tz=UTC)
-
-    adapter = NycAcrisAdapter()
-    typer.echo("loading ACRIS master/legals/parties")
-    transfers = adapter.load_transfers(master_path, legals_path)
-    party_rows = adapter.load_transfer_parties(parties_path)
-    transfers = attach_primary_parties(transfers, party_rows)
-    typer.echo(f"transfers={transfers.height} parties={party_rows.height}")
-    parcel_frame = pl.read_parquet(parcel_path)
+    parcel_path = parcels or (derived_dir(metro) / "parcels_classified.parquet")
     pad_frame = load_pad_crosswalk(pad) if pad is not None else None
+    if metro == "phl":
+        rtt_path = rtt or latest_raw_file(metro, "rtt", "rtt_summary.csv")
+        if rtt_path is None or not rtt_path.exists() or not parcel_path.exists():
+            typer.echo("missing PHL inputs; pass --rtt and run oh build --metro phl", err=True)
+            raise typer.Exit(code=1)
+        adapter = PhlRttAdapter()
+        typer.echo("loading RTT_SUMMARY")
+        transfers = adapter.load_transfers(rtt_path)
+        typer.echo(f"transfers={transfers.height}")
+        source_paths = {"rtt": str(rtt_path), "parcels": str(parcel_path)}
+        source_versions = {"rtt": adapter.source_version, "rules": RULES_VERSION}
+        window = COVERAGE_WINDOWS["phl"]
+        snap = date.fromisoformat(snapshot_date or OPA_SNAPSHOT_DATE)
+        sensitivity_configs = PHL_SENSITIVITY_CONFIGS
+        window_note = "coverage window recorded years 2000-2025 (ADR 0010)"
+    elif metro == "nyc":
+        master_path = master or latest_raw_file(
+            metro, "acris_master", ACRIS_SOURCES["acris_master"].filename
+        )
+        legals_path = legals or latest_raw_file(
+            metro, "acris_legals", ACRIS_SOURCES["acris_legals"].filename
+        )
+        parties_path = parties or latest_raw_file(
+            metro, "acris_parties", ACRIS_SOURCES["acris_parties"].filename
+        )
+        missing = [
+            label
+            for label, path in (
+                ("master", master_path),
+                ("legals", legals_path),
+                ("parties", parties_path),
+                ("parcels", parcel_path),
+            )
+            if path is None or not path.exists()
+        ]
+        if missing:
+            typer.echo(f"missing inputs: {', '.join(missing)}", err=True)
+            raise typer.Exit(code=1)
+        assert master_path is not None and legals_path is not None and parties_path is not None
+        adapter = NycAcrisAdapter()
+        typer.echo("loading ACRIS master/legals/parties")
+        transfers = adapter.load_transfers(master_path, legals_path)
+        party_rows = adapter.load_transfer_parties(parties_path)
+        transfers = attach_primary_parties(transfers, party_rows)
+        typer.echo(f"transfers={transfers.height} parties={party_rows.height}")
+        source_paths = {
+            "acris_master": str(master_path),
+            "acris_legals": str(legals_path),
+            "acris_parties": str(parties_path),
+            "parcels": str(parcel_path),
+            "pad": str(pad) if pad else "",
+        }
+        source_versions = {"acris": adapter.source_version, "rules": RULES_VERSION}
+        window = COVERAGE_WINDOWS["nyc"]
+        snap = date.fromisoformat(snapshot_date or PLUTO_SNAPSHOT_DATE)
+        sensitivity_configs = None
+        window_note = "coverage window recorded years 2003-2025 (ADR 0006)"
+    else:
+        typer.echo(f"flow is only wired for nyc and phl (got {metro})", err=True)
+        raise typer.Exit(code=1)
+    parcel_frame = pl.read_parquet(parcel_path)
 
     hist_sales, hist_counts = history_only_sales(transfers)
     typer.echo(f"classifying {hist_sales.height} named sale-deed buyers")
@@ -309,17 +340,25 @@ def flow(
     )
     flow_matched, join_counts = attach_residential(flow_sales, parcel_frame, pad_frame)
     flow_matched = with_year_and_borough(flow_matched)
-    flow_matched, window_count = in_coverage_window(flow_matched)
+    flow_matched, window_count = in_coverage_window(flow_matched, window[0], window[1])
     breakdowns = flow_breakdowns(flow_matched)
-    headlines = flow_headlines(flow_matched)
+    headlines = flow_headlines(flow_matched, window[0], window[1])
     typer.echo("sensitivity table")
-    sensitivity = sensitivity_table(hist_buyers, parcel_frame, pad_frame)
+    sensitivity = sensitivity_table(
+        hist_buyers,
+        parcel_frame,
+        pad_frame,
+        configs=sensitivity_configs,
+        start=window[0],
+        end=window[1],
+    )
 
     hist_matched, hist_join = attach_residential(hist_buyers, parcel_frame, pad_frame)
     hist_matched = with_year_and_borough(hist_matched)
-    history = historical_stock_table(hist_matched, parcel_frame, year_end_dates())
-    as_of = date.fromisoformat(snapshot_date)
-    consistency = consistency_check(hist_matched, parcel_frame, as_of)
+    history = historical_stock_table(
+        hist_matched, parcel_frame, year_end_dates(window[0], window[1])
+    )
+    consistency = consistency_check(hist_matched, parcel_frame, snap)
 
     for name, table in breakdowns.items():
         table.write_csv(dest / f"flow_{name}.csv")
@@ -332,14 +371,8 @@ def flow(
         metro_id=metro,
         started_at=started.isoformat(),
         finished_at=datetime.now(tz=UTC).isoformat(),
-        source_paths={
-            "acris_master": str(master_path),
-            "acris_legals": str(legals_path),
-            "acris_parties": str(parties_path),
-            "parcels": str(parcel_path),
-            "pad": str(pad) if pad else "",
-        },
-        source_versions={"acris": adapter.source_version, "rules": RULES_VERSION},
+        source_paths=source_paths,
+        source_versions=source_versions,
         rules_version=RULES_VERSION,
         filter_counts=[
             *adapter.filter_counts,
@@ -352,7 +385,7 @@ def flow(
         notes=[
             "flow uses sale_deed + named grantee + consideration cut (ADR 0005)",
             "history uses every sale_deed with a named grantee",
-            "coverage window recorded years 2003-2025 (ADR 0006)",
+            window_note,
             "trusts are not in the entity headline",
         ],
     )

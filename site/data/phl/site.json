@@ -1,6 +1,6 @@
 {
   "metro": "phl",
-  "generated_at": "2026-09-17T20:13:42.163186+00:00",
+  "generated_at": "2026-09-18T00:37:26.399810+00:00",
   "reused": {},
   "stock": {
     "private_all_entity_only": {
@@ -1383,17 +1383,1047 @@
       "unit_share": "0.009562107407161416"
     }
   ],
-  "flow": {},
-  "flow_by_year": [],
-  "flow_sfr_condo": [],
-  "flow_sensitivity": [],
-  "history": [],
-  "consistency": {},
+  "flow": {
+    "window": {
+      "start": 2000,
+      "end": 2025
+    },
+    "private_residential": {
+      "sales": 579112,
+      "units": 694871,
+      "entity_sales": 103923,
+      "entity_units": 171477,
+      "sale_share": 0.17945233391813672,
+      "unit_share": 0.2467753007392739
+    },
+    "sfr_condo": {
+      "sales": 557997,
+      "units": 621312,
+      "entity_sales": 94886,
+      "entity_units": 118107,
+      "sale_share": 0.17004750921599937,
+      "unit_share": 0.19009290018541408
+    }
+  },
+  "flow_by_year": [
+    {
+      "year": "2000",
+      "sales": "20686",
+      "units": "25182",
+      "entity_sales": "1157",
+      "entity_units": "2823",
+      "sale_share": "0.055931547906796865",
+      "unit_share": "0.11210388372647129"
+    },
+    {
+      "year": "2001",
+      "sales": "21879",
+      "units": "25620",
+      "entity_sales": "1377",
+      "entity_units": "2556",
+      "sale_share": "0.06293706293706294",
+      "unit_share": "0.09976580796252928"
+    },
+    {
+      "year": "2002",
+      "sales": "24092",
+      "units": "28890",
+      "entity_sales": "1767",
+      "entity_units": "3651",
+      "sale_share": "0.07334384858044164",
+      "unit_share": "0.12637590861889927"
+    },
+    {
+      "year": "2003",
+      "sales": "25678",
+      "units": "30375",
+      "entity_sales": "2283",
+      "entity_units": "3934",
+      "sale_share": "0.08890879351974453",
+      "unit_share": "0.12951440329218106"
+    },
+    {
+      "year": "2004",
+      "sales": "31287",
+      "units": "37245",
+      "entity_sales": "2686",
+      "entity_units": "5324",
+      "sale_share": "0.0858503531818327",
+      "unit_share": "0.14294536179352935"
+    },
+    {
+      "year": "2005",
+      "sales": "32826",
+      "units": "39212",
+      "entity_sales": "3283",
+      "entity_units": "6148",
+      "sale_share": "0.10001218546274294",
+      "unit_share": "0.1567887381413853"
+    },
+    {
+      "year": "2006",
+      "sales": "30572",
+      "units": "35801",
+      "entity_sales": "3403",
+      "entity_units": "5658",
+      "sale_share": "0.11131100353264425",
+      "unit_share": "0.15804027820451944"
+    },
+    {
+      "year": "2007",
+      "sales": "26336",
+      "units": "31720",
+      "entity_sales": "3300",
+      "entity_units": "6195",
+      "sale_share": "0.1253037667071689",
+      "unit_share": "0.19530264817150064"
+    },
+    {
+      "year": "2008",
+      "sales": "19621",
+      "units": "22842",
+      "entity_sales": "2864",
+      "entity_units": "4364",
+      "sale_share": "0.14596605677590338",
+      "unit_share": "0.19105157166622888"
+    },
+    {
+      "year": "2009",
+      "sales": "17293",
+      "units": "19801",
+      "entity_sales": "2538",
+      "entity_units": "3771",
+      "sale_share": "0.14676458682703986",
+      "unit_share": "0.19044492702388768"
+    },
+    {
+      "year": "2010",
+      "sales": "16794",
+      "units": "20565",
+      "entity_sales": "2689",
+      "entity_units": "5015",
+      "sale_share": "0.1601167083482196",
+      "unit_share": "0.2438609287624605"
+    },
+    {
+      "year": "2011",
+      "sales": "14482",
+      "units": "18337",
+      "entity_sales": "2528",
+      "entity_units": "5113",
+      "sale_share": "0.17456152465129127",
+      "unit_share": "0.2788351420624966"
+    },
+    {
+      "year": "2012",
+      "sales": "14292",
+      "units": "18251",
+      "entity_sales": "2686",
+      "entity_units": "5468",
+      "sale_share": "0.18793730758466276",
+      "unit_share": "0.2996000219166073"
+    },
+    {
+      "year": "2013",
+      "sales": "17283",
+      "units": "21694",
+      "entity_sales": "3633",
+      "entity_units": "6737",
+      "sale_share": "0.21020656136087484",
+      "unit_share": "0.31054669493869275"
+    },
+    {
+      "year": "2014",
+      "sales": "18211",
+      "units": "22857",
+      "entity_sales": "4136",
+      "entity_units": "7452",
+      "sale_share": "0.22711547965515347",
+      "unit_share": "0.32602703766898544"
+    },
+    {
+      "year": "2015",
+      "sales": "20635",
+      "units": "25981",
+      "entity_sales": "5055",
+      "entity_units": "9066",
+      "sale_share": "0.24497213472255877",
+      "unit_share": "0.34894730764789655"
+    },
+    {
+      "year": "2016",
+      "sales": "25724",
+      "units": "30643",
+      "entity_sales": "6349",
+      "entity_units": "9717",
+      "sale_share": "0.24681231534753537",
+      "unit_share": "0.3171034167672878"
+    },
+    {
+      "year": "2017",
+      "sales": "26545",
+      "units": "31898",
+      "entity_sales": "7048",
+      "entity_units": "10621",
+      "sale_share": "0.2655113957430778",
+      "unit_share": "0.3329675841745564"
+    },
+    {
+      "year": "2018",
+      "sales": "26119",
+      "units": "30892",
+      "entity_sales": "6751",
+      "entity_units": "9957",
+      "sale_share": "0.2584708449787511",
+      "unit_share": "0.3223164573352324"
+    },
+    {
+      "year": "2019",
+      "sales": "24400",
+      "units": "29303",
+      "entity_sales": "6545",
+      "entity_units": "10046",
+      "sale_share": "0.2682377049180328",
+      "unit_share": "0.34283179196669283"
+    },
+    {
+      "year": "2020",
+      "sales": "20669",
+      "units": "24600",
+      "entity_sales": "4649",
+      "entity_units": "7416",
+      "sale_share": "0.22492621800764429",
+      "unit_share": "0.30146341463414633"
+    },
+    {
+      "year": "2021",
+      "sales": "20211",
+      "units": "24213",
+      "entity_sales": "4569",
+      "entity_units": "7333",
+      "sale_share": "0.226065014101232",
+      "unit_share": "0.3028538388469004"
+    },
+    {
+      "year": "2022",
+      "sales": "28785",
+      "units": "34466",
+      "entity_sales": "7458",
+      "entity_units": "11473",
+      "sale_share": "0.2590932777488275",
+      "unit_share": "0.3328787790866361"
+    },
+    {
+      "year": "2023",
+      "sales": "17751",
+      "units": "20518",
+      "entity_sales": "4676",
+      "entity_units": "6468",
+      "sale_share": "0.26342177905470116",
+      "unit_share": "0.31523540306072717"
+    },
+    {
+      "year": "2024",
+      "sales": "18163",
+      "units": "21722",
+      "entity_sales": "4846",
+      "entity_units": "7156",
+      "sale_share": "0.26680614435941197",
+      "unit_share": "0.32943559524905625"
+    },
+    {
+      "year": "2025",
+      "sales": "18778",
+      "units": "22243",
+      "entity_sales": "5647",
+      "entity_units": "8015",
+      "sale_share": "0.3007242517840026",
+      "unit_share": "0.3603380838915614"
+    }
+  ],
+  "flow_sfr_condo": [
+    {
+      "year": "2000",
+      "sales": "19788",
+      "units": "21881",
+      "entity_sales": "1002",
+      "entity_units": "1246",
+      "sale_share": "0.0506367495451789",
+      "unit_share": "0.056944380969791146"
+    },
+    {
+      "year": "2001",
+      "sales": "20996",
+      "units": "23251",
+      "entity_sales": "1212",
+      "entity_units": "1500",
+      "sale_share": "0.05772528100590589",
+      "unit_share": "0.06451335426433272"
+    },
+    {
+      "year": "2002",
+      "sales": "23073",
+      "units": "25868",
+      "entity_sales": "1578",
+      "entity_units": "2018",
+      "sale_share": "0.06839162657651801",
+      "unit_share": "0.0780114427091387"
+    },
+    {
+      "year": "2003",
+      "sales": "24648",
+      "units": "27402",
+      "entity_sales": "2059",
+      "entity_units": "2525",
+      "sale_share": "0.08353618954884778",
+      "unit_share": "0.09214655864535436"
+    },
+    {
+      "year": "2004",
+      "sales": "29993",
+      "units": "33282",
+      "entity_sales": "2368",
+      "entity_units": "2963",
+      "sale_share": "0.07895175540959558",
+      "unit_share": "0.08902710173667448"
+    },
+    {
+      "year": "2005",
+      "sales": "31617",
+      "units": "35315",
+      "entity_sales": "2955",
+      "entity_units": "3674",
+      "sale_share": "0.09346237783470918",
+      "unit_share": "0.10403511255840295"
+    },
+    {
+      "year": "2006",
+      "sales": "29546",
+      "units": "32623",
+      "entity_sales": "3120",
+      "entity_units": "3684",
+      "sale_share": "0.10559805049752928",
+      "unit_share": "0.11292646292493026"
+    },
+    {
+      "year": "2007",
+      "sales": "25440",
+      "units": "28175",
+      "entity_sales": "3024",
+      "entity_units": "3767",
+      "sale_share": "0.11886792452830189",
+      "unit_share": "0.13370008873114464"
+    },
+    {
+      "year": "2008",
+      "sales": "18916",
+      "units": "20858",
+      "entity_sales": "2600",
+      "entity_units": "3053",
+      "sale_share": "0.13744977796574329",
+      "unit_share": "0.14637069709463996"
+    },
+    {
+      "year": "2009",
+      "sales": "16714",
+      "units": "18263",
+      "entity_sales": "2326",
+      "entity_units": "2792",
+      "sale_share": "0.13916477204738542",
+      "unit_share": "0.15287740239829162"
+    },
+    {
+      "year": "2010",
+      "sales": "16156",
+      "units": "18170",
+      "entity_sales": "2440",
+      "entity_units": "3265",
+      "sale_share": "0.15102748205001237",
+      "unit_share": "0.17969179966978535"
+    },
+    {
+      "year": "2011",
+      "sales": "13871",
+      "units": "15575",
+      "entity_sales": "2273",
+      "entity_units": "3028",
+      "sale_share": "0.16386706077427726",
+      "unit_share": "0.19441412520064205"
+    },
+    {
+      "year": "2012",
+      "sales": "13646",
+      "units": "15518",
+      "entity_sales": "2381",
+      "entity_units": "3276",
+      "sale_share": "0.17448336508867068",
+      "unit_share": "0.21110967908235598"
+    },
+    {
+      "year": "2013",
+      "sales": "16516",
+      "units": "18453",
+      "entity_sales": "3229",
+      "entity_units": "4057",
+      "sale_share": "0.19550738677645918",
+      "unit_share": "0.2198558499972904"
+    },
+    {
+      "year": "2014",
+      "sales": "17442",
+      "units": "19538",
+      "entity_sales": "3708",
+      "entity_units": "4621",
+      "sale_share": "0.21259029927760578",
+      "unit_share": "0.2365134609478964"
+    },
+    {
+      "year": "2015",
+      "sales": "19818",
+      "units": "22054",
+      "entity_sales": "4617",
+      "entity_units": "5695",
+      "sale_share": "0.2329700272479564",
+      "unit_share": "0.2582297995828421"
+    },
+    {
+      "year": "2016",
+      "sales": "24820",
+      "units": "27608",
+      "entity_sales": "5838",
+      "entity_units": "7194",
+      "sale_share": "0.23521353746978244",
+      "unit_share": "0.2605766444508838"
+    },
+    {
+      "year": "2017",
+      "sales": "25645",
+      "units": "28663",
+      "entity_sales": "6528",
+      "entity_units": "8052",
+      "sale_share": "0.25455254435562485",
+      "unit_share": "0.2809196525136936"
+    },
+    {
+      "year": "2018",
+      "sales": "25294",
+      "units": "28189",
+      "entity_sales": "6261",
+      "entity_units": "7686",
+      "sale_share": "0.24752905827468966",
+      "unit_share": "0.27265954805065806"
+    },
+    {
+      "year": "2019",
+      "sales": "23600",
+      "units": "26290",
+      "entity_sales": "6057",
+      "entity_units": "7452",
+      "sale_share": "0.2566525423728814",
+      "unit_share": "0.28345378470901483"
+    },
+    {
+      "year": "2020",
+      "sales": "20054",
+      "units": "22170",
+      "entity_sales": "4258",
+      "entity_units": "5284",
+      "sale_share": "0.2123267178617732",
+      "unit_share": "0.23834009923319802"
+    },
+    {
+      "year": "2021",
+      "sales": "19536",
+      "units": "21821",
+      "entity_sales": "4142",
+      "entity_units": "5274",
+      "sale_share": "0.21201883701883703",
+      "unit_share": "0.24169378121992577"
+    },
+    {
+      "year": "2022",
+      "sales": "27843",
+      "units": "31180",
+      "entity_sales": "6844",
+      "entity_units": "8596",
+      "sale_share": "0.2458068455267033",
+      "unit_share": "0.2756895445798589"
+    },
+    {
+      "year": "2023",
+      "sales": "17206",
+      "units": "19162",
+      "entity_sales": "4326",
+      "entity_units": "5386",
+      "sale_share": "0.25142392188771356",
+      "unit_share": "0.2810771318234005"
+    },
+    {
+      "year": "2024",
+      "sales": "17615",
+      "units": "19709",
+      "entity_sales": "4484",
+      "entity_units": "5602",
+      "sale_share": "0.25455577632699405",
+      "unit_share": "0.2842356283931199"
+    },
+    {
+      "year": "2025",
+      "sales": "18204",
+      "units": "20294",
+      "entity_sales": "5256",
+      "entity_units": "6417",
+      "sale_share": "0.2887277521423863",
+      "unit_share": "0.31620183305410465"
+    }
+  ],
+  "flow_sensitivity": [
+    {
+      "config": "default_10k",
+      "min_consideration": "10000.0",
+      "treat_zero_amount_as_missing": "false",
+      "require_named_grantee": "true",
+      "require_full_interest": "false",
+      "exclude_same_surname": "false",
+      "drop_sale_codes": "",
+      "sales": "579112",
+      "entity_sales": "103923",
+      "sale_share": "0.17945233391813672",
+      "units": "694871",
+      "entity_units": "171477",
+      "unit_share": "0.2467753007392739"
+    },
+    {
+      "config": "threshold_0",
+      "min_consideration": "0.0",
+      "treat_zero_amount_as_missing": "false",
+      "require_named_grantee": "true",
+      "require_full_interest": "false",
+      "exclude_same_surname": "false",
+      "drop_sale_codes": "",
+      "sales": "835539",
+      "entity_sales": "125061",
+      "sale_share": "0.14967703482422723",
+      "units": "1010017",
+      "entity_units": "216720",
+      "unit_share": "0.21457064584061455"
+    },
+    {
+      "config": "threshold_1",
+      "min_consideration": "1.0",
+      "treat_zero_amount_as_missing": "false",
+      "require_named_grantee": "true",
+      "require_full_interest": "false",
+      "exclude_same_surname": "false",
+      "drop_sale_codes": "",
+      "sales": "824934",
+      "entity_sales": "123992",
+      "sale_share": "0.15030535776195428",
+      "units": "996388",
+      "entity_units": "214062",
+      "unit_share": "0.21483799483735253"
+    },
+    {
+      "config": "threshold_100k",
+      "min_consideration": "100000.0",
+      "treat_zero_amount_as_missing": "false",
+      "require_named_grantee": "true",
+      "require_full_interest": "false",
+      "exclude_same_surname": "false",
+      "drop_sale_codes": "",
+      "sales": "311453",
+      "entity_sales": "37799",
+      "sale_share": "0.1213634159889293",
+      "units": "401910",
+      "entity_units": "96558",
+      "unit_share": "0.2402478166753751"
+    },
+    {
+      "config": "zero_as_missing_10k",
+      "min_consideration": "10000.0",
+      "treat_zero_amount_as_missing": "true",
+      "require_named_grantee": "true",
+      "require_full_interest": "false",
+      "exclude_same_surname": "false",
+      "drop_sale_codes": "",
+      "sales": "609365",
+      "entity_sales": "106656",
+      "sale_share": "0.1750281030252804",
+      "units": "735859",
+      "entity_units": "179893",
+      "unit_share": "0.2444666709247288"
+    },
+    {
+      "config": "exclude_same_surname",
+      "min_consideration": "10000.0",
+      "treat_zero_amount_as_missing": "false",
+      "require_named_grantee": "true",
+      "require_full_interest": "false",
+      "exclude_same_surname": "true",
+      "drop_sale_codes": "",
+      "sales": "569407",
+      "entity_sales": "103269",
+      "sale_share": "0.18136236470573772",
+      "units": "678763",
+      "entity_units": "165628",
+      "unit_share": "0.2440144792806915"
+    },
+    {
+      "config": "require_full_interest",
+      "min_consideration": "10000.0",
+      "treat_zero_amount_as_missing": "false",
+      "require_named_grantee": "true",
+      "require_full_interest": "true",
+      "exclude_same_surname": "false",
+      "drop_sale_codes": "",
+      "sales": "579112",
+      "entity_sales": "103923",
+      "sale_share": "0.17945233391813672",
+      "units": "694871",
+      "entity_units": "171477",
+      "unit_share": "0.2467753007392739"
+    },
+    {
+      "config": "exclude_sheriff",
+      "min_consideration": "10000.0",
+      "treat_zero_amount_as_missing": "false",
+      "require_named_grantee": "true",
+      "require_full_interest": "false",
+      "exclude_same_surname": "false",
+      "drop_sale_codes": "DEED SHERIFF,SHERIFF'S DEED",
+      "sales": "540330",
+      "entity_sales": "90963",
+      "sale_share": "0.16834712120370884",
+      "units": "650843",
+      "entity_units": "155891",
+      "unit_share": "0.23952166651558057"
+    }
+  ],
+  "history": [
+    {
+      "as_of": "2000-12-31",
+      "year": "2000",
+      "parcels": "41984",
+      "units": "51014",
+      "entity_parcels": "1890",
+      "entity_units": "4347",
+      "parcel_share": "0.0450171493902439",
+      "unit_share": "0.08521190261496844",
+      "sfr_condo_parcels": "40076",
+      "sfr_condo_units": "43633",
+      "sfr_condo_entity_unit_share": "0.041344853665803406",
+      "coverage_parcels": "0.08297160251283206"
+    },
+    {
+      "as_of": "2001-12-31",
+      "year": "2001",
+      "parcels": "69812",
+      "units": "83076",
+      "entity_parcels": "3045",
+      "entity_units": "6659",
+      "parcel_share": "0.0436171431845528",
+      "unit_share": "0.08015552024652126",
+      "sfr_condo_parcels": "66661",
+      "sfr_condo_units": "72537",
+      "sfr_condo_entity_unit_share": "0.03931786536526187",
+      "coverage_parcels": "0.13711862959022822"
+    },
+    {
+      "as_of": "2002-12-31",
+      "year": "2002",
+      "parcels": "97976",
+      "units": "116325",
+      "entity_parcels": "4334",
+      "entity_units": "10026",
+      "parcel_share": "0.04423532293622928",
+      "unit_share": "0.08618955512572533",
+      "sfr_condo_parcels": "93553",
+      "sfr_condo_units": "102013",
+      "sfr_condo_entity_unit_share": "0.040014507954868495",
+      "coverage_parcels": "0.19182281272567733"
+    },
+    {
+      "as_of": "2003-12-31",
+      "year": "2003",
+      "parcels": "125470",
+      "units": "148198",
+      "entity_parcels": "6183",
+      "entity_units": "13209",
+      "parcel_share": "0.04927871204271937",
+      "unit_share": "0.08913075750010122",
+      "sfr_condo_parcels": "119921",
+      "sfr_condo_units": "130779",
+      "sfr_condo_entity_unit_share": "0.045282499483862086",
+      "coverage_parcels": "0.24525737892047617"
+    },
+    {
+      "as_of": "2004-12-31",
+      "year": "2004",
+      "parcels": "153617",
+      "units": "181135",
+      "entity_parcels": "7894",
+      "entity_units": "17092",
+      "parcel_share": "0.051387541743426836",
+      "unit_share": "0.0943605598034615",
+      "sfr_condo_parcels": "146863",
+      "sfr_condo_units": "160131",
+      "sfr_condo_entity_unit_share": "0.04718012127570552",
+      "coverage_parcels": "0.30002368398574303"
+    },
+    {
+      "as_of": "2005-12-31",
+      "year": "2005",
+      "parcels": "179653",
+      "units": "211582",
+      "entity_parcels": "10078",
+      "entity_units": "21503",
+      "parcel_share": "0.05609703149961314",
+      "unit_share": "0.10162962822924446",
+      "sfr_condo_parcels": "171961",
+      "sfr_condo_units": "187553",
+      "sfr_condo_entity_unit_share": "0.051841346179479934",
+      "coverage_parcels": "0.3507501223025493"
+    },
+    {
+      "as_of": "2006-12-31",
+      "year": "2006",
+      "parcels": "201953",
+      "units": "237244",
+      "entity_parcels": "12012",
+      "entity_units": "25047",
+      "parcel_share": "0.05947918575114012",
+      "unit_share": "0.10557485120803899",
+      "sfr_condo_parcels": "193442",
+      "sfr_condo_units": "210798",
+      "sfr_condo_entity_unit_share": "0.05506693611893851",
+      "coverage_parcels": "0.3939695136629419"
+    },
+    {
+      "as_of": "2007-12-31",
+      "year": "2007",
+      "parcels": "219755",
+      "units": "258735",
+      "entity_parcels": "13837",
+      "entity_units": "29059",
+      "parcel_share": "0.06296557529976565",
+      "unit_share": "0.11231182484008735",
+      "sfr_condo_parcels": "210564",
+      "sfr_condo_units": "229330",
+      "sfr_condo_entity_unit_share": "0.058718876727859415",
+      "coverage_parcels": "0.42866072884554157"
+    },
+    {
+      "as_of": "2008-12-31",
+      "year": "2008",
+      "parcels": "232789",
+      "units": "273920",
+      "entity_parcels": "15335",
+      "entity_units": "31687",
+      "parcel_share": "0.06587510578248973",
+      "unit_share": "0.1156797605140187",
+      "sfr_condo_parcels": "223070",
+      "sfr_condo_units": "242877",
+      "sfr_condo_entity_unit_share": "0.0615990810163169",
+      "coverage_parcels": "0.4539365890401385"
+    },
+    {
+      "as_of": "2009-12-31",
+      "year": "2009",
+      "parcels": "243527",
+      "units": "286260",
+      "entity_parcels": "16706",
+      "entity_units": "34052",
+      "parcel_share": "0.0686001962821371",
+      "unit_share": "0.11895479633899253",
+      "sfr_condo_parcels": "233401",
+      "sfr_condo_units": "254021",
+      "sfr_condo_entity_unit_share": "0.06473874207250582",
+      "coverage_parcels": "0.47480373352798205"
+    },
+    {
+      "as_of": "2010-12-31",
+      "year": "2010",
+      "parcels": "253033",
+      "units": "297708",
+      "entity_parcels": "18126",
+      "entity_units": "36769",
+      "parcel_share": "0.07163492508882241",
+      "unit_share": "0.12350692624988244",
+      "sfr_condo_parcels": "242518",
+      "sfr_condo_units": "263885",
+      "sfr_condo_entity_unit_share": "0.06830626977660724",
+      "coverage_parcels": "0.49344419509392057"
+    },
+    {
+      "as_of": "2011-12-31",
+      "year": "2011",
+      "parcels": "261870",
+      "units": "308294",
+      "entity_parcels": "19313",
+      "entity_units": "38934",
+      "parcel_share": "0.07375033413525796",
+      "unit_share": "0.1262885427546433",
+      "sfr_condo_parcels": "250966",
+      "sfr_condo_units": "273066",
+      "sfr_condo_entity_unit_share": "0.07059831689042209",
+      "coverage_parcels": "0.5106849719286529"
+    },
+    {
+      "as_of": "2012-12-31",
+      "year": "2012",
+      "parcels": "271514",
+      "units": "320737",
+      "entity_parcels": "21279",
+      "entity_units": "43014",
+      "parcel_share": "0.07837164934404856",
+      "unit_share": "0.13410987818680103",
+      "sfr_condo_parcels": "260144",
+      "sfr_condo_units": "283091",
+      "sfr_condo_entity_unit_share": "0.07545630203715413",
+      "coverage_parcels": "0.5293545531491936"
+    },
+    {
+      "as_of": "2013-12-31",
+      "year": "2013",
+      "parcels": "281130",
+      "units": "333046",
+      "entity_parcels": "23362",
+      "entity_units": "47580",
+      "parcel_share": "0.08310034503610429",
+      "unit_share": "0.14286314803360498",
+      "sfr_condo_parcels": "269274",
+      "sfr_condo_units": "293008",
+      "sfr_condo_entity_unit_share": "0.07994662261781248",
+      "coverage_parcels": "0.5479911320945186"
+    },
+    {
+      "as_of": "2014-12-31",
+      "year": "2014",
+      "parcels": "291043",
+      "units": "345721",
+      "entity_parcels": "25897",
+      "entity_units": "52281",
+      "parcel_share": "0.088979978903461",
+      "unit_share": "0.15122309608036538",
+      "sfr_condo_parcels": "278753",
+      "sfr_condo_units": "303265",
+      "sfr_condo_entity_unit_share": "0.08568743508152936",
+      "coverage_parcels": "0.5672508716483278"
+    },
+    {
+      "as_of": "2015-12-31",
+      "year": "2015",
+      "parcels": "301002",
+      "units": "358382",
+      "entity_parcels": "28992",
+      "entity_units": "58259",
+      "parcel_share": "0.09631829688839277",
+      "unit_share": "0.1625611777377212",
+      "sfr_condo_parcels": "288297",
+      "sfr_condo_units": "313577",
+      "sfr_condo_entity_unit_share": "0.09315734253468845",
+      "coverage_parcels": "0.5866212658896248"
+    },
+    {
+      "as_of": "2016-12-31",
+      "year": "2016",
+      "parcels": "311134",
+      "units": "370725",
+      "entity_parcels": "32299",
+      "entity_units": "63372",
+      "parcel_share": "0.10381057679327878",
+      "unit_share": "0.17094072425652437",
+      "sfr_condo_parcels": "298044",
+      "sfr_condo_units": "324127",
+      "sfr_condo_entity_unit_share": "0.10068275706744578",
+      "coverage_parcels": "0.6063236241933856"
+    },
+    {
+      "as_of": "2017-12-31",
+      "year": "2017",
+      "parcels": "320715",
+      "units": "382339",
+      "entity_parcels": "35825",
+      "entity_units": "69058",
+      "parcel_share": "0.11170353740860266",
+      "unit_share": "0.180619816445615",
+      "sfr_condo_parcels": "307232",
+      "sfr_condo_units": "334087",
+      "sfr_condo_entity_unit_share": "0.10889379113823645",
+      "coverage_parcels": "0.624934966104722"
+    },
+    {
+      "as_of": "2018-12-31",
+      "year": "2018",
+      "parcels": "329701",
+      "units": "392790",
+      "entity_parcels": "38466",
+      "entity_units": "73041",
+      "parcel_share": "0.11666934586185665",
+      "unit_share": "0.18595432673947912",
+      "sfr_condo_parcels": "315887",
+      "sfr_condo_units": "343476",
+      "sfr_condo_entity_unit_share": "0.11392353468655743",
+      "coverage_parcels": "0.6423213412124648"
+    },
+    {
+      "as_of": "2019-12-31",
+      "year": "2019",
+      "parcels": "337735",
+      "units": "402247",
+      "entity_parcels": "40895",
+      "entity_units": "76881",
+      "parcel_share": "0.1210860585962367",
+      "unit_share": "0.19112883377626186",
+      "sfr_condo_parcels": "323631",
+      "sfr_condo_units": "351917",
+      "sfr_condo_entity_unit_share": "0.11838586939534038",
+      "coverage_parcels": "0.6578692954596634"
+    },
+    {
+      "as_of": "2020-12-31",
+      "year": "2020",
+      "parcels": "343703",
+      "units": "409352",
+      "entity_parcels": "41975",
+      "entity_units": "79039",
+      "parcel_share": "0.12212578883512801",
+      "unit_share": "0.19308321444624676",
+      "sfr_condo_parcels": "329380",
+      "sfr_condo_units": "358156",
+      "sfr_condo_entity_unit_share": "0.11947587084957392",
+      "coverage_parcels": "0.6694181504748445"
+    },
+    {
+      "as_of": "2021-12-31",
+      "year": "2021",
+      "parcels": "349828",
+      "units": "416946",
+      "entity_parcels": "43828",
+      "entity_units": "82497",
+      "parcel_share": "0.1252844254890975",
+      "unit_share": "0.1978601545523881",
+      "sfr_condo_parcels": "335258",
+      "sfr_condo_units": "364519",
+      "sfr_condo_entity_unit_share": "0.12259443266331796",
+      "coverage_parcels": "0.6812795564494211"
+    },
+    {
+      "as_of": "2022-12-31",
+      "year": "2022",
+      "parcels": "358740",
+      "units": "427258",
+      "entity_parcels": "47246",
+      "entity_units": "87468",
+      "parcel_share": "0.13169983832301946",
+      "unit_share": "0.2047193967111207",
+      "sfr_condo_parcels": "343860",
+      "sfr_condo_units": "373828",
+      "sfr_condo_entity_unit_share": "0.12926533057983886",
+      "coverage_parcels": "0.6985533355593692"
+    },
+    {
+      "as_of": "2023-12-31",
+      "year": "2023",
+      "parcels": "364602",
+      "units": "433714",
+      "entity_parcels": "49213",
+      "entity_units": "89988",
+      "parcel_share": "0.13497731773276064",
+      "unit_share": "0.20748235012012525",
+      "sfr_condo_parcels": "349516",
+      "sfr_condo_units": "379906",
+      "sfr_condo_entity_unit_share": "0.13259069348733635",
+      "coverage_parcels": "0.7099274726469378"
+    },
+    {
+      "as_of": "2024-12-31",
+      "year": "2024",
+      "parcels": "370218",
+      "units": "439937",
+      "entity_parcels": "50947",
+      "entity_units": "92372",
+      "parcel_share": "0.13761351419974177",
+      "unit_share": "0.20996642701114024",
+      "sfr_condo_parcels": "354964",
+      "sfr_condo_units": "385763",
+      "sfr_condo_entity_unit_share": "0.13520996051980103",
+      "coverage_parcels": "0.7208279300196461"
+    },
+    {
+      "as_of": "2025-12-31",
+      "year": "2025",
+      "parcels": "376422",
+      "units": "447047",
+      "entity_parcels": "53806",
+      "entity_units": "96081",
+      "parcel_share": "0.14294063577580482",
+      "unit_share": "0.21492371048234302",
+      "sfr_condo_parcels": "361025",
+      "sfr_condo_units": "392244",
+      "sfr_condo_entity_unit_share": "0.14058851123280408",
+      "coverage_parcels": "0.73288540833521"
+    }
+  ],
+  "consistency": {
+    "as_of": "2026-04-29",
+    "n_pluto": 515116,
+    "n_reconstructed": 379194,
+    "n_compared": 379194,
+    "n_pluto_without_deed": 135922,
+    "n_deed_without_pluto": 0,
+    "class_agree": 319661,
+    "entity_agree": 367388,
+    "class_agree_rate": 0.8430012078250183,
+    "entity_agree_rate": 0.9688655411214312,
+    "by_building_type": [
+      {
+        "building_type": "large_mf",
+        "n": 369,
+        "class_agree": 239,
+        "entity_agree": 284,
+        "class_agree_rate": 0.6476964769647696,
+        "entity_agree_rate": 0.7696476964769647
+      },
+      {
+        "building_type": "small_mf",
+        "n": 3665,
+        "class_agree": 2729,
+        "entity_agree": 3031,
+        "class_agree_rate": 0.7446111869031378,
+        "entity_agree_rate": 0.8270122783083219
+      },
+      {
+        "building_type": "mixed_use_res",
+        "n": 11566,
+        "class_agree": 9566,
+        "entity_agree": 10766,
+        "class_agree_rate": 0.8270793705689089,
+        "entity_agree_rate": 0.9308317482275635
+      },
+      {
+        "building_type": "condo_unit",
+        "n": 379,
+        "class_agree": 195,
+        "entity_agree": 291,
+        "class_agree_rate": 0.5145118733509235,
+        "entity_agree_rate": 0.7678100263852242
+      },
+      {
+        "building_type": "sfr_1_4",
+        "n": 363215,
+        "class_agree": 306932,
+        "entity_agree": 353016,
+        "class_agree_rate": 0.8450421926407224,
+        "entity_agree_rate": 0.971920212546288
+      }
+    ]
+  },
   "opacity": {},
   "opacity_by_type": [],
   "freshness": {
     "metro": "phl",
-    "generated_at": "2026-09-17T20:13:42.163186+00:00",
+    "generated_at": "2026-09-18T00:37:26.399810+00:00",
     "stock": {
       "metro_id": "phl",
       "started_at": "2026-09-17T20:13:32.400795+00:00",
@@ -1422,7 +2452,7 @@
       ]
     },
     "reused": {},
-    "flow_present": false,
+    "flow_present": true,
     "opacity_present": false,
     "notes": [
       "GitHub-hosted refresh updates PLUTO + tract\u2013NTA stock only (ADR 0009).",

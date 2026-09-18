@@ -323,7 +323,7 @@ Residential categories (live descriptions): 1 Single Family (463,036); 2 Multi F
 | Portal | https://opendataphilly.org/datasets/real-estate-transfers/ |
 | Live table | `rtt_summary` |
 | Verified fields | `document_id`, `document_type`, `recording_date`, `grantors`, `grantees`, `total_consideration`, `opa_account_num` |
-| Sale type used | `DEED` only (1,102,535 rows). `DEED SHERIFF` / `SHERIFF'S DEED` are not in the headline set |
+| Sale types used | `DEED` (1,102,535), `DEED SHERIFF` (69,687), `SHERIFF'S DEED` (19,332). Confirmed 2026-09-17. |
 | Consideration-filtered DEED years | Recording years 2000–2025 are populated at ~18k–39k / year |
 
 ## 12. Pennsylvania Department of State businesses

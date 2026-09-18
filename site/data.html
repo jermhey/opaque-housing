@@ -46,7 +46,15 @@
       <li><a href="./data/opacity_by_type.csv"><code>opacity_by_type.csv</code></a></li>
       <li><a href="./data/freshness.json"><code>freshness.json</code></a></li>
     </ul>
-    <p class="caveat">Cite dataset IDs and versions from the freshness file. NYC Open Data and OPEN NY terms apply to the underlying extracts; this site republishes aggregates only.</p>
+    <h3>Philadelphia</h3>
+    <ul class="download">
+      <li><a href="./data/phl/site.json"><code>phl/site.json</code></a> — stock + flow payload for the compare page</li>
+      <li><a href="./data/phl/headlines.json"><code>phl/headlines.json</code></a> — raw stock shares (no gold correction)</li>
+      <li><a href="./data/phl/flow_headlines.json"><code>phl/flow_headlines.json</code></a> — 2000–2025 sales, including sheriff deeds</li>
+      <li><a href="./data/phl/flow_by_year.csv"><code>phl/flow_by_year.csv</code></a></li>
+      <li><a href="./data/phl/neighborhoods.csv"><code>phl/neighborhoods.csv</code></a> — one row per ZIP</li>
+    </ul>
+    <p class="caveat">Cite dataset IDs and versions from the freshness file. NYC Open Data, OPEN NY, and City of Philadelphia terms apply to the underlying extracts; this site republishes aggregates only.</p>
   </main>
   <footer class="site">
     <div class="wrap">Reproduce with <code>docker run … oh build --metro nyc</code> against a raw-data volume, then <code>oh publish</code>.</div>

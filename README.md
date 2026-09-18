@@ -28,7 +28,9 @@ uv run oh flow --metro nyc
 uv run oh opacity --metro nyc
 uv run oh publish --metro nyc
 uv run oh ingest --metro phl
+uv run oh ingest --metro phl --dataset rtt
 uv run oh build --metro phl
+uv run oh flow --metro phl
 uv run oh publish --metro phl
 uv run oh label --sample-from data/derived/nyc/parcels_classified.parquet
 uv run oh label

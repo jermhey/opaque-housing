@@ -14,5 +14,5 @@ def carto_csv_url(spec: CartoSpec) -> str:
     return f"{spec.host}/api/v2/sql?{query}"
 
 
-def write_carto_csv(dest: Path, spec: CartoSpec, timeout: float = 300.0) -> None:
-    stream_to_path(carto_csv_url(spec), dest, timeout=timeout)
+def write_carto_csv(dest: Path, spec: CartoSpec, timeout: float | None = None) -> None:
+    stream_to_path(carto_csv_url(spec), dest, timeout=timeout or spec.timeout)

@@ -1,0 +1,78 @@
+{
+  "metro_id": "phl",
+  "started_at": "2026-09-18T00:36:44.549311+00:00",
+  "finished_at": "2026-09-18T00:37:13.984623+00:00",
+  "source_versions": {
+    "rtt": "rtt_summary-2026-09-17",
+    "rules": "2026-09-17.3"
+  },
+  "rules_version": "2026-09-17.3",
+  "filter_counts": [
+    {
+      "stage": "rtt_to_transfers",
+      "rule_id": "group_document_parcels",
+      "rows_in": 1191554,
+      "rows_out": 1071179
+    },
+    {
+      "stage": "sale_filter",
+      "rule_id": "sale_deed_type",
+      "rows_in": 1071097,
+      "rows_out": 1071097
+    },
+    {
+      "stage": "sale_filter",
+      "rule_id": "named_grantee",
+      "rows_in": 1071097,
+      "rows_out": 1071097
+    },
+    {
+      "stage": "sale_filter",
+      "rule_id": "min_consideration",
+      "rows_in": 1071097,
+      "rows_out": 716483
+    },
+    {
+      "stage": "flow_residential_join",
+      "rule_id": "pluto_or_pad_residential",
+      "rows_in": 716483,
+      "rows_out": 592039
+    },
+    {
+      "stage": "coverage_window",
+      "rule_id": "recorded_year_2000_2025",
+      "rows_in": 605629,
+      "rows_out": 592419
+    },
+    {
+      "stage": "sale_filter",
+      "rule_id": "sale_deed_type",
+      "rows_in": 1071179,
+      "rows_out": 1071179
+    },
+    {
+      "stage": "sale_filter",
+      "rule_id": "named_grantee",
+      "rows_in": 1071179,
+      "rows_out": 1071097
+    },
+    {
+      "stage": "sale_filter",
+      "rule_id": "min_consideration",
+      "rows_in": 1071097,
+      "rows_out": 1071097
+    },
+    {
+      "stage": "flow_residential_join",
+      "rule_id": "pluto_or_pad_residential",
+      "rows_in": 1071097,
+      "rows_out": 882304
+    }
+  ],
+  "notes": [
+    "flow uses sale_deed + named grantee + consideration cut (ADR 0005)",
+    "history uses every sale_deed with a named grantee",
+    "coverage window recorded years 2000-2025 (ADR 0010)",
+    "trusts are not in the entity headline"
+  ]
+}

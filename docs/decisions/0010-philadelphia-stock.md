@@ -30,7 +30,7 @@ OPA has no unit census. Unit-weighted shares use the **lower bound of the offici
 | other category 2 | `sfr_1_4` | 2 |
 | category 3 Mixed Use | `mixed_use_res` | 1 |
 
-Parcel-weighted shares are the comparable NYC vs PHL headline. Unit-weighted PHL figures are a lower bound, not a dwelling census.
+Parcel-weighted shares are the comparable NYC vs PHL headline. Unit-weighted PHL figures are a lower bound, not a dwelling census. Confirmed 2026-09-17: do **not** wait for another unit source.
 
 ### Geography
 
@@ -52,7 +52,7 @@ Classify `owner_1` only. `owner_2` is a second recorded owner (often a spouse) a
 
 ### Flow
 
-`rtt_summary` `document_type='DEED'` with `total_consideration >= 10000` is usable from recording year 2000. The adapter and a fixture exist; a citywide PHL flow series is not required for the comparison page.
+Confirmed 2026-09-17: sale deeds are `DEED`, `DEED SHERIFF`, and `SHERIFF'S DEED` (both sheriff labels appear in live `rtt_summary`). Other deed-like types (`DEED MISCELLANEOUS`, land-bank, condemnation) stay out. Consideration `>= 10000` and recording years **2000–2025** are the PHL coverage window (`oh flow --metro phl`).
 
 ## Consequences
 

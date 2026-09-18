@@ -1,6 +1,6 @@
 {
   "metro": "phl",
-  "generated_at": "2026-09-17T20:13:42.163186+00:00",
+  "generated_at": "2026-09-18T00:37:26.399810+00:00",
   "stock": {
     "metro_id": "phl",
     "started_at": "2026-09-17T20:13:32.400795+00:00",
@@ -29,7 +29,7 @@
     ]
   },
   "reused": {},
-  "flow_present": false,
+  "flow_present": true,
   "opacity_present": false,
   "notes": [
     "GitHub-hosted refresh updates PLUTO + tract\u2013NTA stock only (ADR 0009).",

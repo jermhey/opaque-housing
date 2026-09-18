@@ -118,6 +118,8 @@ Portfolio links (ADR 0008): cluster edges are shared O1 persons and HPD `Corpora
 
 OPA `opa_properties_public` via Carto. Residential filter and unit lower bounds are ADR 0010. `geo_borough` is `Philadelphia`; `geo_neighborhood` is ZIP; `geo_tract` is null. Classify `owner_1` only. Parcel share is the NYC vs PHL headline. PA DOS `3urc-uaba` has no officer names, so PHL has no O-tiers.
 
+PHL flow uses `rtt_summary` sale types `DEED` / `DEED SHERIFF` / `SHERIFF'S DEED`, the same $10,000 named-grantee cut as NYC, and recorded years **2000–2025**.
+
 ## Public aggregates (M4)
 
 `oh publish` copies an allowlist of citywide and NTA-or-coarser files. Parcel extracts, `owner_key`, HPD person names, addresses, and cluster member lists are refused. NTA cells with fewer than 10 units keep `suppressed=true`. The static site reads `site/data/site.json`. GitHub-hosted refresh updates PLUTO stock only; ACRIS and NY DOS are not cold-pulled (ADR 0009).
