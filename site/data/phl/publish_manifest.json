@@ -1,16 +1,17 @@
 {
   "metro": "phl",
   "origins": {
-    "consistency.json": "derived",
-    "flow_by_year.csv": "derived",
-    "flow_by_year_borough.csv": "derived",
-    "flow_by_year_type.csv": "derived",
-    "flow_headlines.json": "derived",
-    "flow_manifest.json": "derived",
-    "flow_sensitivity.csv": "derived",
-    "flow_sfr_condo_by_year.csv": "derived",
+    "concentration_by_neighborhood.csv": "derived",
+    "consistency.json": "reused",
+    "flow_by_year.csv": "reused",
+    "flow_by_year_borough.csv": "reused",
+    "flow_by_year_type.csv": "reused",
+    "flow_headlines.json": "reused",
+    "flow_manifest.json": "reused",
+    "flow_sensitivity.csv": "reused",
+    "flow_sfr_condo_by_year.csv": "reused",
     "headlines.json": "derived",
-    "history_by_year.csv": "derived",
+    "history_by_year.csv": "reused",
     "run_manifest.json": "derived",
     "stock_by_borough_type.csv": "derived",
     "stock_by_building_type.csv": "derived",
@@ -18,6 +19,7 @@
     "stock_by_nta_type.csv": "derived"
   },
   "files": [
+    "concentration_by_neighborhood.csv",
     "consistency.json",
     "flow_by_year.csv",
     "flow_by_year_borough.csv",
@@ -36,6 +38,7 @@
     "stock_by_borough_type.csv",
     "stock_by_building_type.csv",
     "stock_by_class.csv",
-    "stock_by_nta_type.csv"
+    "stock_by_nta_type.csv",
+    "stock_sensitivity.csv"
   ]
 }

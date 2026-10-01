@@ -1,7 +1,7 @@
 {
   "metro_id": "cook",
-  "started_at": "2026-09-18T15:32:14.863852+00:00",
-  "finished_at": "2026-09-18T15:33:37.261685+00:00",
+  "started_at": "2026-10-01T18:41:29.863891+00:00",
+  "finished_at": "2026-10-01T18:43:21.970012+00:00",
   "source_versions": {
     "sales": "wvhk-k5uv-2026-09-18",
     "rules": "2026-09-18.1"
@@ -11,62 +11,62 @@
     {
       "stage": "cook_sales_to_transfers",
       "rule_id": "group_document_parcels",
-      "rows_in": 2686086,
-      "rows_out": 2345388
+      "rows_in": 2688811,
+      "rows_out": 2347729
     },
     {
       "stage": "sale_filter",
       "rule_id": "sale_deed_type",
-      "rows_in": 2134422,
-      "rows_out": 2134422
+      "rows_in": 2136213,
+      "rows_out": 2136213
     },
     {
       "stage": "sale_filter",
       "rule_id": "named_grantee",
-      "rows_in": 2134422,
-      "rows_out": 2134422
+      "rows_in": 2136213,
+      "rows_out": 2136213
     },
     {
       "stage": "sale_filter",
       "rule_id": "min_consideration",
-      "rows_in": 2134422,
-      "rows_out": 2016061
+      "rows_in": 2136213,
+      "rows_out": 2017849
     },
     {
       "stage": "flow_residential_join",
       "rule_id": "pluto_or_pad_residential",
-      "rows_in": 2016061,
-      "rows_out": 1822550
+      "rows_in": 2017849,
+      "rows_out": 1824322
     },
     {
       "stage": "coverage_window",
       "rule_id": "recorded_year_2000_2025",
-      "rows_in": 1865316,
-      "rows_out": 1842207
+      "rows_in": 1867136,
+      "rows_out": 1842245
     },
     {
       "stage": "sale_filter",
       "rule_id": "sale_deed_type",
-      "rows_in": 2345388,
-      "rows_out": 2243677
+      "rows_in": 2347729,
+      "rows_out": 2245969
     },
     {
       "stage": "sale_filter",
       "rule_id": "named_grantee",
-      "rows_in": 2243677,
-      "rows_out": 2134422
+      "rows_in": 2245969,
+      "rows_out": 2136213
     },
     {
       "stage": "sale_filter",
       "rule_id": "min_consideration",
-      "rows_in": 2134422,
-      "rows_out": 2134422
+      "rows_in": 2136213,
+      "rows_out": 2136213
     },
     {
       "stage": "flow_residential_join",
       "rule_id": "pluto_or_pad_residential",
-      "rows_in": 2134422,
-      "rows_out": 1925414
+      "rows_in": 2136213,
+      "rows_out": 1927177
     }
   ],
   "notes": [

@@ -1,34 +1,34 @@
 {
   "private_all_entity_only": {
-    "parcels": 511336,
-    "units": 619738,
-    "entity_parcels": 53053,
-    "entity_units": 106290,
-    "parcel_share": 0.10375369619975906,
-    "unit_share": 0.17150795981527678
+    "parcels": 511326,
+    "units": 619813,
+    "entity_parcels": 53134,
+    "entity_units": 106407,
+    "parcel_share": 0.10391413696936984,
+    "unit_share": 0.17167597323708925
   },
   "private_all_entity_plus_trust": {
-    "parcels": 511336,
-    "units": 619738,
-    "entity_parcels": 59881,
-    "entity_units": 114527,
-    "parcel_share": 0.11710695120234053,
-    "unit_share": 0.1847990602480403
+    "parcels": 511326,
+    "units": 619813,
+    "entity_parcels": 60019,
+    "entity_units": 114716,
+    "parcel_share": 0.11737912799270915,
+    "unit_share": 0.18508162945920786
   },
   "sfr_condo_entity_only": {
-    "parcels": 491465,
-    "units": 529061,
-    "entity_parcels": 45540,
-    "entity_units": 53713,
-    "parcel_share": 0.09266173583062884,
-    "unit_share": 0.10152515494432589
+    "parcels": 491436,
+    "units": 529041,
+    "entity_parcels": 45596,
+    "entity_units": 53787,
+    "parcel_share": 0.09278115563369391,
+    "unit_share": 0.10166886876442469
   },
   "sfr_condo_entity_plus_trust": {
-    "parcels": 491465,
-    "units": 529061,
-    "entity_parcels": 52039,
-    "entity_units": 60867,
-    "parcel_share": 0.10588546488559715,
-    "unit_share": 0.11504722517819306
+    "parcels": 491436,
+    "units": 529041,
+    "entity_parcels": 52150,
+    "entity_units": 61003,
+    "parcel_share": 0.10611758194352876,
+    "unit_share": 0.11530864337546617
   }
 }

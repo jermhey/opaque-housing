@@ -1,11 +1,11 @@
 {
   "metro_id": "nyc",
-  "started_at": "2026-09-17T05:27:16.710173+00:00",
-  "finished_at": "2026-09-17T05:27:29.995002+00:00",
+  "started_at": "2026-10-01T18:22:06.154120+00:00",
+  "finished_at": "2026-10-01T18:22:32.349087+00:00",
   "source_versions": {
     "pluto": "26v2"
   },
-  "rules_version": "2026-09-16.2",
+  "rules_version": "2026-09-18.1",
   "filter_counts": [
     {
       "stage": "pluto_to_parcels",
@@ -21,7 +21,7 @@
     }
   ],
   "notes": [
-    "raw shares plus gold-set correction",
+    "raw shares only",
     "trusts are not in the entity headline"
   ]
 }

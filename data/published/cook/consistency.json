@@ -1,23 +1,15 @@
 {
   "as_of": "2026-01-01",
-  "n_pluto": 1482835,
-  "n_reconstructed": 1001897,
-  "n_compared": 1001897,
-  "n_pluto_without_deed": 480938,
+  "n_pluto": 1483271,
+  "n_reconstructed": 1001915,
+  "n_compared": 1001915,
+  "n_pluto_without_deed": 481356,
   "n_deed_without_pluto": 0,
-  "class_agree": 859656,
-  "entity_agree": 946340,
-  "class_agree_rate": 0.8580283202764356,
-  "entity_agree_rate": 0.9445481920796249,
+  "class_agree": 859666,
+  "entity_agree": 946349,
+  "class_agree_rate": 0.8580228861729787,
+  "entity_agree_rate": 0.9445402055064551,
   "by_building_type": [
-    {
-      "building_type": "small_mf",
-      "n": 18512,
-      "class_agree": 9018,
-      "entity_agree": 11488,
-      "class_agree_rate": 0.4871434745030251,
-      "entity_agree_rate": 0.6205704407951599
-    },
     {
       "building_type": "other_res",
       "n": 28,
@@ -27,28 +19,12 @@
       "entity_agree_rate": 0.7142857142857143
     },
     {
-      "building_type": "mixed_use_res",
-      "n": 8681,
-      "class_agree": 5489,
-      "entity_agree": 6492,
-      "class_agree_rate": 0.6323004262181776,
-      "entity_agree_rate": 0.7478401105863379
-    },
-    {
-      "building_type": "condo_unit",
-      "n": 288229,
-      "class_agree": 247126,
-      "entity_agree": 273836,
-      "class_agree_rate": 0.8573946410666519,
-      "entity_agree_rate": 0.950064011601886
-    },
-    {
       "building_type": "sfr_1_4",
-      "n": 686269,
-      "class_agree": 597999,
-      "entity_agree": 654344,
-      "class_agree_rate": 0.871376967340795,
-      "entity_agree_rate": 0.9534803407993075
+      "n": 686276,
+      "class_agree": 597998,
+      "entity_agree": 654342,
+      "class_agree_rate": 0.8713666221753347,
+      "entity_agree_rate": 0.9534677010415634
     },
     {
       "building_type": "coop_building",
@@ -57,6 +33,30 @@
       "entity_agree": 160,
       "class_agree_rate": 0.028089887640449437,
       "entity_agree_rate": 0.898876404494382
+    },
+    {
+      "building_type": "mixed_use_res",
+      "n": 8686,
+      "class_agree": 5489,
+      "entity_agree": 6493,
+      "class_agree_rate": 0.6319364494588994,
+      "entity_agree_rate": 0.7475247524752475
+    },
+    {
+      "building_type": "small_mf",
+      "n": 18519,
+      "class_agree": 9029,
+      "entity_agree": 11498,
+      "class_agree_rate": 0.48755332361358605,
+      "entity_agree_rate": 0.6208758572277121
+    },
+    {
+      "building_type": "condo_unit",
+      "n": 288228,
+      "class_agree": 247126,
+      "entity_agree": 273836,
+      "class_agree_rate": 0.8573976157763993,
+      "entity_agree_rate": 0.9500673078257491
     }
   ]
 }
