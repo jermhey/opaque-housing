@@ -1,7 +1,7 @@
 {
   "metro_id": "cook",
-  "started_at": "2026-10-01T18:41:29.863891+00:00",
-  "finished_at": "2026-10-01T18:43:21.970012+00:00",
+  "started_at": "2026-11-01T18:04:12.773782+00:00",
+  "finished_at": "2026-11-01T18:05:42.191850+00:00",
   "source_versions": {
     "sales": "wvhk-k5uv-2026-09-18",
     "rules": "2026-09-18.1"
@@ -36,13 +36,13 @@
       "stage": "flow_residential_join",
       "rule_id": "pluto_or_pad_residential",
       "rows_in": 2017849,
-      "rows_out": 1824322
+      "rows_out": 1824356
     },
     {
       "stage": "coverage_window",
       "rule_id": "recorded_year_2000_2025",
-      "rows_in": 1867136,
-      "rows_out": 1842245
+      "rows_in": 1867217,
+      "rows_out": 1842301
     },
     {
       "stage": "sale_filter",
@@ -66,7 +66,7 @@
       "stage": "flow_residential_join",
       "rule_id": "pluto_or_pad_residential",
       "rows_in": 2136213,
-      "rows_out": 1927177
+      "rows_out": 1927204
     }
   ],
   "notes": [

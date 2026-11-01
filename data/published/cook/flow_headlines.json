@@ -4,19 +4,19 @@
     "end": 2025
   },
   "private_residential": {
-    "sales": 1799828,
-    "units": 2276244,
-    "entity_sales": 128786,
-    "entity_units": 267116,
-    "sale_share": 0.07155461521878757,
-    "unit_share": 0.1173494581424487
+    "sales": 1799838,
+    "units": 2276435,
+    "entity_sales": 128804,
+    "entity_units": 267218,
+    "sale_share": 0.07156421855744795,
+    "unit_share": 0.11738441905874757
   },
   "sfr_condo": {
-    "sales": 1759601,
-    "units": 2026700,
-    "entity_sales": 111356,
-    "entity_units": 147834,
-    "sale_share": 0.06328480149761224,
-    "unit_share": 0.07294320817091825
+    "sales": 1759603,
+    "units": 2026800,
+    "entity_sales": 111364,
+    "entity_units": 147857,
+    "sale_share": 0.0632892760469265,
+    "unit_share": 0.07295095717387014
   }
 }
